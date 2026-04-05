@@ -13,6 +13,7 @@ import {
   FaReply,
   FaThumbsDown,
   FaThumbsUp,
+  FaTrash,
 } from "react-icons/fa";
 import { ComicCard } from "./comic-card";
 
@@ -85,6 +86,17 @@ export function EnhancedComment({
     }
   }
 
+  async function deleteComment() {
+    if (!confirm("Are you sure you want to delete this comment?")) return;
+    try {
+      await commentApi.delete(comment._id);
+      toast.success("Comment deleted");
+      onRefresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete comment");
+    }
+  }
+
   return (
     <div className={cn(isReply ? "ml-6 mt-2" : "mt-3")}>
       <ComicCard variant={isReply ? "light" : "cream"} shadow="small" className="p-3">
@@ -120,6 +132,11 @@ export function EnhancedComment({
               {replies.length > 0 && (
                 <button type="button" onClick={() => setShowReplies(!showReplies)} className="flex items-center gap-1 px-2 py-1 rounded-full comic-border-2 bg-yellow hover:bg-[#e8c98a] comic-shadow-2 comic-lift text-xs">
                   {showReplies ? <FaChevronUp /> : <FaChevronDown />} {replies.length} {replies.length === 1 ? "reply" : "replies"}
+                </button>
+              )}
+              {user?.id === comment.userId?._id && (
+                <button type="button" onClick={deleteComment} className="flex items-center gap-1 px-2 py-1 rounded-full comic-border-2 bg-red-400 hover:bg-red-500 comic-shadow-2 comic-lift text-xs ml-auto">
+                  <FaTrash /> Delete
                 </button>
               )}
             </div>

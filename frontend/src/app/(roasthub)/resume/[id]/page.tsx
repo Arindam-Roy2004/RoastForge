@@ -8,7 +8,7 @@ import { apiFetch, commentApi, resumeApi, type Resume, type Comment } from "@/li
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { FaArrowLeft, FaFilePdf } from "react-icons/fa";
+import { FaArrowLeft, FaFilePdf, FaTrash } from "react-icons/fa";
 import { AiFillFire } from "react-icons/ai";
 import { useAuth } from "@/store/auth";
 
@@ -71,6 +71,17 @@ export default function ResumeDetail() {
     }
   }
 
+  async function deleteThisResume() {
+    if (!confirm("Are you sure you want to delete this resume?")) return;
+    try {
+      await resumeApi.delete(id as string);
+      toast.success("Resume deleted");
+      router.push("/profile");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete resume");
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-32">
@@ -97,13 +108,18 @@ export default function ResumeDetail() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <button type="button" onClick={() => router.back()} className={cn(display.className, "comic-btn bg-beige comic-shadow-3 comic-lift text-sm")}>
           <FaArrowLeft /> Back
         </button>
-        <h1 className={cn(display.className, "text-2xl sm:text-3xl")}>
+        <h1 className={cn(display.className, "text-2xl sm:text-3xl flex-1")}>
           {resume.userId?.anonymousUsername ? `${resume.userId.anonymousUsername}'s Resume` : "Anonymous Resume"}
         </h1>
+        {isOwner && (
+          <button type="button" onClick={deleteThisResume} className={cn(display.className, "flex gap-2 items-center comic-btn bg-red-400 comic-shadow-3 comic-lift text-sm")}>
+            <FaTrash /> Delete Resume
+          </button>
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-5">
