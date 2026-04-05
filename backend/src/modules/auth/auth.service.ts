@@ -58,7 +58,8 @@ export const logout = async (userId: string) => {
 
 export const getMe = async (userId: string) => {
   const user = await User.findById(userId);
-  if (!user) throw ApiError.notfound("User not found");, anonymousUsername: user.anonymousUsername };
+  if (!user) throw ApiError.notfound("User not found");
+  return { id: user._id, name: user.name, email: user.email, avatar: user.avatar, anonymousUsername: user.anonymousUsername };
 };
 
 export const updateAvatar = async (userId: string, avatar: string) => {
@@ -78,6 +79,5 @@ export const regenerateUsername = async (userId: string) => {
 
   if (!updatedUser) throw ApiError.notfound("User not found");
 
-  return { anonymousUsername: updatedUser.anonymousUsername
-  return { id: user._id, name: user.name, email: user.email, avatar: user.avatar };
+  return { anonymousUsername: updatedUser.anonymousUsername };
 };

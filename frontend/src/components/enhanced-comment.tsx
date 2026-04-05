@@ -35,7 +35,7 @@ export function EnhancedComment({
   const [submitting, setSubmitting] = useState(false);
 
   const replies = allComments.filter((c) => c.parentId === comment._id);
-  const alias = comment.userId?.name || "Anon";
+  const alias = comment.userId?.anonymousUsername || "Anon";
 
   // Extract roast type from text if prepended (e.g. "[STRENGTH] Looks good")
   const roastMatch = comment.text.match(/^\[(STRENGTH|WEAKNESS|SUGGESTION)\](.*)/i);

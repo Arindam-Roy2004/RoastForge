@@ -17,7 +17,7 @@ body {
   color: var(--color-foreground);
 }
 
-/* ─── Comic-book utility classes (RoastHub-style) ─── */
+/* ─── Comic-book utility classes (RoastForge-style) ─── */
 
 @layer components {
   .comic-border {

@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SignalTalent — Resume Roasting & Talent Discovery",
+  title: "RoastForge — Resume Roasting & Talent Discovery",
   description:
     "Upload resumes for AI analysis, get community feedback, showcase projects, and let recruiters discover high-signal candidates.",
 };

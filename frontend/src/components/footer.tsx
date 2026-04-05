@@ -9,7 +9,7 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex flex-col items-center md:items-start gap-1">
-            <span className={cn(display.className, "text-2xl text-[#2c2c2c]")}>SIGNALTALENT</span>
+            <span className={cn(display.className, "text-2xl text-[#2c2c2c]")}>ROASTFORGE</span>
             <p className={cn(body.className, "text-sm text-[#2c2c2c]/70")}>
               Get your resume roasted &amp; discover high-signal talent!
             </p>
@@ -28,7 +28,7 @@ export default function Footer() {
         </div>
         <div className="mt-6 text-center">
           <p className={cn(body.className, "text-xs text-[#2c2c2c]/60")}>
-            &copy; {new Date().getFullYear()} SignalTalent. Keep it kind!
+            &copy; {new Date().getFullYear()} RoastForge. Keep it kind!
           </p>
         </div>
       </div>

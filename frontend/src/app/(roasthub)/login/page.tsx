@@ -35,7 +35,7 @@ export default function LoginPage() {
       <ComicCard variant="cream" shadow="large" className="w-full max-w-md">
         <h1 className={cn(display.className, "text-3xl text-center mb-1")}>Sign In</h1>
         <p className={cn(body.className, "text-center text-sm text-[#2c2c2c]/70 mb-6")}>
-          Access your SignalTalent workspace.
+          Access your RoastForge workspace.
         </p>
         <form onSubmit={onSubmit} className="space-y-4">
           <div>

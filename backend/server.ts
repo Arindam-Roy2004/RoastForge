@@ -14,7 +14,7 @@ const start = async () => {
 
   const httpServer = http.createServer(app);
   httpServer.listen(PORT, () => {
-    console.log(`🔥 RoastHub API running on port ${PORT} [${process.env.NODE_ENV || "development"}]`);
+    console.log(`🔥 RoastForge API running on port ${PORT} [${process.env.NODE_ENV || "development"}]`);
   });
 };
 

@@ -45,7 +45,7 @@ function CommentItem({ comment, depth = 0, onDeleted, onAdded }: CommentItemProp
   const [editText, setEditText] = useState(comment.text);
   const [currentText, setCurrentText] = useState(comment.text);
 
-  const authorName = comment.userId?.name || "Anonymous";
+  const authorName = comment.userId?.anonymousUsername || comment.userId?.name || "Anonymous";
   const authorAvatar = comment.userId?.avatar;
 
   const vote = async (type: "upvote" | "downvote") => {
@@ -231,7 +231,7 @@ export function CommentThread({ resumeId, initialComments }: Props) {
         <div className="flex items-start gap-3">
           {user ? (
             <div className="size-9 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-orange-600 flex items-center justify-center text-sm font-bold text-white shrink-0">
-              {user.name[0].toUpperCase()}
+              {(user.anonymousUsername || user.name)[0].toUpperCase()}
             </div>
           ) : (
             <div className="size-9 rounded-full bg-[var(--color-surface-elevated)] border-2 border-dashed border-[var(--color-border)] shrink-0" />

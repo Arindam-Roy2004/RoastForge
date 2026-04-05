@@ -51,7 +51,7 @@ export default function Navbar() {
           <span
             className={cn(display.className, "text-2xl md:text-3xl text-[#2c2c2c] tracking-wide")}
           >
-            SIGNALTALENT
+            ROASTFORGE
           </span>
           <span className="text-[10px] font-bold text-[#2c2c2c]/70 tracking-widest hidden sm:block">
             ROAST YOUR RESUME

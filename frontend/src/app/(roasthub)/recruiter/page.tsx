@@ -12,6 +12,7 @@ import Link from "next/link";
 type CandidateRow = {
   resumeId: string;
   aiScore?: { overall: number };
+  userId?: { anonymousUsername?: string };
   candidateAlias?: string;
   talentComposite?: number;
   identity?: { displayName?: string; linkedInUrl?: string; githubUrl?: string } | null;
@@ -82,10 +83,10 @@ export default function RecruiterPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full comic-border-2 bg-teal flex items-center justify-center text-lg font-bold">
-                  {r.candidateAlias?.charAt(0)?.toUpperCase() || "?"}
+                  {(r.userId?.anonymousUsername || r.candidateAlias)?.charAt(0)?.toUpperCase() || "?"}
                 </div>
                 <div>
-                  <p className={cn(display.className, "text-base")}>{r.candidateAlias || "Anonymous"}</p>
+                  <p className={cn(display.className, "text-base")}>{r.userId?.anonymousUsername || r.candidateAlias || "Anonymous"}</p>
                   <p className={cn(body.className, "text-xs text-[#2c2c2c]/60")}>Resume {r.resumeId.slice(-6)}</p>
                 </div>
               </div>

@@ -102,7 +102,7 @@ export default function ResumeDetail() {
           <FaArrowLeft /> Back
         </button>
         <h1 className={cn(display.className, "text-2xl sm:text-3xl")}>
-          {resume.name}
+          {resume.userId?.anonymousUsername ? `${resume.userId.anonymousUsername}'s Resume` : "Anonymous Resume"}
         </h1>
       </div>
 

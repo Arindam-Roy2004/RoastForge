@@ -16,6 +16,7 @@ type Resume = {
   status: string;
   aiScore?: { overall: number };
   createdAt?: string;
+  userId?: { anonymousUsername?: string };
   candidateAlias?: string;
 };
 
@@ -44,7 +45,7 @@ export default function HomePage() {
     const q = search.toLowerCase();
     return resumes.filter(
       (r) =>
-        r.candidateAlias?.toLowerCase().includes(q) ||
+        (r.userId?.anonymousUsername || r.candidateAlias)?.toLowerCase().includes(q) ||
         `v${r.version}`.includes(q) ||
         r.status.toLowerCase().includes(q),
     );
@@ -65,7 +66,7 @@ export default function HomePage() {
       {/* Welcome */}
       <ComicCard variant="teal" shadow="large" className="text-center">
         <h1 className={cn(display.className, "text-3xl sm:text-4xl mb-2")}>
-          Welcome to SignalTalent! 🔥
+          Welcome to RoastForge! 🔥
         </h1>
         <p className={cn(body.className, "text-base text-[#2c2c2c]/80")}>
           Upload your resume, get community roasts, AI analysis, and let recruiters discover your
@@ -127,7 +128,7 @@ export default function HomePage() {
                 status={r.status}
                 overall={r.aiScore?.overall}
                 createdAt={r.createdAt}
-                candidateAlias={r.candidateAlias}
+                candidateAlias={r.userId?.anonymousUsername || r.candidateAlias}
               />
             ))}
           </div>

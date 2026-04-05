@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.get("/health", (_req, res) => {
-  res.json({ ok: true, service: "roasthub-api" });
+  res.json({ ok: true, service: "roastforge-api" });
 });
 
 app.use("/api/auth", authRoute);

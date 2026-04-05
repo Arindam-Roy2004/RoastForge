@@ -3,7 +3,7 @@ import CommentVote from "./comment-vote.model.js";
 import Resume from "../resume/resume.model.js";
 import ApiError from "../../common/utils/api-error.js";
 
-const populateUser = (q: any) => q.populate("userId", "name avatar");
+const populateUser = (q: any) => q.populate("userId", "name avatar anonymousUsername");
 
 export const getComments = async (resumeId: string) => {
   // Get all top-level comments (no parent)

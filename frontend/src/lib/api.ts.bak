@@ -69,7 +69,7 @@ export const authApi = {
 // ─── Resumes ─────────────────────────────────────────────────────────────────
 export type Resume = {
   _id: string;
-  userId: { _id: string; name: string; avatar: string; anonymousUsername?: string };
+  userId: { _id: string; name: string; avatar: string };
   name: string;
   blurb: string;
   fileUrl: string;
@@ -108,7 +108,7 @@ export const resumeApi = {
 // ─── Comments ────────────────────────────────────────────────────────────────
 export type Comment = {
   _id: string;
-  userId: { _id: string; name: string; avatar: string; anonymousUsername?: string };
+  userId: { _id: string; name: string; avatar: string };
   text: string;
   parentId: string | null;
   upvotesCount: number;

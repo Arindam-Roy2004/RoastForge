@@ -7,7 +7,7 @@ const PAGE_SIZE = 12;
 
 // Populate user info for public display
 const populateUser = (q: any) =>
-  q.populate("userId", "name avatar");
+  q.populate("userId", "name avatar anonymousUsername");
 
 export const listResumes = async (opts: {
   page: number;
