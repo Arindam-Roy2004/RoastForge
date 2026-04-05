@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "dist/server.js",
+      "src": "dist/api/index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/dist/server.js",
+      "dest": "/dist/api/index.js",
       "headers": {
         "Access-Control-Allow-Origin": "https://roast-forge-bo6d.vercel.app",
         "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
