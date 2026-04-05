@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { commentApi, type Comment } from "@/lib/api";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/store/auth";
 import {
   FaChevronDown,
   FaChevronUp,
@@ -25,6 +27,8 @@ export function EnhancedComment({
   onRefresh: () => void;
   isReply?: boolean;
 }) {
+  const router = useRouter();
+  const { user } = useAuth();
   const [showReplies, setShowReplies] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyText, setReplyText] = useState("");
@@ -46,6 +50,11 @@ export function EnhancedComment({
   };
 
   async function vote(value: 1 | -1) {
+    if (!user) {
+      toast.error("Please sign in to vote");
+      router.push("/login");
+      return;
+    }
     try {
       await commentApi.vote(comment._id, value === 1 ? "upvote" : "downvote");
       onRefresh();
@@ -56,6 +65,11 @@ export function EnhancedComment({
 
   async function reply(e: React.FormEvent) {
     e.preventDefault();
+    if (!user) {
+      toast.error("Please sign in to reply");
+      router.push("/login");
+      return;
+    }
     if (!replyText.trim()) return;
     setSubmitting(true);
     try {
@@ -99,7 +113,7 @@ export function EnhancedComment({
                 <FaThumbsDown /> {comment.downvotesCount}
               </button>
               {!isReply && (
-                <button type="button" onClick={() => setShowReplyForm(!showReplyForm)} className="flex items-center gap-1 px-2 py-1 rounded-full comic-border-2 bg-blue-200 hover:bg-blue-300 comic-shadow-2 comic-lift text-xs">
+                <button type="button" onClick={() => user ? setShowReplyForm(!showReplyForm) : router.push("/login")} className="flex items-center gap-1 px-2 py-1 rounded-full comic-border-2 bg-blue-200 hover:bg-blue-300 comic-shadow-2 comic-lift text-xs">
                   <FaReply /> Reply
                 </button>
               )}

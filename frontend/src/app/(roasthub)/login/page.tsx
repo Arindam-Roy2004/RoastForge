@@ -7,10 +7,11 @@ import { toast } from "sonner";
 import { display, body } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { ComicCard } from "@/components/comic-card";
-import { apiFetch, setToken } from "@/lib/api";
+import { useAuth } from "@/store/auth";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,13 +20,8 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await apiFetch<{ user: unknown; accessToken: string }>("/api/auth/login", {
-        method: "POST",
-        auth: false,
-        body: JSON.stringify({ email, password }),
-      });
-      if (res.data?.accessToken) setToken(res.data.accessToken);
-      toast.success(res.message);
+      await login(email, password);
+      toast.success("Successfully logged in");
       router.push("/");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Login failed");

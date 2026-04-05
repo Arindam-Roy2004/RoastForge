@@ -17,6 +17,7 @@ export function uploadFile(
         resource_type: opts.resourceType,
         public_id: opts.publicId,
         format: opts.format,
+        type: "upload" // explicit public upload
       },
       (err, result) => {
         if (err) reject(err);
@@ -31,9 +32,9 @@ export function uploadFile(
 export async function uploadResumePdf(buffer: Buffer, userId: string): Promise<string> {
   return uploadFile(buffer, {
     folder: "roasthub/resumes",
-    resourceType: "raw",
+    resourceType: "image", // Must use 'image' so it doesn't force 'attachment' download
     publicId: `${userId}-${Date.now()}`,
-    format: "pdf",
+    format: "pdf",         // Ensures the .pdf extension is appended automatically
   });
 }
 
