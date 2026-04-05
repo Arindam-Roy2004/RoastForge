@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
+import type { UploadApiOptions } from "cloudinary";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -11,14 +12,16 @@ export function uploadFile(
   opts: { folder: string; resourceType: "raw" | "image" | "auto"; publicId: string; format?: string }
 ): Promise<string> {
   return new Promise((resolve, reject) => {
+    const uploadOpts: UploadApiOptions = {
+      folder: opts.folder,
+      resource_type: opts.resourceType,
+      public_id: opts.publicId,
+      type: "upload", // public delivery (not authenticated/private)
+    };
+    if (opts.format) uploadOpts.format = opts.format;
+
     const stream = cloudinary.uploader.upload_stream(
-      {
-        folder: opts.folder,
-        resource_type: opts.resourceType,
-        public_id: opts.publicId,
-        format: opts.format,
-        type: "upload" // explicit public upload
-      },
+      uploadOpts,
       (err, result) => {
         if (err) reject(err);
         else if (!result?.secure_url) reject(new Error("No URL from Cloudinary"));
@@ -30,11 +33,12 @@ export function uploadFile(
 }
 
 export async function uploadResumePdf(buffer: Buffer, userId: string): Promise<string> {
+  // PDFs must use resource_type "raw". Delivering PDFs via /image/upload/ often hits ACL
+  // restrictions (401 x-cld-error: deny or ACL failure) and breaks iframe/embed viewers.
   return uploadFile(buffer, {
     folder: "roasthub/resumes",
-    resourceType: "image", // Must use 'image' so it doesn't force 'attachment' download
-    publicId: `${userId}-${Date.now()}`,
-    format: "pdf",         // Ensures the .pdf extension is appended automatically
+    resourceType: "raw",
+    publicId: `${userId}-${Date.now()}.pdf`,
   });
 }
 
