@@ -4,7 +4,7 @@ import { ComicCard } from "@/components/comic-card";
 import { ResumeCard } from "@/components/resume-card";
 import { display, body } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
-import { apiFetch, getToken, clearToken } from "@/lib/api";
+import { apiFetch, clearToken } from "@/lib/api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -36,8 +36,8 @@ type Resume = {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const token = getToken();
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [editMode, setEditMode] = useState(false);
   const [displayName, setDisplayName] = useState("");
@@ -59,6 +59,8 @@ export default function ProfilePage() {
       setResumes(r.data || []);
     } catch {
       /* not logged in */
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -78,7 +80,17 @@ export default function ProfilePage() {
     }
   }
 
-  if (!token) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <ComicCard variant="peach" shadow="medium" className="text-center font-bold">
+          Loading profile...
+        </ComicCard>
+      </div>
+    );
+  }
+
+  if (!user) {
     return (
       <div className="flex items-center justify-center py-16">
         <ComicCard variant="yellow" shadow="large" className="text-center max-w-md">

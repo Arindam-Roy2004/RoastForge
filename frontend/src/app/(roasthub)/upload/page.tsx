@@ -10,11 +10,13 @@ import { toast } from "sonner";
 import { FaFilePdf, FaUpload, FaTimes } from "react-icons/fa";
 import Link from "next/link";
 
+import { useAuth } from "@/store/auth";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function UploadPage() {
   const router = useRouter();
-  const token = getToken();
+  const { user, loading } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +40,8 @@ export default function UploadPage() {
       const fd = new FormData();
       fd.append("resume", file);
       const headers: HeadersInit = {};
-      if (token) headers.Authorization = `Bearer ${token}`;
+      const t = getToken();
+      if (t) headers.Authorization = `Bearer ${t}`;
       const res = await fetch(`${API_BASE}/api/resume/upload`, { method: "POST", headers, body: fd });
       const json = await res.json();
       if (!res.ok) throw new Error(json.message || "Upload failed");
@@ -51,7 +54,17 @@ export default function UploadPage() {
     }
   }
 
-  if (!token) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <ComicCard variant="cream" shadow="medium" className="text-center font-bold">
+          Loading...
+        </ComicCard>
+      </div>
+    );
+  }
+
+  if (!user) {
     return (
       <div className="flex items-center justify-center py-16">
         <ComicCard variant="yellow" shadow="large" className="text-center max-w-md">

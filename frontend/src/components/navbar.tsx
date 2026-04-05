@@ -2,10 +2,9 @@
 
 import { display } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
-import { getToken, clearToken } from "@/lib/api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   FaBars,
   FaEllipsisV,
@@ -19,15 +18,14 @@ import {
   FaSignOutAlt,
 } from "react-icons/fa";
 
+import { useAuth } from "@/store/auth";
+
 export default function Navbar() {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    setLoggedIn(!!getToken());
-  }, []);
+  const { user, logout } = useAuth();
+  const loggedIn = !!user;
 
   return (
     <nav className="sticky top-0 z-50 bg-teal comic-border rounded-none border-x-0 border-t-0">
@@ -78,9 +76,8 @@ export default function Navbar() {
               </Link>
               <button
                 type="button"
-                onClick={() => {
-                  clearToken();
-                  setLoggedIn(false);
+                onClick={async () => {
+                  try { await logout(); } catch {}
                   router.push("/");
                 }}
                 className={cn(display.className, "comic-btn bg-red-400 comic-shadow-3 comic-lift text-sm")}
@@ -140,7 +137,7 @@ export default function Navbar() {
                 <FaUserCircle /> My Profile
               </Link>
               {loggedIn ? (
-                <button type="button" onClick={() => { clearToken(); setLoggedIn(false); setIsProfileOpen(false); router.push("/"); }} className={cn(display.className, "flex items-center gap-3 px-4 py-3 text-base font-bold hover:bg-red-300 w-full text-left")}>
+                <button type="button" onClick={async () => { try { await logout(); } catch {} setIsProfileOpen(false); router.push("/"); }} className={cn(display.className, "flex items-center gap-3 px-4 py-3 text-base font-bold hover:bg-red-300 w-full text-left")}>
                   <FaSignOutAlt /> Sign Out
                 </button>
               ) : (
