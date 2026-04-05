@@ -24,7 +24,8 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.3.1",
     "multer": "^2.1.1",
-    "multer-cloudinary": "^1.1.0"
+    "multer-cloudinary": "^1.1.0",
+    "nanoid": "^5.1.7"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

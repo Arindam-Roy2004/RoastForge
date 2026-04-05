@@ -38,3 +38,9 @@ export const getMe = async (req: Request, res: Response) => {
   ApiResponse.ok(res, "Profile", user);
 };
 
+export const regenerateUsername = async (req: Request, res: Response) => {
+  const userId = (req as any).user.id; 
+  const result = await authService.regenerateUsername(userId);
+  ApiResponse.ok(res, "Username regenerated successfully", result);
+};
+

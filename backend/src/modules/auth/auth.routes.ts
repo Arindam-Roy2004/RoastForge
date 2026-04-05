@@ -13,5 +13,6 @@ router.post("/login", validate(LoginDto), asyncHandler(controller.login));
 router.post("/refresh", asyncHandler(controller.refresh));
 router.post("/logout", authenticate, asyncHandler(controller.logout));
 router.get("/me", authenticate, asyncHandler(controller.getMe));
+router.patch("/regenerate-username", authenticate, asyncHandler(controller.regenerateUsername));
 
 export default router;

@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true, minlength: 8, select: false },
     avatar: { type: String, default: "" },
+    anonymousUsername: { type: String, unique: true },
     isVerified: { type: Boolean, default: true }, // email/pass users auto-verified for simplicity
     refreshToken: { type: String, select: false },
   },
