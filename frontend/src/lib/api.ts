@@ -51,7 +51,7 @@ async function tryRefreshToken(): Promise<boolean> {
 }
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
-export type User = { id: string; name: string; email: string; avatar: string };
+export type User = { id: string; name: string; email: string; avatar: string; anonymousUsername?: string };
 
 export const authApi = {
   register: (body: { name: string; email: string; password: string }) =>
