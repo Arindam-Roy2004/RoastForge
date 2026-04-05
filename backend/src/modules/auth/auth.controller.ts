@@ -2,11 +2,14 @@ import * as authService from "./auth.service.js";
 import ApiResponse from "../../common/utils/api-response.js";
 import type { Request, Response } from "express";
 
+// Split Vercel deploys (frontend on a.*, API on b.*) need SameSite=None + Secure or the refresh cookie is never sent on fetch().
+const crossSiteCookies = process.env.CROSS_SITE_COOKIES === "true";
 const COOKIE_OPTS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax" as const,
+  secure: crossSiteCookies || process.env.NODE_ENV === "production",
+  sameSite: (crossSiteCookies ? "none" : "lax") as "none" | "lax",
   maxAge: 7 * 24 * 60 * 60 * 1000,
+  path: "/",
 };
 
 export const register = async (req: Request, res: Response) => {
@@ -29,7 +32,7 @@ export const refresh = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
   await authService.logout((req as any).user.id);
-  res.clearCookie("refreshToken");
+  res.clearCookie("refreshToken", { path: "/", sameSite: COOKIE_OPTS.sameSite, secure: COOKIE_OPTS.secure });
   ApiResponse.ok(res, "Logged out");
 };
 

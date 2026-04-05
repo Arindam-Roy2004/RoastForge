@@ -7,11 +7,31 @@ import commentRoute from "./modules/comment/comment.routes.js";
 import uploadRoute from "./modules/upload/upload.routes.js";
 import { errorHandler } from "./common/middleware/error.middleware.js";
 
+/** Comma-separated FRONTEND_ORIGIN (e.g. prod + previews). Required on Vercel for split deploys. */
+function allowedBrowserOrigins(): string[] {
+  const raw = process.env.FRONTEND_ORIGIN ?? "http://localhost:3000";
+  return raw
+    .split(",")
+    .map((o) => o.trim().replace(/\/$/, ""))
+    .filter(Boolean);
+}
+
 const app = express();
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_ORIGIN || "http://localhost:3000",
+    origin(origin, callback) {
+      const allowed = allowedBrowserOrigins();
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      if (allowed.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error(`CORS blocked origin: ${origin}`));
+    },
     credentials: true,
   }),
 );
