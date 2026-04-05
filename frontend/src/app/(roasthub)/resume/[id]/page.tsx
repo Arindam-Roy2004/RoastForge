@@ -46,7 +46,7 @@ export default function ResumeDetail() {
 
   const loadResume = useCallback(async () => {
     try {
-      const res = await apiFetch<Resume>(`/api/resume/${id}`);
+      const res = await apiFetch<Resume>(`/api/resumes/${id}`);
       setResume(res.data || null);
     } catch {
       setResume(null);

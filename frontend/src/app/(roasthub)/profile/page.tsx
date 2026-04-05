@@ -55,7 +55,7 @@ export default function ProfilePage() {
         setGithub(u.data.publicProfile.githubUrl || "");
         setShare(u.data.publicProfile.shareIdentityWithRecruiters || false);
       }
-      const r = await apiFetch<Resume[]>("/api/resume/my-resumes");
+      const r = await apiFetch<Resume[]>("/api/resumes/my");
       setResumes(r.data || []);
     } catch {
       /* not logged in */

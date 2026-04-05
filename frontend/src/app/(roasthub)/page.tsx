@@ -26,8 +26,8 @@ export default function HomePage() {
 
   const load = useCallback(async () => {
     try {
-      const res = await apiFetch<Resume[]>("/api/resume/my-resumes");
-      setResumes(res.data || []);
+      const res = await apiFetch<{ resumes: Resume[] }>("/api/resumes");
+      setResumes(res.data?.resumes || []);
     } catch {
       /* not logged in or empty */
     } finally {

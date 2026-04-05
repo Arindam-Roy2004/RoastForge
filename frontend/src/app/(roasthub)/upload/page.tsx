@@ -37,15 +37,28 @@ export default function UploadPage() {
     setUploading(true);
     setError(null);
     try {
+      // 1. Upload file to Cloudinary
       const fd = new FormData();
-      fd.append("resume", file);
+      fd.append("file", file);
       const headers: HeadersInit = {};
       const t = getToken();
       if (t) headers.Authorization = `Bearer ${t}`;
-      const res = await fetch(`${API_BASE}/api/resume/upload`, { method: "POST", headers, body: fd });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.message || "Upload failed");
-      toast.success(json.message || "Resume uploaded & queued!");
+      const uploadRes = await fetch(`${API_BASE}/api/upload/resume`, { method: "POST", headers, body: fd });
+      const uploadJson = await uploadRes.json();
+      if (!uploadRes.ok) throw new Error(uploadJson.message || "Failed to upload file to cloud");
+
+      const { fileUrl, fileType } = uploadJson.data;
+
+      // 2. Create resume entry in MongoDB
+      const createRes = await fetch(`${API_BASE}/api/resumes`, {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ name: file.name, fileUrl, fileType })
+      });
+      const createJson = await createRes.json();
+      if (!createRes.ok) throw new Error(createJson.message || "Failed to save resume profile");
+
+      toast.success(createJson.message || "Resume uploaded & queued!");
       router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
