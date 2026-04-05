@@ -4,49 +4,31 @@ import { ComicCard } from "@/components/comic-card";
 import { EnhancedComment } from "@/components/enhanced-comment";
 import { display, body } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, commentApi, resumeApi, type Resume, type Comment } from "@/lib/api";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { FaArrowLeft, FaFilePdf } from "react-icons/fa";
-import { AiFillFire, AiOutlineLike } from "react-icons/ai";
-
-type Resume = {
-  _id: string;
-  version: number;
-  status: string;
-  originalPdfUrl?: string;
-  aiScore?: { overall: number; atsVisibility: number; readability: number; impact: number };
-  aiSuggestions?: { section: string; suggestion: string; type: string }[];
-  scoreHistory?: { overall: number; recordedAt: string }[];
-  candidateAlias?: string;
-  createdAt?: string;
-};
-
-type Review = {
-  _id: string;
-  content: string;
-  type: string;
-  upvotes: number;
-  downvotes: number;
-  createdAt: string;
-  reviewerId?: { anonymousPublicId?: string } | string;
-  parentReviewId?: string | null;
-};
+import { AiFillFire } from "react-icons/ai";
+import { useAuth } from "@/store/auth";
 
 export default function ResumeDetail() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { user } = useAuth();
+  
   const [resume, setResume] = useState<Resume | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [commentText, setCommentText] = useState("");
   const [commentType, setCommentType] = useState<string>("comment");
   const [posting, setPosting] = useState(false);
 
+  const isOwner = user && resume && user.id === resume.userId._id;
+
   const loadResume = useCallback(async () => {
     try {
-      const res = await apiFetch<Resume>(`/api/resumes/${id}`);
+      const res = await resumeApi.get(id);
       setResume(res.data || null);
     } catch {
       setResume(null);
@@ -55,26 +37,32 @@ export default function ResumeDetail() {
     }
   }, [id]);
 
-  const loadReviews = useCallback(async () => {
+  const loadComments = useCallback(async () => {
     try {
-      const res = await apiFetch<Review[]>(`/api/review/target/${id}`);
-      setReviews(res.data || []);
+      const res = await commentApi.list(id);
+      setComments(res.data || []);
     } catch { /* ignore */ }
   }, [id]);
 
-  useEffect(() => { loadResume(); loadReviews(); }, [loadResume, loadReviews]);
+  useEffect(() => { loadResume(); loadComments(); }, [loadResume, loadComments]);
+
+  // Make sure owners can't post roast tags if they bypass UI
+  useEffect(() => {
+    if (isOwner && commentType !== "comment") {
+      setCommentType("comment");
+    }
+  }, [isOwner, commentType]);
 
   async function postComment(e: React.FormEvent) {
     e.preventDefault();
     if (!commentText.trim()) return;
     setPosting(true);
     try {
-      await apiFetch("/api/review", {
-        method: "POST",
-        body: JSON.stringify({ targetId: id, targetModel: "Resume", content: commentText.trim(), type: commentType }),
-      });
+      const finalText = commentType === "comment" ? commentText.trim() : `[${commentType.toUpperCase()}] ${commentText.trim()}`;
+      await commentApi.add(id, { text: finalText });
       setCommentText("");
-      loadReviews();
+      setCommentType("comment");
+      loadComments();
       toast.success("Comment posted!");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Post failed");
@@ -104,7 +92,7 @@ export default function ResumeDetail() {
     );
   }
 
-  const topLevel = reviews.filter((r) => !r.parentReviewId);
+  const topLevel = comments.filter((c) => !c.parentId);
 
   return (
     <div className="space-y-6">
@@ -114,67 +102,45 @@ export default function ResumeDetail() {
           <FaArrowLeft /> Back
         </button>
         <h1 className={cn(display.className, "text-2xl sm:text-3xl")}>
-          {resume.candidateAlias || `Resume v${resume.version}`}
+          {resume.name}
         </h1>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Left: resume info */}
         <div className="lg:col-span-2 space-y-4">
-          {/* PDF link */}
-          {resume.originalPdfUrl && (
-            <ComicCard variant="peach" shadow="medium">
+          <ComicCard variant="peach" shadow="medium">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
                 <FaFilePdf className="text-3xl text-[#2c2c2c]" />
                 <div>
                   <p className={cn(display.className, "text-base")}>Resume PDF</p>
-                  <a href={resume.originalPdfUrl} target="_blank" rel="noreferrer" className={cn(body.className, "text-sm underline text-blue-800")}>
-                    Open in new tab
+                  <a href={resume.fileUrl} target="_blank" rel="noreferrer" className={cn(body.className, "text-sm underline text-blue-800")}>
+                    Open in full screen
                   </a>
                 </div>
               </div>
-            </ComicCard>
-          )}
-
-          {/* Scores */}
-          <ComicCard variant="teal" shadow="medium">
-            <p className={cn(display.className, "text-lg mb-3")}>AI Scores</p>
-            <div className="grid grid-cols-2 gap-2">
-              {(["overall", "atsVisibility", "readability", "impact"] as const).map((k) => (
-                <div key={k} className="rounded-xl comic-border-2 bg-white/50 p-2 text-center">
-                  <p className={cn(display.className, "text-xs uppercase")}>{k}</p>
-                  <p className={cn(display.className, "text-2xl")}>{resume.aiScore?.[k] ?? "—"}</p>
-                </div>
-              ))}
+            </div>
+            {/* Embed PDF visible to the user */}
+            <div className="w-full aspect-[1/1.4] rounded-xl overflow-hidden comic-border-2 bg-white relative comic-shadow-inner group">
+              {resume.fileType === "pdf" ? (
+                <iframe src={resume.fileUrl + "#toolbar=0&navpanes=0&scrollbar=0"} className="w-full h-full border-none" />
+              ) : (
+                <img src={resume.fileUrl} className="w-full h-full object-contain" alt="Resume" />
+              )}
             </div>
           </ComicCard>
 
-          {/* AI Suggestions */}
-          {resume.aiSuggestions && resume.aiSuggestions.length > 0 && (
+          {/* AI Suggestions (if present in future) */}
+          {resume.blurb && (
             <ComicCard variant="yellow" shadow="small">
-              <p className={cn(display.className, "text-base mb-2")}>AI Suggestions</p>
-              {resume.aiSuggestions.map((s, i) => (
-                <div key={i} className="rounded-lg comic-border-2 bg-white/40 p-2 mb-2 last:mb-0">
-                  <span className={cn(display.className, "text-xs px-2 py-0.5 rounded-full comic-border-2", s.type === "strength" ? "bg-green-300" : s.type === "weakness" ? "bg-red-300" : "bg-blue-300")}>
-                    {s.type}
-                  </span>
-                  <p className={cn(body.className, "text-sm mt-1")}>[{s.section}] {s.suggestion}</p>
-                </div>
-              ))}
+              <p className={cn(display.className, "text-base mb-2")}>Author's Note</p>
+              <p className={cn(body.className, "text-sm text-[#2c2c2c]")}>
+                {resume.blurb}
+              </p>
             </ComicCard>
           )}
 
-          {/* Score history */}
-          {resume.scoreHistory && resume.scoreHistory.length > 1 && (
-            <ComicCard variant="light" shadow="small">
-              <p className={cn(display.className, "text-base mb-2")}>Score History</p>
-              {resume.scoreHistory.map((h, i) => (
-                <p key={i} className={cn(body.className, "text-xs text-[#2c2c2c]/70")}>
-                  {new Date(h.recordedAt).toLocaleDateString()}: <strong>{h.overall}</strong>
-                </p>
-              ))}
-            </ComicCard>
-          )}
         </div>
 
         {/* Right: discussion */}
@@ -184,31 +150,43 @@ export default function ResumeDetail() {
               <AiFillFire className="text-xl text-orange-600" />
               <p className={cn(display.className, "text-lg")}>Roast Thread</p>
               <span className={cn(display.className, "ml-auto text-sm bg-white/50 rounded-full comic-border-2 px-2 py-0.5")}>
-                {reviews.length} comments
+                {comments.length} comments
               </span>
             </div>
 
             {/* Post form */}
             <form onSubmit={postComment} className="mb-4 space-y-2">
-              <div className="flex gap-2 flex-wrap">
-                {(["comment", "strength", "weakness", "suggestion"] as const).map((t) => (
-                  <button key={t} type="button" onClick={() => setCommentType(t)} className={cn(display.className, "rounded-full comic-border-2 px-3 py-1 text-xs comic-shadow-2 comic-lift", commentType === t ? "bg-green-400" : "bg-white/60")}>
+              <div className="flex gap-2 flex-wrap mb-1">
+                {!isOwner && (["strength", "weakness", "suggestion"] as const).map((t) => (
+                  <button key={t} type="button" onClick={() => setCommentType(t)} className={cn(display.className, "uppercase rounded-full comic-border-2 px-3 py-1 text-xs comic-shadow-2 comic-lift transition-colors", commentType === t ? "bg-green-400" : "bg-white/60 hover:bg-white")}>
                     {t}
                   </button>
                 ))}
+                <button type="button" onClick={() => setCommentType("comment")} className={cn(display.className, "uppercase rounded-full comic-border-2 px-3 py-1 text-xs comic-shadow-2 comic-lift transition-colors", commentType === "comment" ? "bg-yellow" : "bg-white/60 hover:bg-white")}>
+                  {isOwner ? "Add Comment" : "Comment"}
+                </button>
               </div>
+
+              {isOwner && (
+                <p className={cn(body.className, "text-[10px] text-orange-800 ml-1 mb-1")}>
+                  You cannot roast your own resume, but you can reply to comments!
+                </p>
+              )}
+
               <textarea
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Write your roast / feedback..."
+                placeholder={isOwner ? "Write a comment..." : "Write your roast / feedback..."}
                 rows={3}
-                className={cn(body.className, "w-full p-3 comic-border rounded-lg bg-[#F8E4C6] focus:outline-none focus:bg-white transition-colors resize-none")}
+                className={cn(body.className, "w-full p-3 comic-border-2 rounded-lg bg-[#F8E4C6] focus:outline-none focus:bg-white transition-colors resize-none")}
                 required
               />
-              <button type="submit" disabled={posting} className={cn(display.className, "comic-btn bg-orange-400 hover:bg-orange-500 comic-shadow-3 comic-lift text-sm")}>
-                {posting ? "Posting..." : "Post Roast 🔥"}
+              <button type="submit" disabled={posting} className={cn(display.className, "comic-btn bg-orange-400 hover:bg-orange-500 comic-shadow-3 comic-lift text-sm px-6")}>
+                {posting ? "Posting..." : isOwner ? "Post Comment" : "Post Roast 🔥"}
               </button>
             </form>
+
+            <div className="border-t-2 border-[#2c2c2c] my-4 opacity-10"></div>
 
             {/* Comments list */}
             {topLevel.length === 0 ? (
@@ -217,7 +195,7 @@ export default function ResumeDetail() {
               </p>
             ) : (
               topLevel.map((c) => (
-                <EnhancedComment key={c._id} comment={c} allComments={reviews} targetId={id} targetModel="Resume" onRefresh={loadReviews} />
+                <EnhancedComment key={c._id} comment={c} allComments={comments} onRefresh={loadComments} />
               ))
             )}
           </ComicCard>
