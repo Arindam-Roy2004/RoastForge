@@ -1,0 +1,17 @@
+import { Router } from "express";
+import * as controller from "./auth.controller.js";
+import { authenticate } from "./auth.middleware.js";
+import { asyncHandler } from "../../common/middleware/async-handler.js";
+import validate from "../../common/middleware/validate.middleware.js";
+import RegisterDto from "./dto/register.dto.js";
+import LoginDto from "./dto/login.dto.js";
+
+const router = Router();
+
+router.post("/register", validate(RegisterDto), asyncHandler(controller.register));
+router.post("/login", validate(LoginDto), asyncHandler(controller.login));
+router.post("/refresh", asyncHandler(controller.refresh));
+router.post("/logout", authenticate, asyncHandler(controller.logout));
+router.get("/me", authenticate, asyncHandler(controller.getMe));
+
+export default router;
