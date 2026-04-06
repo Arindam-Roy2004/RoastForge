@@ -14,12 +14,10 @@ import { Badge } from "@/components/ui/badge";
 
 export function EnhancedComment({
   comment,
-  allComments,
   onRefresh,
   isReply = false,
 }: {
   comment: Comment;
-  allComments: Comment[];
   onRefresh: () => void;
   isReply?: boolean;
 }) {
@@ -30,7 +28,7 @@ export function EnhancedComment({
   const [replyText, setReplyText] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const replies = allComments.filter((c) => c.parentId === comment._id);
+  const replies = comment.replies || [];
   const alias = comment.userId?.anonymousUsername || "Anon";
 
   const roastMatch = comment.text.match(/^\[(STRENGTH|WEAKNESS|SUGGESTION)\](.*)/i);
@@ -92,74 +90,74 @@ export function EnhancedComment({
   }
 
   return (
-    <div className={cn(isReply ? "ml-6 sm:ml-12 pl-4 border-l-4 border-border mt-4" : "mt-4")}>
-      <Card className="border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-card p-4 sm:p-6 transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-full border-4 border-border bg-primary/20 flex flex-col items-center justify-center text-lg font-heading uppercase shrink-0 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+    <div className={cn(isReply ? "ml-6 sm:ml-10 pl-3 border-l-4 border-border mt-3" : "")}>
+      <div className="border-2 border-border rounded-none bg-card p-3 sm:p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-full border-2 border-border bg-primary/20 flex items-center justify-center text-sm font-heading uppercase shrink-0">
             {alias.charAt(0)}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-2">
-              <span className="font-heading uppercase text-lg tracking-wide">{alias}</span>
-              <Badge variant="outline" className={cn("border-2 border-border rounded-none font-bold uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] py-0 text-[10px]", typeStyles[extractedType])}>
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <span className="font-heading uppercase text-sm tracking-wide">{alias}</span>
+              <Badge variant="outline" className={cn("border border-border rounded-none font-bold uppercase py-0 text-[10px]", typeStyles[extractedType])}>
                 {extractedType}
               </Badge>
-              <span className="text-xs text-muted-foreground font-mono">
+              <span className="text-[11px] text-muted-foreground font-mono">
                 {new Date(comment.createdAt).toLocaleDateString()}
               </span>
             </div>
             <p className="text-sm font-medium whitespace-pre-wrap leading-relaxed">{cleanText}</p>
 
             {/* Actions */}
-            <div className="flex items-center gap-3 mt-4 flex-wrap">
-              <div className="flex items-center border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] bg-muted shrink-0">
-                <button type="button" onClick={() => vote(1)} className="px-3 py-1.5 hover:bg-green-200 transition-colors border-r-2 border-border flex items-center gap-1 font-bold text-xs font-heading">
+            <div className="flex items-center gap-2 mt-3 flex-wrap">
+              <div className="flex items-center border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] bg-muted shrink-0">
+                <button type="button" onClick={() => vote(1)} className="px-2 py-1 hover:bg-green-200 transition-colors border-r-2 border-border flex items-center gap-1 font-bold text-xs font-heading">
                   <ThumbsUp className="w-3 h-3" /> {comment.upvotesCount}
                 </button>
-                <button type="button" onClick={() => vote(-1)} className="px-3 py-1.5 hover:bg-red-200 transition-colors flex items-center gap-1 font-bold text-xs font-heading">
+                <button type="button" onClick={() => vote(-1)} className="px-2 py-1 hover:bg-red-200 transition-colors flex items-center gap-1 font-bold text-xs font-heading">
                   <ThumbsDown className="w-3 h-3" /> {comment.downvotesCount}
                 </button>
               </div>
               
               {!isReply && (
-                <Button variant="outline" size="sm" onClick={() => user ? setShowReplyForm(!showReplyForm) : router.push("/login")} className="border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all rounded-none font-heading uppercase text-xs h-8 px-3 hover:-translate-y-0.5">
-                  <Reply className="w-3 h-3 mr-1.5" /> Reply
+                <Button variant="outline" size="sm" onClick={() => user ? setShowReplyForm(!showReplyForm) : router.push("/login")} className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all rounded-none font-heading uppercase text-[10px] h-7 px-2">
+                  <Reply className="w-3 h-3 mr-1" /> Reply
                 </Button>
               )}
               
               {replies.length > 0 && (
-                <Button variant="default" size="sm" onClick={() => setShowReplies(!showReplies)} className="border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all rounded-none font-heading uppercase text-xs h-8 px-3 bg-yellow text-black hover:bg-yellow hover:-translate-y-0.5">
-                  {showReplies ? <ChevronUp className="w-3 h-3 mr-1.5" /> : <ChevronDown className="w-3 h-3 mr-1.5" />} {replies.length} {replies.length === 1 ? "reply" : "replies"}
+                <Button variant="default" size="sm" onClick={() => setShowReplies(!showReplies)} className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all rounded-none font-heading uppercase text-[10px] h-7 px-2 bg-yellow text-black hover:bg-yellow">
+                  {showReplies ? <ChevronUp className="w-3 h-3 mr-1" /> : <ChevronDown className="w-3 h-3 mr-1" />} {replies.length} {replies.length === 1 ? "reply" : "replies"}
                 </Button>
               )}
               
               {user?.id === comment.userId?._id && (
-                <Button variant="destructive" size="sm" onClick={deleteComment} className="border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all rounded-none font-heading uppercase text-xs h-8 px-3 ml-auto hover:-translate-y-0.5">
-                  <Trash2 className="w-3 h-3 mr-1.5" /> Delete
+                <Button variant="destructive" size="sm" onClick={deleteComment} className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all rounded-none font-heading uppercase text-[10px] h-7 px-2 ml-auto">
+                  <Trash2 className="w-3 h-3 mr-1" /> Delete
                 </Button>
               )}
             </div>
           </div>
         </div>
-      </Card>
+      </div>
 
       {showReplyForm && (
-        <form onSubmit={reply} className="mt-4 flex gap-2 w-full max-w-2xl bg-card p-3 border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <form onSubmit={reply} className="mt-2 ml-11 flex gap-2 bg-card p-2 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
           <Input
             value={replyText}
             onChange={(e) => setReplyText(e.target.value)}
             placeholder="Write a reply..."
-            className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus-visible:ring-0 font-medium"
+            className="border-2 border-border rounded-none shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] focus-visible:ring-0 font-medium text-sm h-8"
             required
           />
-          <Button type="submit" disabled={submitting} className="border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none font-heading uppercase hover:shadow-none transition-all shrink-0">
+          <Button type="submit" disabled={submitting} className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-none font-heading uppercase hover:shadow-none transition-all shrink-0 h-8 text-xs">
             {submitting ? "..." : "Post"}
           </Button>
         </form>
       )}
 
       {showReplies && replies.map((r) => (
-        <EnhancedComment key={r._id} comment={r} allComments={allComments} onRefresh={onRefresh} isReply />
+        <EnhancedComment key={r._id} comment={r} onRefresh={onRefresh} isReply />
       ))}
     </div>
   );

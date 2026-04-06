@@ -182,7 +182,7 @@ export default function ResumeDetail() {
           </Button>
           <div>
             <h1 className="text-4xl sm:text-5xl font-heading uppercase drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-              {resume.userId?.anonymousUsername ? `${resume.userId.anonymousUsername}'s Resume` : "Anonymous Resume"}
+              {resume.title || (resume.userId?.anonymousUsername ? `${resume.userId.anonymousUsername}'s Resume` : "Anonymous Resume")}
             </h1>
             <p className="text-muted-foreground flex items-center gap-2 mt-2">
               Uploaded by <span className="font-bold text-foreground">{resume.userId?.anonymousUsername || resume.userId?.name || "Unknown"}</span>
@@ -382,7 +382,7 @@ export default function ResumeDetail() {
 
         {/* Right: Discussion */}
         <div className="xl:col-span-1 space-y-6 flex flex-col h-full">
-          <Card className="flex-1 border-4 border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col overflow-hidden h-[min(70vh,780px)] xl:h-auto xl:min-h-[560px] xl:max-h-[720px]">
+          <Card className="flex-1 border-4 border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col overflow-hidden h-[min(80vh,900px)] xl:h-auto xl:min-h-[560px] xl:max-h-[900px]">
             <CardHeader className="bg-muted border-b-4 border-border shrink-0 py-4">
                <div className="flex items-center justify-between">
                  <CardTitle className="font-heading uppercase text-xl flex items-center gap-2">
@@ -391,56 +391,9 @@ export default function ResumeDetail() {
                  <Badge variant="outline" className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-bold">{comments.length} comments</Badge>
                </div>
             </CardHeader>
-            
-            <div className="bg-background flex-1 overflow-y-auto p-4 space-y-4">
-              {/* Post form */}
-              {user ? (
-                <form onSubmit={postComment} className="border-4 border-border bg-card p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-8">
-                  <div className="flex gap-2 flex-wrap mb-3">
-                    {!isOwner && (["strength", "weakness", "suggestion"] as const).map((t) => (
-                      <button key={t} type="button" onClick={() => setCommentType(t)} className={cn("uppercase rounded-none border-2 border-border px-3 py-1 text-xs font-bold transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none", commentType === t ? "bg-primary text-primary-foreground" : "bg-muted")}>
-                        {t}
-                      </button>
-                    ))}
-                    <button type="button" onClick={() => setCommentType("comment")} className={cn("uppercase rounded-none border-2 border-border px-3 py-1 text-xs font-bold transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none", commentType === "comment" ? "bg-yellow text-black" : "bg-muted")}>
-                      {isOwner ? "Add Comment" : "Comment"}
-                    </button>
-                  </div>
-  
-                  {isOwner && (
-                    <p className="text-[10px] text-destructive font-bold uppercase tracking-wider mb-2">
-                      You cannot roast your own resume, but you can reply to comments!
-                    </p>
-                  )}
-  
-                  <textarea
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    placeholder={isOwner ? "Write a comment..." : "Write your roast / feedback..."}
-                    rows={3}
-                    className="w-full p-3 border-2 border-border rounded-none shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none text-sm mb-3"
-                    required
-                  />
-                  <Button type="submit" disabled={posting} className="w-full border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-sm">
-                    {posting ? "Posting..." : isOwner ? "Post Comment" : "Post Roast 🔥"}
-                  </Button>
-                </form>
-              ) : (
-                <div className="bg-muted p-6 text-center border-4 border-border border-dashed shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-8">
-                  <p className="font-heading uppercase mb-3">Log in to join the roast.</p>
-                  <Link
-                    href="/login"
-                    className={cn(
-                      buttonVariants({ variant: "outline" }),
-                      "inline-flex border-4 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-heading uppercase no-underline hover:no-underline",
-                    )}
-                  >
-                    Login
-                  </Link>
-                </div>
-              )}
-  
-              {/* Comments list */}
+
+            {/* Scrollable comments area */}
+            <div className="bg-background flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
               {topLevel.length === 0 ? (
                 <div className="text-center py-12 border-4 border-border border-dashed text-muted-foreground bg-muted/30">
                    <MessageSquare className="w-8 h-8 mx-auto mb-3 opacity-40" />
@@ -448,10 +401,58 @@ export default function ResumeDetail() {
                    <p className="text-sm mt-1">Be the first to roast!</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {topLevel.map((c) => (
-                    <EnhancedComment key={c._id} comment={c} allComments={comments} onRefresh={loadComments} />
+                    <EnhancedComment key={c._id} comment={c} onRefresh={loadComments} />
                   ))}
+                </div>
+              )}
+            </div>
+
+            {/* Post form — pinned at bottom */}
+            <div className="shrink-0 border-t-4 border-border bg-card">
+              {user ? (
+                <form onSubmit={postComment} className="p-4">
+                  <div className="flex gap-2 flex-wrap mb-2">
+                    {!isOwner && (["strength", "weakness", "suggestion"] as const).map((t) => (
+                      <button key={t} type="button" onClick={() => setCommentType(t)} className={cn("uppercase rounded-none border-2 border-border px-2 py-0.5 text-[10px] font-bold transition-colors shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none", commentType === t ? "bg-primary text-primary-foreground" : "bg-muted")}>
+                        {t}
+                      </button>
+                    ))}
+                    <button type="button" onClick={() => setCommentType("comment")} className={cn("uppercase rounded-none border-2 border-border px-2 py-0.5 text-[10px] font-bold transition-colors shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none", commentType === "comment" ? "bg-yellow text-black" : "bg-muted")}>
+                      {isOwner ? "Add Comment" : "Comment"}
+                    </button>
+                  </div>
+                  {isOwner && (
+                    <p className="text-[10px] text-destructive font-bold uppercase tracking-wider mb-1">
+                      You cannot roast your own resume, but you can reply to comments!
+                    </p>
+                  )}
+                  <div className="flex gap-2">
+                    <textarea
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      placeholder={isOwner ? "Write a comment..." : "Write your roast / feedback..."}
+                      rows={2}
+                      className="flex-1 p-2 border-2 border-border rounded-none shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none text-sm"
+                      required
+                    />
+                    <Button type="submit" disabled={posting} className="self-end border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase text-xs h-10 px-4">
+                      {posting ? "..." : "Post"}
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <div className="p-4 text-center">
+                  <Link
+                    href="/login"
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "inline-flex border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-heading uppercase text-xs no-underline hover:no-underline",
+                    )}
+                  >
+                    Log in to join the roast
+                  </Link>
                 </div>
               )}
             </div>

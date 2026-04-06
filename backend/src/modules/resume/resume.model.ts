@@ -14,7 +14,8 @@ export interface IAiRoast {
 
 export interface IResume extends Document {
   userId: mongoose.Types.ObjectId;
-  name: string;           // resume title / person's name
+  title: string;          // user-provided post title shown on cards & detail
+  name: string;           // original filename (kept for reference)
   blurb: string;          // short description / "roast me because..."
   fileUrl: string;        // Cloudinary URL
   fileType: "pdf" | "image";
@@ -29,6 +30,7 @@ export interface IResume extends Document {
 const resumeSchema = new Schema<IResume>(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    title: { type: String, required: true, trim: true, maxlength: 200 },
     name: { type: String, required: true, trim: true, maxlength: 120 },
     blurb: { type: String, default: "", trim: true, maxlength: 500 },
     fileUrl: { type: String, required: true },
@@ -53,5 +55,6 @@ const resumeSchema = new Schema<IResume>(
 
 resumeSchema.index({ createdAt: -1 });
 resumeSchema.index({ likesCount: -1, commentsCount: -1 });
+resumeSchema.index({ title: "text", blurb: "text" }, { weights: { title: 10, blurb: 3 } });
 
 export default mongoose.model<IResume>("Resume", resumeSchema);

@@ -33,21 +33,41 @@ export const listResumes = async (opts: {
   const { page = 1, sort, search, viewerId } = opts;
 
   const filter: any = {};
-  if (search) {
-    filter.$or = [
-      { name: { $regex: search, $options: "i" } },
-      { blurb: { $regex: search, $options: "i" } },
-    ];
+  let useTextScore = false;
+
+  if (search && search.trim().length > 0) {
+    const q = search.trim();
+    // Use MongoDB $text index for multi-word / long queries (leverages weights on title & blurb).
+    // Fall back to regex for very short single-token queries where $text is too strict.
+    if (q.length >= 3 && /\s/.test(q) === false) {
+      // Single short token — regex gives better partial-match UX
+      const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      filter.$or = [
+        { title: { $regex: escaped, $options: "i" } },
+        { blurb: { $regex: escaped, $options: "i" } },
+      ];
+    } else if (q.length >= 2) {
+      // Multi-word or longer query — use text index for relevance scoring
+      filter.$text = { $search: q };
+      useTextScore = true;
+    }
   }
 
   let sortObj: any = { createdAt: -1 };
-  if (sort === "hot") sortObj = { likesCount: -1, commentsCount: -1, createdAt: -1 };
-  if (sort === "top") sortObj = { likesCount: -1, createdAt: -1 };
+  if (useTextScore && sort === "new") {
+    // When searching, rank by relevance first, then recency
+    sortObj = { score: { $meta: "textScore" }, createdAt: -1 };
+  } else if (sort === "hot") {
+    sortObj = { likesCount: -1, commentsCount: -1, createdAt: -1 };
+  } else if (sort === "top") {
+    sortObj = { likesCount: -1, createdAt: -1 };
+  }
 
   const total = await Resume.countDocuments(filter);
-  const resumes = await populateUser(
-    Resume.find(filter).sort(sortObj).skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE)
-  );
+
+  let query = Resume.find(filter).sort(sortObj).skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE);
+  if (useTextScore) query = query.select({ score: { $meta: "textScore" } });
+  const resumes = await populateUser(query);
 
   // Attach liked status for authenticated viewer
   let likedIds: Set<string> = new Set();
@@ -90,7 +110,7 @@ export const getMyResumes = async (userId: string) => {
 
 export const createResume = async (
   userId: string,
-  data: { name: string; blurb?: string; fileUrl: string; fileType: "pdf" | "image" },
+  data: { title: string; name: string; blurb?: string; fileUrl: string; fileType: "pdf" | "image" },
 ) => {
   return Resume.create({ userId, ...data });
 };
@@ -98,10 +118,11 @@ export const createResume = async (
 export const updateResume = async (
   id: string,
   userId: string,
-  data: { name?: string; blurb?: string },
+  data: { title?: string; name?: string; blurb?: string },
 ) => {
   const resume = await Resume.findOne({ _id: id, userId });
   if (!resume) throw ApiError.notfound("Resume not found or not yours");
+  if (data.title !== undefined) resume.title = data.title;
   if (data.name !== undefined) resume.name = data.name;
   if (data.blurb !== undefined) resume.blurb = data.blurb;
   await resume.save();

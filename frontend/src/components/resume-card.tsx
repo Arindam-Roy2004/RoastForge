@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 
 type ResumeCardProps = {
   id: string;
+  title?: string;
   version: number;
   status: string;
   overall?: number;
@@ -15,7 +16,7 @@ type ResumeCardProps = {
   candidateAlias?: string;
 };
 
-export function ResumeCard({ id, version, status, overall, createdAt, candidateAlias }: ResumeCardProps) {
+export function ResumeCard({ id, title, version, status, overall, createdAt, candidateAlias }: ResumeCardProps) {
   return (
     <Link href={`/resume/${id}`} className="block h-full">
       <Card className="h-full cursor-pointer border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all bg-card p-4">
@@ -24,8 +25,8 @@ export function ResumeCard({ id, version, status, overall, createdAt, candidateA
             {candidateAlias?.charAt(0)?.toUpperCase() || "?"}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-heading uppercase text-lg truncate">
-              {candidateAlias || `Resume v${version}`}
+            <p className="font-heading uppercase text-lg line-clamp-2 leading-tight">
+              {title || candidateAlias || `Resume v${version}`}
             </p>
             <p className="text-sm text-muted-foreground line-clamp-2 font-medium">
               Version {version} &middot; <span className="capitalize">{status}</span>

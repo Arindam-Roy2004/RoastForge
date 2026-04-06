@@ -25,8 +25,8 @@ export const getMyResumes = async (req: Request, res: Response) => {
 };
 
 export const createResume = async (req: Request, res: Response) => {
-  const { name, blurb, fileUrl, fileType } = req.body;
-  const resume = await resumeService.createResume((req as any).user.id, { name, blurb, fileUrl, fileType });
+  const { title, name, blurb, fileUrl, fileType } = req.body;
+  const resume = await resumeService.createResume((req as any).user.id, { title, name, blurb, fileUrl, fileType });
   ApiResponse.created(res, "Resume uploaded", resume);
 };
 

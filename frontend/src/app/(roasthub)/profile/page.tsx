@@ -41,6 +41,7 @@ type User = {
 
 type Resume = {
   _id: string;
+  title?: string;
   version: number;
   status: string;
   aiScore?: { overall: number };
@@ -268,7 +269,7 @@ export default function ProfilePage() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               {resumes.map((r) => (
-                <ResumeCard key={r._id} id={r._id} version={r.version} status={r.status} overall={r.aiScore?.overall} createdAt={r.createdAt} candidateAlias={r.candidateAlias || r.userId?.anonymousUsername || "Anonymous"} />
+                <ResumeCard key={r._id} id={r._id} title={r.title} version={r.version} status={r.status} overall={r.aiScore?.overall} createdAt={r.createdAt} candidateAlias={r.candidateAlias || r.userId?.anonymousUsername || "Anonymous"} />
               ))}
             </div>
           )}

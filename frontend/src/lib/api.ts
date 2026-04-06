@@ -78,6 +78,7 @@ export type AiRoast = {
 export type Resume = {
   _id: string;
   userId: { _id: string; name: string; avatar: string; anonymousUsername?: string };
+  title: string;
   name: string;
   blurb: string;
   fileUrl: string;
@@ -109,9 +110,9 @@ export const resumeApi = {
   },
   get: (id: string) => apiFetch<Resume>(`/api/resumes/${id}`),
   my: () => apiFetch<Resume[]>("/api/resumes/my"),
-  create: (body: { name: string; blurb?: string; fileUrl: string; fileType: "pdf" | "image" }) =>
+  create: (body: { title: string; name: string; blurb?: string; fileUrl: string; fileType: "pdf" | "image" }) =>
     apiFetch<Resume>("/api/resumes", { method: "POST", body: JSON.stringify(body) }),
-  update: (id: string, body: { name?: string; blurb?: string }) =>
+  update: (id: string, body: { title?: string; name?: string; blurb?: string }) =>
     apiFetch<Resume>(`/api/resumes/${id}`, { method: "PUT", body: JSON.stringify(body) }),
   delete: (id: string) => apiFetch(`/api/resumes/${id}`, { method: "DELETE" }),
   like: (id: string) => apiFetch<{ liked: boolean }>(`/api/resumes/${id}/like`, { method: "POST" }),

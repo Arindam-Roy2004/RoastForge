@@ -17,6 +17,7 @@ export default function UploadPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const [file, setFile] = useState<File | null>(null);
+  const [title, setTitle] = useState("");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const ref = useRef<HTMLInputElement>(null);
@@ -50,7 +51,7 @@ export default function UploadPage() {
       const createRes = await fetch(`${API_BASE}/api/resumes`, {
         method: "POST",
         headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ name: file.name, fileUrl, fileType })
+        body: JSON.stringify({ title: title.trim(), name: file.name, fileUrl, fileType })
       });
       const createJson = await createRes.json();
       if (!createRes.ok) throw new Error(createJson.message || "Failed to save resume profile");
@@ -151,9 +152,25 @@ export default function UploadPage() {
               </div>
             )}
 
+            {/* Title input */}
+            <div className="space-y-2">
+              <label className="font-heading uppercase text-sm tracking-wider" htmlFor="resume-title">Post Title</label>
+              <input
+                id="resume-title"
+                type="text"
+                maxLength={200}
+                required
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder='e.g. "Roast my SWE intern resume" or "3 YOE Frontend Dev"'
+                className="w-full p-3 border-4 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm"
+              />
+              <p className="text-xs text-muted-foreground">This title will be shown on the Hall of Shame card.</p>
+            </div>
+
             <Button
               type="submit"
-              disabled={!file || uploading}
+              disabled={!file || !title.trim() || uploading}
               className="w-full h-14 border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-xl"
             >
               {uploading ? "Uploading to Forge..." : "Upload & Roast! 🔥"}
