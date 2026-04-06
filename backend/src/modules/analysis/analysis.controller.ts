@@ -17,6 +17,19 @@ async function extractTextFromPdf(url: string): Promise<string> {
   const res = await fetch(url);
   if (!res.ok) throw ApiError.badRequest("Failed to fetch PDF from storage");
   const buffer = Buffer.from(await res.arrayBuffer());
+
+  // Polyfill DOMMatrix for pdf.js in Node.js environment
+  if (typeof globalThis.DOMMatrix === "undefined") {
+    (globalThis as any).DOMMatrix = class DOMMatrix {
+      a = 1; b = 0; c = 0; d = 1; e = 0; f = 0;
+      constructor(init?: number[] | string) {
+        if (Array.isArray(init)) {
+          [this.a, this.b, this.c, this.d, this.e, this.f] = init;
+        }
+      }
+    };
+  }
+
   // Dynamic import — handle CJS/ESM interop
   const { PDFParse } = await import("pdf-parse");
   const parser = new PDFParse({ data: buffer });

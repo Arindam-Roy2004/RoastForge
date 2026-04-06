@@ -3,10 +3,12 @@ import ApiResponse from "../../common/utils/api-response.js";
 import type { Request, Response } from "express";
 
 // Split Vercel deploys (frontend on a.*, API on b.*) need SameSite=None + Secure or the refresh cookie is never sent on fetch().
-const crossSiteCookies = process.env.CROSS_SITE_COOKIES === "true";
+const isProd = process.env.NODE_ENV === "production";
+const crossSiteCookies = process.env.CROSS_SITE_COOKIES === "true" || isProd;
+
 const COOKIE_OPTS = {
   httpOnly: true,
-  secure: crossSiteCookies || process.env.NODE_ENV === "production",
+  secure: isProd || crossSiteCookies,
   sameSite: (crossSiteCookies ? "none" : "lax") as "none" | "lax",
   maxAge: 7 * 24 * 60 * 60 * 1000,
   path: "/",
