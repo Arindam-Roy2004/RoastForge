@@ -1,18 +1,28 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { apiFetch, clearToken } from "@/lib/api";
+import { apiFetch, clearToken, type User as AuthUser } from "@/lib/api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { FileText, LogOut, Edit2 } from "lucide-react";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardFooter, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ResumeCard } from "@/components/resume-card";
+import { useAuth } from "@/store/auth";
+
+function profileRowFromAuth(u: AuthUser): User {
+  return {
+    _id: u.id,
+    name: u.name,
+    email: u.email,
+    role: u.role ?? "user",
+    anonymousPublicId: u.anonymousUsername,
+  };
+}
 
 type User = {
   _id: string;
@@ -41,8 +51,9 @@ type Resume = {
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { user: authUser, loading: authLoading } = useAuth();
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [detailLoading, setDetailLoading] = useState(true);
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [editMode, setEditMode] = useState(false);
   const [displayName, setDisplayName] = useState("");
@@ -50,26 +61,47 @@ export default function ProfilePage() {
   const [github, setGithub] = useState("");
   const [share, setShare] = useState(false);
 
-  const load = useCallback(async () => {
+  const loadDetails = useCallback(async () => {
+    if (!authUser) return;
+    setDetailLoading(true);
     try {
-      const u = await apiFetch<User>("/api/auth/me");
-      setUser(u.data || null);
-      if (u.data?.publicProfile) {
-        setDisplayName(u.data.publicProfile.displayName || "");
-        setLinkedIn(u.data.publicProfile.linkedInUrl || "");
-        setGithub(u.data.publicProfile.githubUrl || "");
-        setShare(u.data.publicProfile.shareIdentityWithRecruiters || false);
+      const u = await apiFetch<User & { id?: string }>("/api/auth/me");
+      const raw = u.data;
+      const row: User = raw
+        ? {
+            ...raw,
+            _id: raw._id ?? (raw as { id?: string }).id ?? authUser.id,
+            name: raw.name ?? authUser.name,
+            email: raw.email ?? authUser.email,
+          }
+        : profileRowFromAuth(authUser);
+      setUser(row);
+      if (row.publicProfile) {
+        setDisplayName(row.publicProfile.displayName || "");
+        setLinkedIn(row.publicProfile.linkedInUrl || "");
+        setGithub(row.publicProfile.githubUrl || "");
+        setShare(row.publicProfile.shareIdentityWithRecruiters || false);
       }
       const r = await apiFetch<Resume[]>("/api/resumes/my");
       setResumes(r.data || []);
     } catch {
-      /* not logged in */
+      setUser(profileRowFromAuth(authUser));
     } finally {
-      setLoading(false);
+      setDetailLoading(false);
     }
-  }, []);
+  }, [authUser]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    if (authLoading) return;
+    if (!authUser) {
+      setUser(null);
+      setResumes([]);
+      setDetailLoading(false);
+      return;
+    }
+    setUser(profileRowFromAuth(authUser));
+    void loadDetails();
+  }, [authLoading, authUser, loadDetails]);
 
   async function saveProfile() {
     try {
@@ -79,13 +111,13 @@ export default function ProfilePage() {
       });
       toast.success("Profile updated!");
       setEditMode(false);
-      load();
+      void loadDetails();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Update failed");
     }
   }
 
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Skeleton className="h-48 w-full border-4 border-border rounded-none mb-8" />
@@ -97,12 +129,12 @@ export default function ProfilePage() {
     );
   }
 
-  if (!user) {
+  if (!authUser) {
     return (
       <div className="flex items-center justify-center p-4 py-16">
-        <Card className="w-full max-w-md border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center p-8">
-          <CardTitle className="font-heading uppercase text-3xl mb-4">Sign In Required</CardTitle>
-          <CardDescription className="mb-6">You need to sign in to view your profile and manage your resumes.</CardDescription>
+        <Card className="w-full max-w-md border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center p-8 bg-card">
+          <h1 className="font-heading uppercase text-3xl mb-4">Sign In Required</h1>
+          <p className="text-sm text-muted-foreground mb-6">You need to sign in to view your profile and manage your resumes.</p>
           <Link href="/login">
             <Button className="border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase">
               Sign In Now
@@ -113,21 +145,23 @@ export default function ProfilePage() {
     );
   }
 
+  const displayUser = user ?? profileRowFromAuth(authUser);
+
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       {/* User Header */}
       <Card className="border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
         <div className="bg-primary p-6 md:p-8 flex flex-col md:flex-row items-center gap-6">
           <div className="w-24 h-24 rounded-full border-4 border-border bg-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center text-4xl font-heading uppercase shrink-0">
-            {user.name.charAt(0).toUpperCase() || "?"}
+            {displayUser.name.charAt(0).toUpperCase() || "?"}
           </div>
           <div className="flex-1 text-center md:text-left text-primary-foreground space-y-1">
-            <h1 className="text-3xl md:text-4xl font-heading uppercase drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">{user.name}</h1>
-            <p className="font-medium opacity-90">{user.email}</p>
-            {user.anonymousPublicId && <p className="text-sm opacity-80 uppercase tracking-widest mt-2 border border-primary-foreground/30 inline-block px-2 py-1 rounded-sm">Alias: {user.anonymousPublicId}</p>}
-            {user.talentMetrics && (
+            <h1 className="text-3xl md:text-4xl font-heading uppercase drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">{displayUser.name}</h1>
+            <p className="font-medium opacity-90">{displayUser.email}</p>
+            {displayUser.anonymousPublicId && <p className="text-sm opacity-80 uppercase tracking-widest mt-2 border border-primary-foreground/30 inline-block px-2 py-1 rounded-sm">Alias: {displayUser.anonymousPublicId}</p>}
+            {displayUser.talentMetrics && (
               <Badge variant="secondary" className="mt-2 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none font-bold">
-                Talent Score: {user.talentMetrics.composite}
+                Talent Score: {displayUser.talentMetrics.composite}
               </Badge>
             )}
           </div>
@@ -188,20 +222,20 @@ export default function ProfilePage() {
                 <div className="space-y-4">
                   <div>
                     <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Display Name</h4>
-                    <p className="font-medium bg-muted p-2 border-2 border-border inline-block min-w-full text-sm">{user.publicProfile?.displayName || "—"}</p>
+                    <p className="font-medium bg-muted p-2 border-2 border-border inline-block min-w-full text-sm">{displayUser.publicProfile?.displayName || "—"}</p>
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">LinkedIn</h4>
-                    <p className="font-medium bg-muted p-2 border-2 border-border inline-block min-w-full text-sm truncate">{user.publicProfile?.linkedInUrl || "—"}</p>
+                    <p className="font-medium bg-muted p-2 border-2 border-border inline-block min-w-full text-sm truncate">{displayUser.publicProfile?.linkedInUrl || "—"}</p>
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">GitHub</h4>
-                    <p className="font-medium bg-muted p-2 border-2 border-border inline-block min-w-full text-sm truncate">{user.publicProfile?.githubUrl || "—"}</p>
+                    <p className="font-medium bg-muted p-2 border-2 border-border inline-block min-w-full text-sm truncate">{displayUser.publicProfile?.githubUrl || "—"}</p>
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Visibility</h4>
-                    <Badge variant={user.publicProfile?.shareIdentityWithRecruiters ? "default" : "secondary"} className="border-2 border-border rounded-none font-bold uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                      {user.publicProfile?.shareIdentityWithRecruiters ? "Shared with Recruiters" : "Anonymous"}
+                    <Badge variant={displayUser.publicProfile?.shareIdentityWithRecruiters ? "default" : "secondary"} className="border-2 border-border rounded-none font-bold uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                      {displayUser.publicProfile?.shareIdentityWithRecruiters ? "Shared with Recruiters" : "Anonymous"}
                     </Badge>
                   </div>
                 </div>
@@ -215,7 +249,12 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-heading uppercase">Your Resumes</h2>
           </div>
-          {resumes.length === 0 ? (
+          {detailLoading ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Skeleton className="h-48 w-full border-4 border-border rounded-none" />
+              <Skeleton className="h-48 w-full border-4 border-border rounded-none" />
+            </div>
+          ) : resumes.length === 0 ? (
             <Card className="border-4 border-border border-dashed bg-muted/50 rounded-none text-center p-8">
               <CardDescription className="text-base text-muted-foreground">
                 You haven't uploaded any resumes yet.

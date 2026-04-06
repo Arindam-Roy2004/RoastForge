@@ -77,9 +77,9 @@ export default function UploadPage() {
   if (!user) {
     return (
       <div className="flex items-center justify-center p-4 py-16">
-        <Card className="w-full max-w-md border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center p-8">
-          <CardTitle className="font-heading uppercase text-3xl mb-4">Sign In Required</CardTitle>
-          <CardDescription className="mb-6">You need to sign in to upload your resume for roasting!</CardDescription>
+        <Card className="w-full max-w-md border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center p-8 bg-card">
+          <h1 className="font-heading uppercase text-3xl mb-4">Sign In Required</h1>
+          <p className="text-sm text-muted-foreground mb-6">You need to sign in to upload your resume for roasting!</p>
           <Link href="/login">
             <Button className="border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-lg px-8">
               Sign In to Upload
