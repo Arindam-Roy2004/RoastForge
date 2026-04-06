@@ -11,7 +11,7 @@ import { useAuth } from "@/store/auth";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
@@ -250,9 +250,15 @@ export default function ResumeDetail() {
               ) : (
                 <div className="bg-muted p-6 text-center border-4 border-border border-dashed shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-8">
                   <p className="font-heading uppercase mb-3">Log in to join the roast.</p>
-                  <Button asChild variant="outline" className="border-4 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-heading uppercase">
-                    <Link href="/login">Login</Link>
-                  </Button>
+                  <Link
+                    href="/login"
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "inline-flex border-4 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-heading uppercase no-underline hover:no-underline",
+                    )}
+                  >
+                    Login
+                  </Link>
                 </div>
               )}
   
