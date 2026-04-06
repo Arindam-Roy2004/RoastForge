@@ -5,6 +5,21 @@ import mongoose from "mongoose";
 
 const PAGE_SIZE = 12;
 
+/** AI roast is private to the uploader — never expose in public list/API. */
+function stripPrivateRoastFields<T extends Record<string, unknown>>(doc: T): T {
+  const out = { ...doc };
+  delete out.aiRoast;
+  delete out.roastHash;
+  return out;
+}
+
+function resumeOwnerId(resume: { userId: unknown }): string {
+  const u = resume.userId as { _id?: mongoose.Types.ObjectId } | mongoose.Types.ObjectId | string;
+  if (u && typeof u === "object" && "_id" in u && u._id) return u._id.toString();
+  if (u && typeof u === "object" && "toString" in u) return (u as mongoose.Types.ObjectId).toString();
+  return String(u);
+}
+
 // Populate user info for public display
 const populateUser = (q: any) =>
   q.populate("userId", "name avatar anonymousUsername");
@@ -43,7 +58,7 @@ export const listResumes = async (opts: {
 
   return {
     resumes: resumes.map((r) => ({
-      ...r.toObject(),
+      ...stripPrivateRoastFields(r.toObject() as Record<string, unknown>),
       isLiked: likedIds.has(r._id.toString()),
     })),
     total,
@@ -61,7 +76,12 @@ export const getResumeById = async (id: string, viewerId?: string) => {
     isLiked = !!(await Like.findOne({ resumeId: id, userId: viewerId }));
   }
 
-  return { ...resume.toObject(), isLiked };
+  const obj = resume.toObject() as Record<string, unknown>;
+  const ownerId = resumeOwnerId(resume);
+  const isOwner = Boolean(viewerId && viewerId === ownerId);
+  const safe = isOwner ? obj : stripPrivateRoastFields(obj);
+
+  return { ...safe, isLiked, isOwner };
 };
 
 export const getMyResumes = async (userId: string) => {

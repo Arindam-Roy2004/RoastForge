@@ -6,9 +6,8 @@ import { apiFetch, type Resume } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Flame, Search } from "lucide-react";
+import { FileText, Flame, ImageIcon, Search } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function HomePage() {
@@ -130,29 +129,35 @@ export default function HomePage() {
                   whileHover={{ y: -5, x: -5, boxShadow: "8px 8px 0px 0px rgba(0,0,0,1)" }}
                   className="h-full"
                 >
-                  <Card className="h-full flex flex-col border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all bg-card cursor-pointer">
-                    <CardHeader className="pb-0 p-6">
-                      <div className="flex justify-between items-start gap-2">
-                        <div className="min-w-0">
-                          <h3 className="font-heading text-lg truncate whitespace-nowrap">{resume.name || resume.userId?.anonymousUsername || "Anonymous"}</h3>
-                          <p className="text-xs text-muted-foreground truncate">by {resume.userId?.anonymousUsername || resume.userId?.name}</p>
+                  <Card className="h-[320px] flex flex-col border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all bg-card cursor-pointer overflow-hidden">
+                    <CardHeader className="pb-0 p-5 shrink-0 border-b-2 border-border">
+                      <div className="flex justify-between items-start gap-3">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-heading text-base truncate pr-1">{resume.name || resume.userId?.anonymousUsername || "Anonymous"}</h3>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">by {resume.userId?.anonymousUsername || resume.userId?.name}</p>
                         </div>
-                        <Badge variant="secondary" className="border-2 border-border rounded-none shrink-0 bg-primary/20">
-                          Roasting
-                        </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent className="flex-1 px-6 pb-6">
-                      <div className="mt-4 flex flex-col items-center justify-center py-6 bg-muted border-2 border-border border-dashed h-full">
-                        <span className="text-4xl font-heading text-destructive drop-shadow-[1px_1px_0px_rgba(0,0,0,1)]">
-                          {((resume._id.charCodeAt(0) + resume._id.charCodeAt(resume._id.length - 1)) % 50) + 10 /* Replace with actual AI score when available */}
-                        </span>
-                        <span className="text-xs font-bold uppercase tracking-wider mt-1">Roast Score</span>
+                    <CardContent className="flex-1 min-h-0 px-5 pb-4 flex flex-col">
+                      <div className="mt-2 flex-1 min-h-0 flex flex-col items-center justify-center gap-3 py-5 px-3 bg-muted border-2 border-border border-dashed">
+                        <Flame className="w-10 h-10 text-destructive" />
+                        <div className="text-center space-y-1">
+                          <p className="font-heading text-sm uppercase tracking-wide text-foreground leading-tight">
+                            Resume + roast thread
+                          </p>
+                          <p className="text-[11px] text-muted-foreground font-medium tabular-nums">
+                            {resume.commentsCount ?? 0}{" "}
+                            {(resume.commentsCount ?? 0) === 1 ? "comment" : "comments"}
+                            <span className="mx-1.5 text-border">·</span>
+                            {resume.likesCount ?? 0}{" "}
+                            {(resume.likesCount ?? 0) === 1 ? "like" : "likes"}
+                          </p>
+                        </div>
                       </div>
                     </CardContent>
-                    <CardFooter className="text-xs text-muted-foreground border-t-4 border-border p-4 bg-muted rounded-none justify-between">
+                    <CardFooter className="text-xs text-muted-foreground border-t-4 border-border p-3 bg-muted rounded-none justify-between shrink-0 mt-auto">
                       <span>{new Date(resume.createdAt).toLocaleDateString()}</span>
-                      <span className="font-heading uppercase text-[10px] tracking-wider">View Roast</span>
+                      <span className="font-heading uppercase text-[10px] tracking-wider">Open</span>
                     </CardFooter>
                   </Card>
                 </motion.div>

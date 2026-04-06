@@ -1,5 +1,17 @@
 import mongoose, { Schema, Document } from "mongoose";
 
+export interface IAiRoastBar {
+  id: string;
+  label: string;
+  score: number;
+}
+
+export interface IAiRoast {
+  score: number;
+  roastText: string;
+  verdictBars: IAiRoastBar[];
+}
+
 export interface IResume extends Document {
   userId: mongoose.Types.ObjectId;
   name: string;           // resume title / person's name
@@ -8,6 +20,8 @@ export interface IResume extends Document {
   fileType: "pdf" | "image";
   likesCount: number;
   commentsCount: number;
+  roastHash: string | null;
+  aiRoast: IAiRoast | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,6 +35,18 @@ const resumeSchema = new Schema<IResume>(
     fileType: { type: String, enum: ["pdf", "image"], required: true },
     likesCount: { type: Number, default: 0 },
     commentsCount: { type: Number, default: 0 },
+    roastHash: { type: String, default: null },
+    aiRoast: {
+      score: { type: Number },
+      roastText: { type: String },
+      verdictBars: [
+        {
+          id: { type: String },
+          label: { type: String },
+          score: { type: Number, min: 1, max: 5 },
+        },
+      ],
+    },
   },
   { timestamps: true },
 );

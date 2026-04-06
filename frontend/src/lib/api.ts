@@ -67,6 +67,14 @@ export const authApi = {
 };
 
 // ─── Resumes ─────────────────────────────────────────────────────────────────
+export type VerdictBar = { id: string; label: string; score: number };
+
+export type AiRoast = {
+  score: number;
+  roastText: string;
+  verdictBars: VerdictBar[];
+};
+
 export type Resume = {
   _id: string;
   userId: { _id: string; name: string; avatar: string; anonymousUsername?: string };
@@ -77,6 +85,10 @@ export type Resume = {
   likesCount: number;
   commentsCount: number;
   isLiked?: boolean;
+  /** Present only for the resume owner (API strips for others). */
+  isOwner?: boolean;
+  aiRoast?: AiRoast;
+  roastHash?: string | null;
   createdAt: string;
 };
 
@@ -103,6 +115,19 @@ export const resumeApi = {
     apiFetch<Resume>(`/api/resumes/${id}`, { method: "PUT", body: JSON.stringify(body) }),
   delete: (id: string) => apiFetch(`/api/resumes/${id}`, { method: "DELETE" }),
   like: (id: string) => apiFetch<{ liked: boolean }>(`/api/resumes/${id}/like`, { method: "POST" }),
+};
+
+// ─── AI Analysis ─────────────────────────────────────────────────────────────
+export type RoastData = {
+  cached: boolean;
+  score: number;
+  roastText: string;
+  verdictBars: VerdictBar[];
+};
+
+export const analysisApi = {
+  roast: (resumeId: string) =>
+    apiFetch<RoastData>(`/api/analysis/${resumeId}`, { method: "POST" }),
 };
 
 // ─── Comments ────────────────────────────────────────────────────────────────

@@ -5,6 +5,7 @@ import authRoute from "./modules/auth/auth.routes.js";
 import resumeRoute from "./modules/resume/resume.routes.js";
 import commentRoute from "./modules/comment/comment.routes.js";
 import uploadRoute from "./modules/upload/upload.routes.js";
+import analysisRoute from "./modules/analysis/analysis.routes.js";
 import { errorHandler } from "./common/middleware/error.middleware.js";
 
 /** Comma-separated FRONTEND_ORIGIN (e.g. prod + previews). Required on Vercel for split deploys. */
@@ -47,6 +48,7 @@ app.use("/api/auth", authRoute);
 app.use("/api/resumes", resumeRoute);
 app.use("/api/comments", commentRoute);
 app.use("/api/upload", uploadRoute);
+app.use("/api/analysis", analysisRoute);
 
 app.use(errorHandler);
 

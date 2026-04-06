@@ -2,19 +2,19 @@
 
 import { EnhancedComment } from "@/components/enhanced-comment";
 import { cn } from "@/lib/utils";
-import { resumeApi, commentApi, type Resume, type Comment } from "@/lib/api";
+import { resumeApi, commentApi, analysisApi, type Resume, type Comment, type RoastData } from "@/lib/api";
+import { coalesceVerdictBars, isCompleteRoastPayload, verdictBarFillClass } from "@/lib/verdict-dimensions";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, Trash2, FileText, Flame, AlertCircle, CheckCircle2, XCircle, TrendingUp, Sparkles, MessageSquare } from "lucide-react";
+import { ArrowLeft, Trash2, FileText, Flame, MessageSquare, Zap, AlertTriangle, RefreshCw } from "lucide-react";
 import { useAuth } from "@/store/auth";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function ResumeDetail() {
   const { id } = useParams<{ id: string }>();
@@ -28,7 +28,14 @@ export default function ResumeDetail() {
   const [commentType, setCommentType] = useState<string>("comment");
   const [posting, setPosting] = useState(false);
 
-  const isOwner = user && resume && user.id === resume.userId?._id;
+  // AI Roast state
+  const [roastData, setRoastData] = useState<RoastData | null>(null);
+  const [roasting, setRoasting] = useState(false);
+  const [roastError, setRoastError] = useState("");
+
+  const isOwner = Boolean(
+    resume && (resume.isOwner === true || (user && user.id === resume.userId?._id)),
+  );
 
   const loadResume = useCallback(async () => {
     try {
@@ -51,10 +58,60 @@ export default function ResumeDetail() {
   useEffect(() => { loadResume(); loadComments(); }, [loadResume, loadComments]);
 
   useEffect(() => {
+    setRoastData(null);
+    setRoastError("");
+    setRoasting(false);
+  }, [id]);
+
+  useEffect(() => {
+    if (!resume?.aiRoast || !isOwner) return;
+    if (!isCompleteRoastPayload(resume.aiRoast)) return;
+    setRoastData((prev) => {
+      if (prev && isCompleteRoastPayload(prev)) return prev;
+      const ar = resume.aiRoast!;
+      return {
+        cached: true,
+        score: ar.score,
+        roastText: ar.roastText,
+        verdictBars: coalesceVerdictBars(ar.verdictBars),
+      };
+    });
+  }, [resume, isOwner]);
+
+  useEffect(() => {
+    if (roastData != null && !isCompleteRoastPayload(roastData)) {
+      setRoastData(null);
+    }
+  }, [roastData]);
+
+  useEffect(() => {
     if (isOwner && commentType !== "comment") {
       setCommentType("comment");
     }
   }, [isOwner, commentType]);
+
+  async function fetchRoast() {
+    setRoasting(true);
+    setRoastError("");
+    try {
+      const res = await analysisApi.roast(id);
+      if (res.data) {
+        setRoastData(res.data);
+        void loadResume();
+        if (res.data.cached) {
+          toast.success("Loaded cached roast — resume unchanged since last analysis.");
+        } else {
+          toast.success("Fresh roast generated! 🔥");
+        }
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to forge the roast. Try again.";
+      setRoastError(msg);
+      toast.error(msg);
+    } finally {
+      setRoasting(false);
+    }
+  }
 
   async function postComment(e: React.FormEvent) {
     e.preventDefault();
@@ -85,6 +142,13 @@ export default function ResumeDetail() {
     }
   }
 
+  // Score color helper
+  function scoreColor(score: number) {
+    if (score >= 70) return "text-green-600";
+    if (score >= 40) return "text-yellow-600";
+    return "text-destructive";
+  }
+
   if (loading) {
     return (
       <div className="container mx-auto p-4 py-8 space-y-4">
@@ -106,8 +170,7 @@ export default function ResumeDetail() {
   }
 
   const topLevel = comments.filter((c) => !c.parentId);
-  // Optional mockup logic for AI elements since backend doesn't provide them all yet.
-  const aiScore = { overall: 42, atsCompatibility: 45, formatting: 60, impact: 35, readability: 50, keywordDensity: 20 };
+  const isPdf = resume.fileType === "pdf";
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl space-y-8">
@@ -139,56 +202,171 @@ export default function ResumeDetail() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        {/* Left: resume info & score */}
-        <div className="xl:col-span-1 space-y-6">
-          <Card className="border-4 border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card">
+      <div
+        className={cn(
+          "grid grid-cols-1 gap-8 xl:items-stretch",
+          isOwner ? "xl:grid-cols-3" : "xl:grid-cols-2",
+        )}
+      >
+        {/* Left: AI Roast (owner only) */}
+        {isOwner && (
+        <div className="xl:col-span-1 space-y-6 min-h-0">
+          <Card className="border-4 border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card flex flex-col max-h-[760px] min-h-0">
             <CardHeader className="bg-muted border-b-2 border-border pb-4">
-              <CardTitle className="font-heading uppercase text-xl text-center">AI Roast Score</CardTitle>
+              <CardTitle className="font-heading uppercase text-xl text-center flex items-center justify-center gap-2">
+                <Flame className="w-5 h-5 text-destructive" /> AI Roast Score
+              </CardTitle>
             </CardHeader>
-            <CardContent className="pt-6">
-              <div className="flex justify-center mb-8">
-                <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }} className="w-32 h-32 rounded-full border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center bg-background">
-                  <span className="text-5xl font-heading text-destructive">{aiScore.overall}</span>
-                </motion.div>
-              </div>
-              <div className="space-y-4">
-                {[
-                  { label: "ATS Compat.", value: aiScore.atsCompatibility },
-                  { label: "Formatting", value: aiScore.formatting },
-                  { label: "Impact", value: aiScore.impact },
-                  { label: "Readability", value: aiScore.readability },
-                  { label: "Keywords", value: aiScore.keywordDensity },
-                ].map((stat) => (
-                  <div key={stat.label}>
-                    <div className="flex justify-between mb-1 text-xs font-bold uppercase">
-                      <span>{stat.label}</span>
-                      <span>{stat.value}/100</span>
+            <CardContent className="pt-6 flex-1 min-h-0 overflow-y-auto">
+              <AnimatePresence mode="wait">
+                {/* State: No roast yet */}
+                {!isCompleteRoastPayload(roastData) && !roasting && !roastError && (
+                  <motion.div
+                    key="empty"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex flex-col items-center gap-5 py-6"
+                  >
+                    <div className="w-32 h-32 rounded-full border-4 border-dashed border-border flex items-center justify-center bg-muted/30">
+                      <Zap className="w-12 h-12 text-muted-foreground" />
                     </div>
-                    {/* fallback progress-bar if shadcn progress fails */}
-                    <div className="w-full bg-muted border-2 border-border h-3 overflow-hidden">
-                       <div className="bg-primary h-full border-r-2 border-border" style={{ width: `${stat.value}%` }} />
+                    <p className="text-sm text-muted-foreground text-center font-medium">
+                      {isPdf
+                        ? "No roast yet. Hit the button to unleash the AI."
+                        : "AI roast is only available for PDF resumes."}
+                    </p>
+                    {isPdf && isOwner && user && (
+                      <Button
+                        onClick={fetchRoast}
+                        className="w-full border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-base bg-destructive text-destructive-foreground"
+                      >
+                        🔥 Roast Me
+                      </Button>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* State: Loading */}
+                {roasting && (
+                  <motion.div
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex flex-col items-center gap-5 py-6"
+                  >
+                    <div className="w-32 h-32 rounded-full border-4 border-border flex items-center justify-center bg-background">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                      >
+                        <Flame className="w-12 h-12 text-destructive" />
+                      </motion.div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                    <p className="text-sm font-bold uppercase text-destructive animate-pulse">Forging roast...</p>
+                    <div className="w-full space-y-3 mt-2">
+                      <div className="h-3 bg-muted border-2 border-border rounded-none animate-pulse" />
+                      <div className="h-3 bg-muted border-2 border-border rounded-none animate-pulse w-4/5" />
+                      <div className="h-3 bg-muted border-2 border-border rounded-none animate-pulse w-3/5" />
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* State: Error */}
+                {roastError && !roasting && (
+                  <motion.div
+                    key="error"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex flex-col items-center gap-4 py-6"
+                  >
+                    <AlertTriangle className="w-12 h-12 text-destructive" />
+                    <p className="text-sm text-destructive font-bold text-center">{roastError}</p>
+                    <Button
+                      onClick={fetchRoast}
+                      variant="outline"
+                      className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading uppercase text-xs"
+                    >
+                      Try Again
+                    </Button>
+                  </motion.div>
+                )}
+
+                {/* State: Roast result */}
+                {isCompleteRoastPayload(roastData) && !roasting && (
+                  <motion.div
+                    key="result"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 200 }}
+                    className="space-y-4"
+                  >
+                    {/* Score circle */}
+                    <div className="flex justify-center shrink-0">
+                      <motion.div
+                        initial={{ scale: 0.5 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+                        className="w-32 h-32 rounded-full border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center bg-background"
+                      >
+                        <span className={cn("text-5xl font-heading", scoreColor(roastData!.score))}>
+                          {roastData!.score}
+                        </span>
+                      </motion.div>
+                    </div>
+                    <p className="text-center text-xs text-muted-foreground font-bold uppercase">
+                      {roastData!.score >= 70 ? "Not terrible." : roastData!.score >= 40 ? "Mediocre at best." : "Brutal."}
+                    </p>
+
+                    {/* Verdict bars — 5 dimensions × /5, fixed layout */}
+                    <div className="border-2 border-border bg-muted/30 p-3 shrink-0 max-h-[14rem] overflow-y-auto overscroll-contain">
+                      <h4 className="font-heading uppercase text-xs mb-3 tracking-wide flex items-center gap-2">
+                        Verdict <span className="text-[10px] font-sans font-normal text-muted-foreground normal-case">(1–5 each)</span>
+                      </h4>
+                      <div className="space-y-3">
+                        {coalesceVerdictBars(roastData!.verdictBars).map((bar) => (
+                          <div key={bar.id} className="space-y-1">
+                            <div className="flex justify-between items-baseline gap-2 text-[11px] font-bold uppercase tracking-tight">
+                              <span className="text-foreground leading-tight min-w-0">{bar.label}</span>
+                              <span className="shrink-0 tabular-nums text-muted-foreground">{bar.score}/5</span>
+                            </div>
+                            <div className="flex gap-0.5 w-full" role="img" aria-label={`${bar.label}: ${bar.score} out of 5`}>
+                              {[1, 2, 3, 4, 5].map((step) => (
+                                <div
+                                  key={step}
+                                  className={cn(
+                                    "flex-1 h-2.5 min-w-0 border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]",
+                                    step <= bar.score ? verdictBarFillClass(bar.score) : "bg-background",
+                                  )}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Refresh button */}
+                    <button
+                      onClick={fetchRoast}
+                      className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors font-bold uppercase mx-auto"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      Re-roast {roastData!.cached && "(cached — updates if resume changed)"}
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </CardContent>
           </Card>
-          
-          {resume.blurb && (
-            <Card className="border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-yellow/20">
-              <CardHeader className="pb-2">
-                <CardTitle className="font-heading uppercase text-lg">Author's Note</CardTitle>
-              </CardHeader>
-              <CardContent>
-                 <p className="text-sm font-medium">{resume.blurb}</p>
-              </CardContent>
-            </Card>
-          )}
         </div>
+        )}
 
         {/* Center: PDF Viewer */}
-        <div className="xl:col-span-1 border-4 border-border shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-muted overflow-hidden flex flex-col h-[700px] xl:h-[auto]">
+        <div className="xl:col-span-1 border-4 border-border shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-muted overflow-hidden flex flex-col h-[min(70vh,640px)] xl:h-auto xl:min-h-[560px] xl:max-h-[720px]">
           <div className="bg-primary text-primary-foreground p-3 border-b-4 border-border font-heading uppercase flex items-center gap-2 shrink-0">
              <FileText className="w-5 h-5" /> Resume PDF
              <a href={resume.fileUrl} target="_blank" rel="noreferrer" className="ml-auto text-xs underline font-sans capitalize font-medium">Open external</a>
@@ -204,7 +382,7 @@ export default function ResumeDetail() {
 
         {/* Right: Discussion */}
         <div className="xl:col-span-1 space-y-6 flex flex-col h-full">
-          <Card className="flex-1 border-4 border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col overflow-hidden max-h-[800px] xl:max-h-none">
+          <Card className="flex-1 border-4 border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col overflow-hidden h-[min(70vh,780px)] xl:h-auto xl:min-h-[560px] xl:max-h-[720px]">
             <CardHeader className="bg-muted border-b-4 border-border shrink-0 py-4">
                <div className="flex items-center justify-between">
                  <CardTitle className="font-heading uppercase text-xl flex items-center gap-2">
@@ -280,6 +458,17 @@ export default function ResumeDetail() {
           </Card>
         </div>
       </div>
+
+      {resume.blurb ? (
+        <Card className="border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-yellow-500/15">
+          <CardHeader className="pb-2">
+            <CardTitle className="font-heading uppercase text-lg">Author&apos;s Note</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm font-medium">{resume.blurb}</p>
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   );
 }
