@@ -1,230 +1,153 @@
-# 🔥 RoastForge
+# RoastForge
 
-RoastForge is an interactive platform for developers, designers, and job seekers to upload their resumes and projects and receive honest, community-driven **“roasts”** (reviews), constructive feedback, and actionable advice.
+RoastForge is a full-stack web app for sharing resumes and collecting feedback through comments, replies, votes, and likes. The repository is split into a TypeScript backend API and a Next.js frontend.
 
-🌐 **Live Demo:** https://roastforge-web.vercel.app/
+## What Is Implemented
 
----
+### Backend
 
-## 🏗️ System Architecture
+- JWT authentication with register, login, refresh, logout, `me`, and username regeneration endpoints
+- Resume CRUD with list, detail, my-resumes, and like/unlike support
+- Commenting on resumes with replies and comment voting
+- Resume and avatar uploads to Cloudinary
+- MongoDB persistence through Mongoose
+- Request validation with DTOs and middleware
+- CORS, cookie parsing, async error handling, and a `/health` endpoint
 
-RoastForge follows a **decoupled client-server architecture**:
+### Frontend
 
-### 1. Frontend (Client)
+- App Router pages for home, login, register, verify email, profile, recruiter, projects, resume detail, and upload
+- Shared UI components for navbar, footer, resume cards, comment threads, and reusable form controls
+- Frontend state management for authentication
+- API helpers and shared utilities
 
-* Built with **Next.js 14+ (App Router)**, React, and Tailwind CSS
-* Communicates with backend via REST APIs
-* Features:
+## Code Structure
 
-  * Interactive UI
-  * Optimistic updates (votes, comments)
-  * Client-side state management
-
----
-
-### 2. Backend (API Server)
-
-* Built with **Node.js, Express, and TypeScript**
-* Responsible for:
-
-  * Authentication (JWT)
-  * Resume & project management
-  * Multi-level threaded comments
-  * Voting and ranking logic
-
----
-
-### 3. Database
-
-* **MongoDB (Mongoose)**
-* Handles:
-
-  * Nested comment structures
-  * User data
-  * Resume/project documents
-
----
-
-## 🧱 Backend Architecture (DTO + Modular MVC)
-
-The backend uses a **feature-based modular MVC architecture** combined with **DTO-driven validation**.
-
-### 📦 DTOs (Data Transfer Objects)
-
-* Define strict schemas for incoming requests
-* Validated via middleware before reaching controllers
-* Benefits:
-
-  * Type safety
-  * Security (prevents malformed input)
-  * Cleaner controller logic
-
----
-
-### 🎮 Controllers
-
-* Handle HTTP requests/responses
-* Extract params/body
-* Delegate logic to services
-
----
-
-### ⚙️ Services
-
-* Contain core business logic:
-
-  * Resume ranking algorithms
-  * Comment tree handling
-  * Voting systems
-
----
-
-### 🔌 Middlewares
-
-* Handle cross-cutting concerns:
-
-  * JWT Authentication
-  * DTO Validation
-  * Async error handling
-
----
-
-## 📂 Project Structure
+### Backend
 
 ```text
-RoastForge/
-├── backend/                      # Node.js + Express API
-│   ├── src/
-│   │   ├── common/             # Shared utilities
-│   │   │   ├── dto/            # Base DTOs
-│   │   │   └── middleware/     # Auth, validation, error handling
-│   │   └── modules/            # Feature-based modules
-│   │       ├── auth/           # Authentication (JWT, User)
-│   │       ├── comment/        # Nested replies, voting
-│   │       ├── resume/         # Resume logic, sorting
-│   │       └── upload/         # Cloudinary integration
-│   └── package.json
-│
-└── frontend/                   # Next.js App Router
-    ├── src/
-    │   ├── app/                # Routes (App Router)
-    │   │   └── (roasthub)/     # Route grouping
-    │   ├── components/         # Reusable UI components
-    │   ├── hooks/              # Custom React hooks
-    │   ├── lib/                # API utilities
-    │   └── store/              # Global state (Auth)
-    └── package.json
+backend/
+├── server.ts                # Starts the HTTP server and connects to MongoDB
+├── src/
+│   ├── app.ts               # Express app, middleware, routes, and health check
+│   ├── common/              # Shared config, middleware, DTO base class, and utilities
+│   │   ├── config/db.ts     # MongoDB connection setup
+│   │   ├── dto/             # Shared DTO base definitions
+│   │   ├── middleware/      # Validation, error handling, async wrapper, upload config
+│   │   └── utils/           # API response/error helpers, JWT, username, Cloudinary upload
+│   └── modules/             # Feature-based API modules
+│       ├── auth/            # Register/login/session handling and auth middleware
+│       ├── comment/         # Comments, replies, and comment voting
+│       ├── resume/          # Resume CRUD and likes
+│       └── upload/          # Resume and avatar upload endpoints
 ```
 
----
+### Frontend
 
-## ✨ Core Features
+```text
+frontend/
+├── src/
+│   ├── app/                 # Next.js App Router entry points and route groups
+│   │   └── (roasthub)/      # Main application pages
+│   ├── components/          # Reusable UI and feature components
+│   ├── hooks/               # Custom hooks
+│   ├── lib/                 # API client and utility helpers
+│   └── store/               # Global state, including auth state
+```
 
-* 🔐 **Authentication & Aliasing**
+## API Routes
 
-  * JWT-based authentication
-  * Anonymous user identities
+- `GET /health` - service health check
+- `POST /api/auth/register` - create account
+- `POST /api/auth/login` - sign in
+- `POST /api/auth/refresh` - refresh tokens
+- `POST /api/auth/logout` - sign out
+- `GET /api/auth/me` - current user profile
+- `PATCH /api/auth/regenerate-username` - regenerate username
+- `GET /api/resumes` - list resumes
+- `GET /api/resumes/my` - current user's resumes
+- `GET /api/resumes/:id` - get one resume
+- `POST /api/resumes` - create resume
+- `PUT /api/resumes/:id` - update resume
+- `DELETE /api/resumes/:id` - delete resume
+- `POST /api/resumes/:id/like` - toggle like
+- `GET /api/comments/resume/:resumeId` - list comments for a resume
+- `POST /api/comments/resume/:resumeId` - add comment
+- `PUT /api/comments/:id` - update comment
+- `DELETE /api/comments/:id` - delete comment
+- `POST /api/comments/:id/replies` - add reply
+- `POST /api/comments/:id/vote` - vote on a comment
+- `POST /api/upload/resume` - upload resume file
+- `POST /api/upload/avatar` - upload avatar image
 
-* 📄 **File Uploads**
+## Local Setup
 
-  * Upload resumes (PDF/Image)
-  * Managed via Cloudinary
+### Prerequisites
 
-* 🧵 **Multi-Level Commenting**
+- Node.js
+- MongoDB connection string
+- Cloudinary account
 
-  * Reddit-style nested threads
-
-* 🏷️ **Categorized Feedback**
-
-  * Tag feedback:
-
-    * `[STRENGTH]`
-    * `[WEAKNESS]`
-    * `[SUGGESTION]`
-
-* 👍 **Voting System**
-
-  * Upvote/downvote comments
-  * Resume ranking (hot/top logic)
-
-* 🗑️ **Full CRUD Control**
-
-  * Users can manage their own:
-
-    * Resumes
-    * Comments
-
----
-
-## 🚀 Local Development Setup
-
-### 📌 Prerequisites
-
-* Node.js (v18+)
-* MongoDB (Atlas recommended)
-* Cloudinary account
-
----
-
-### ⚙️ Backend Setup
+### Backend
 
 ```bash
 cd backend
 npm install
 ```
 
-Create `.env` file (based on `env.example`):
+Create `backend/.env` from `backend/env.example` and set the required values:
 
-```env
-PORT=
-MONGODB_URI=
-JWT_SECRET=
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-```
+- `PORT`
+- `NODE_ENV`
+- `MONGODB_URI`
+- `JWT_ACCESS_SECRET`
+- `JWT_REFRESH_SECRET`
+- `JWT_ACCESS_EXPIRES_IN`
+- `JWT_REFRESH_EXPIRES_IN`
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
+- `UPLOAD_MAX_BYTES`
+- `FRONTEND_ORIGIN`
+- `CROSS_SITE_COOKIES`
 
-Run:
+Run the backend:
 
 ```bash
 npm run dev
 ```
 
----
-
-### 🎨 Frontend Setup
+### Frontend
 
 ```bash
 cd frontend
 npm install
 ```
 
-Create `.env.local`:
+Create `frontend/.env.local` with the backend API URL:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000
 ```
 
-Run:
+Run the frontend:
 
 ```bash
 npm run dev
 ```
 
----
+## Scripts
 
-### 🌐 Access App
+### Backend
 
-Open:
+- `npm run dev` - start the API in development mode
+- `npm run dev:worker` - start the API with worker mode enabled
+- `npm run build` - compile TypeScript
+- `npm run start` - run the compiled server
 
-```
-http://localhost:3000
-```
+### Frontend
 
----
-
-## 🧠 Notes
-
-RoastForge was created to solve a real problem:
-
-> Traditional resume reviews are passive — this makes them **interactive and transparent**.
+- `npm run dev` - start the Next.js dev server
+- `npm run build` - build the frontend
+- `npm run start` - start the production frontend
+- `npm run lint` - run ESLint
