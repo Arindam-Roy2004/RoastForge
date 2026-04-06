@@ -18,8 +18,8 @@ async function extractTextFromPdf(url: string): Promise<string> {
   if (!res.ok) throw ApiError.badRequest("Failed to fetch PDF from storage");
   const buffer = Buffer.from(await res.arrayBuffer());
 
-  // Dynamic import — handle CJS/ESM interop (pdf-parse v1)
-  const mod = await import("pdf-parse");
+  // Import inner lib directly — pdf-parse's index.js tries to open a test PDF on import
+  const mod = await import("pdf-parse/lib/pdf-parse.js");
   const pdfParse = (mod as any).default ?? mod;
   const parsed = await pdfParse(buffer);
   return parsed.text;
