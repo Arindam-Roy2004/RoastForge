@@ -1,16 +1,15 @@
 "use client";
 
-import { ComicCard } from "@/components/comic-card";
-import { display, body } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { getToken } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { FaFilePdf, FaUpload, FaTimes } from "react-icons/fa";
+import { UploadCloud, FileText, X } from "lucide-react";
 import Link from "next/link";
-
 import { useAuth } from "@/store/auth";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -37,7 +36,6 @@ export default function UploadPage() {
     setUploading(true);
     setError(null);
     try {
-      // 1. Upload file to Cloudinary
       const fd = new FormData();
       fd.append("file", file);
       const headers: HeadersInit = {};
@@ -49,7 +47,6 @@ export default function UploadPage() {
 
       const { fileUrl, fileType } = uploadJson.data;
 
-      // 2. Create resume entry in MongoDB
       const createRes = await fetch(`${API_BASE}/api/resumes`, {
         method: "POST",
         headers: { ...headers, "Content-Type": "application/json" },
@@ -69,88 +66,109 @@ export default function UploadPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <ComicCard variant="cream" shadow="medium" className="text-center font-bold">
-          Loading...
-        </ComicCard>
+      <div className="flex items-center justify-center py-16 p-4">
+        <Card className="w-full max-w-md border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center p-8 animate-pulse">
+           <CardTitle className="font-heading uppercase text-xl">Loading...</CardTitle>
+        </Card>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <ComicCard variant="yellow" shadow="large" className="text-center max-w-md">
-          <h1 className={cn(display.className, "text-3xl mb-2")}>Sign In Required</h1>
-          <p className={cn(body.className, "text-sm text-[#2c2c2c]/70 mb-4")}>
-            You need to sign in to upload your resume for roasting!
-          </p>
-          <Link href="/login" className={cn(display.className, "comic-btn bg-green-400 comic-shadow-3 comic-lift text-base")}>
-            Sign In to Upload
+      <div className="flex items-center justify-center p-4 py-16">
+        <Card className="w-full max-w-md border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center p-8">
+          <CardTitle className="font-heading uppercase text-3xl mb-4">Sign In Required</CardTitle>
+          <CardDescription className="mb-6">You need to sign in to upload your resume for roasting!</CardDescription>
+          <Link href="/login">
+            <Button className="border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-lg px-8">
+              Sign In to Upload
+            </Button>
           </Link>
-        </ComicCard>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-center py-8">
-      <ComicCard variant="cream" shadow="large" className="w-full max-w-lg">
-        <h1 className={cn(display.className, "text-3xl text-center mb-1")}>Upload Your Resume</h1>
-        <p className={cn(body.className, "text-center text-sm text-[#2c2c2c]/70 mb-6")}>
-          Ready to get roasted? Upload your resume PDF and let the community + AI give you feedback!
-        </p>
-        <form onSubmit={submit} className="space-y-5">
-          <div>
+    <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center p-4 py-12">
+      <Card className="w-full max-w-lg border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+        <CardHeader className="text-center space-y-3 pb-6 border-b-4 border-border bg-muted">
+          <div className="mx-auto bg-primary w-14 h-14 flex items-center justify-center rounded-full border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-2">
+            <UploadCloud className="w-7 h-7 text-primary-foreground" />
+          </div>
+          <CardTitle className="text-4xl font-heading uppercase drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">Enter The Forge</CardTitle>
+          <CardDescription className="text-base text-muted-foreground font-medium max-w-sm mx-auto">
+            Submit your PDF resume to the forge. Let the community and AI mercilessly break it down so recruiters do not have to (constructively).
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-8">
+          <form onSubmit={submit} className="space-y-6">
             {!file ? (
-              <div className="flex flex-col items-center gap-3 p-6 rounded-2xl comic-border bg-[#F8E4C6] comic-shadow-3">
-                <FaUpload className="text-3xl text-[#2c2c2c]/50" />
-                <p className={cn(display.className, "text-base")}>Upload Your Resume</p>
-                <p className={cn(body.className, "text-xs text-[#2c2c2c]/60")}>PDF up to 5 MB</p>
+              <div 
+                className="border-4 border-dashed border-border bg-muted/30 p-10 flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                onClick={() => ref.current?.click()}
+              >
+                <div className="w-16 h-16 rounded-full bg-background border-2 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center">
+                  <FileText className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <div className="text-center">
+                  <p className="font-heading uppercase text-lg">Click to Upload</p>
+                  <p className="text-sm text-muted-foreground mt-1">PDF up to 5MB</p>
+                </div>
                 <input ref={ref} type="file" accept="application/pdf" className="hidden" onChange={handleFile} />
-                <button type="button" onClick={() => ref.current?.click()} className={cn(display.className, "comic-btn bg-yellow comic-shadow-3 comic-lift text-sm")}>
-                  <FaFilePdf /> Choose File
-                </button>
+                <Button type="button" variant="outline" className="mt-2 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase" onClick={(e: React.MouseEvent) => { e.stopPropagation(); ref.current?.click(); }}>
+                   Select File
+                </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-3 p-4 rounded-2xl comic-border bg-green-200 comic-shadow-3">
-                <FaFilePdf className="text-2xl text-[#2c2c2c]" />
-                <div className="flex-1 min-w-0">
-                  <p className={cn(display.className, "text-sm truncate")}>{file.name}</p>
-                  <p className={cn(body.className, "text-xs text-[#2c2c2c]/60")}>{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+              <div className="border-4 border-border bg-primary/10 p-4 flex items-center justify-between shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <div className="flex items-center gap-3 overflow-hidden">
+                   <div className="w-10 h-10 bg-primary/20 border-2 border-border flex items-center justify-center shrink-0">
+                     <FileText className="w-5 h-5 text-primary" />
+                   </div>
+                   <div className="min-w-0">
+                     <p className="font-heading text-sm truncate">{file.name}</p>
+                     <p className="text-xs text-muted-foreground font-mono">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                   </div>
                 </div>
-                <button type="button" onClick={() => { setFile(null); if (ref.current) ref.current.value = ""; }} className="comic-icon-btn bg-red-300 comic-shadow-2 comic-lift w-8 h-8">
-                  <FaTimes />
-                </button>
+                <Button 
+                   type="button" 
+                   variant="destructive" 
+                   size="icon"
+                   className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all shrink-0" 
+                   onClick={() => { setFile(null); if (ref.current) ref.current.value = ""; }}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
             )}
-          </div>
 
-          {error && (
-            <div className="rounded-xl comic-border-2 bg-red-200 p-3 text-sm">
-              <strong>Error:</strong> {error}
-            </div>
-          )}
+            {error && (
+              <div className="border-4 border-destructive bg-destructive/10 p-3 flex flex-col gap-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-medium text-sm">
+                 <span className="font-heading uppercase text-destructive text-xs">Error</span>
+                 {error}
+              </div>
+            )}
 
-          <button
-            type="submit"
-            disabled={!file || uploading}
-            className={cn(display.className, "w-full comic-btn bg-orange-400 hover:bg-orange-500 comic-shadow-4 comic-lift justify-center text-lg disabled:opacity-50")}
-          >
-            {uploading ? "Uploading..." : "Upload Resume for Roasting! 🔥"}
-          </button>
-        </form>
-
-        <ComicCard variant="light" shadow="small" className="mt-6 text-sm">
-          <p className={cn(display.className, "text-base mb-2")}>Tips for Getting Great Feedback:</p>
-          <ul className={cn(body.className, "list-disc list-inside space-y-1 text-[#2c2c2c]/80")}>
-            <li>Upload a clean, text-based PDF (not scanned images)</li>
-            <li>Mention your target industry or role in discussions</li>
-            <li>Keep it fun — this is a playful roasting environment!</li>
-            <li>Remember to give constructive feedback to others too</li>
-          </ul>
-        </ComicCard>
-      </ComicCard>
+            <Button
+              type="submit"
+              disabled={!file || uploading}
+              className="w-full h-14 border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-xl"
+            >
+              {uploading ? "Uploading to Forge..." : "Upload & Roast! 🔥"}
+            </Button>
+          </form>
+        </CardContent>
+        <CardFooter className="bg-muted p-6 border-t-4 border-border flex flex-col items-start gap-2">
+           <p className="font-heading uppercase tracking-wider text-sm">Tips for a good roast:</p>
+           <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+             <li>Upload a clean, readable PDF (no scanned images).</li>
+             <li>Include your target role for context.</li>
+             <li>Feedback here is brutally honest — don't take it personally!</li>
+           </ul>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

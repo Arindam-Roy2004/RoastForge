@@ -1,15 +1,18 @@
 "use client";
 
-import { ComicCard } from "@/components/comic-card";
-import { ResumeCard } from "@/components/resume-card";
-import { display, body } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { apiFetch, clearToken } from "@/lib/api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { FaFileAlt, FaSignOutAlt, FaEdit } from "react-icons/fa";
+import { FileText, LogOut, Edit2 } from "lucide-react";
 import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardFooter, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ResumeCard } from "@/components/resume-card";
 
 type User = {
   _id: string;
@@ -32,6 +35,8 @@ type Resume = {
   status: string;
   aiScore?: { overall: number };
   createdAt?: string;
+  userId?: { anonymousUsername?: string };
+  candidateAlias?: string;
 };
 
 export default function ProfilePage() {
@@ -82,104 +87,153 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <ComicCard variant="peach" shadow="medium" className="text-center font-bold">
-          Loading profile...
-        </ComicCard>
+      <div className="container mx-auto px-4 py-8">
+        <Skeleton className="h-48 w-full border-4 border-border rounded-none mb-8" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Skeleton className="h-64 w-full border-4 border-border rounded-none" />
+          <Skeleton className="h-64 w-full border-4 border-border rounded-none" />
+        </div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <ComicCard variant="yellow" shadow="large" className="text-center max-w-md">
-          <h1 className={cn(display.className, "text-3xl mb-2")}>Sign In Required</h1>
-          <p className={cn(body.className, "text-sm text-[#2c2c2c]/70 mb-4")}>
-            You need to sign in to view your profile and manage your resumes.
-          </p>
-          <Link href="/login" className={cn(display.className, "comic-btn bg-green-400 comic-shadow-3 comic-lift text-base")}>
-            🚀 Sign In Now
+      <div className="flex items-center justify-center p-4 py-16">
+        <Card className="w-full max-w-md border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center p-8">
+          <CardTitle className="font-heading uppercase text-3xl mb-4">Sign In Required</CardTitle>
+          <CardDescription className="mb-6">You need to sign in to view your profile and manage your resumes.</CardDescription>
+          <Link href="/login">
+            <Button className="border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase">
+              Sign In Now
+            </Button>
           </Link>
-        </ComicCard>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* User card */}
-      <ComicCard variant="teal" shadow="large">
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          <div className="w-16 h-16 rounded-full comic-border-4 bg-yellow flex items-center justify-center text-3xl font-bold shrink-0">
-            {user?.name?.charAt(0)?.toUpperCase() || "?"}
+    <div className="container mx-auto px-4 py-8 space-y-8">
+      {/* User Header */}
+      <Card className="border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+        <div className="bg-primary p-6 md:p-8 flex flex-col md:flex-row items-center gap-6">
+          <div className="w-24 h-24 rounded-full border-4 border-border bg-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center text-4xl font-heading uppercase shrink-0">
+            {user.name.charAt(0).toUpperCase() || "?"}
           </div>
-          <div className="flex-1 text-center sm:text-left">
-            <h1 className={cn(display.className, "text-2xl")}>{user?.name || "Loading..."}</h1>
-            {user?.email && <p className={cn(body.className, "text-sm text-[#2c2c2c]/70")}>{user.email}</p>}
-            {user?.anonymousPublicId && <p className={cn(body.className, "text-xs text-[#2c2c2c]/50")}>Alias: {user.anonymousPublicId}</p>}
-            {user?.talentMetrics && (
-              <span className={cn(display.className, "inline-block mt-1 rounded-full comic-border-2 bg-green-400 px-3 py-0.5 text-xs comic-shadow-2")}>
+          <div className="flex-1 text-center md:text-left text-primary-foreground space-y-1">
+            <h1 className="text-3xl md:text-4xl font-heading uppercase drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">{user.name}</h1>
+            <p className="font-medium opacity-90">{user.email}</p>
+            {user.anonymousPublicId && <p className="text-sm opacity-80 uppercase tracking-widest mt-2 border border-primary-foreground/30 inline-block px-2 py-1 rounded-sm">Alias: {user.anonymousPublicId}</p>}
+            {user.talentMetrics && (
+              <Badge variant="secondary" className="mt-2 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none font-bold">
                 Talent Score: {user.talentMetrics.composite}
-              </span>
+              </Badge>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <span className={cn(display.className, "comic-pill bg-cream comic-shadow-2")}>
-              <FaFileAlt /> {resumes.length} Resume{resumes.length !== 1 ? "s" : ""}
-            </span>
-            <button type="button" onClick={() => { clearToken(); router.push("/"); }} className={cn(display.className, "comic-btn bg-red-400 comic-shadow-3 comic-lift text-sm")}>
-              <FaSignOutAlt /> Sign Out
-            </button>
+          <div className="flex flex-col gap-3">
+            <Badge variant="outline" className="border-2 border-primary-foreground text-primary-foreground rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] bg-primary/50 text-sm py-1.5 px-3 flex items-center gap-2 font-heading uppercase">
+              <FileText className="w-4 h-4" /> {resumes.length} Resume{resumes.length !== 1 ? "s" : ""}
+            </Badge>
+            <Button
+              variant="destructive"
+              onClick={() => { clearToken(); router.push("/"); }}
+              className="border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase text-xs"
+            >
+              <LogOut className="w-3 h-3 mr-2" /> Sign Out
+            </Button>
           </div>
         </div>
-      </ComicCard>
+      </Card>
 
-      {/* Public profile settings */}
-      <ComicCard variant="cream" shadow="medium">
-        <div className="flex items-center justify-between mb-3">
-          <p className={cn(display.className, "text-lg")}>Public Profile</p>
-          <button type="button" onClick={() => setEditMode(!editMode)} className={cn(display.className, "comic-btn bg-blue-300 comic-shadow-2 comic-lift text-xs")}>
-            <FaEdit /> {editMode ? "Cancel" : "Edit"}
-          </button>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Public Profile Settings */}
+        <div className="md:col-span-1">
+          <Card className="border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b-4 border-border bg-muted">
+              <CardTitle className="font-heading uppercase text-lg">Public Profile</CardTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setEditMode(!editMode)}
+                className="border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase text-xs h-8"
+              >
+                <Edit2 className="w-3 h-3 mr-1" /> {editMode ? "Cancel" : "Edit"}
+              </Button>
+            </CardHeader>
+            <CardContent className="pt-6">
+              {editMode ? (
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="font-heading uppercase text-xs">Display Name</label>
+                    <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Display name" className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-heading uppercase text-xs">LinkedIn URL</label>
+                    <Input value={linkedIn} onChange={(e) => setLinkedIn(e.target.value)} placeholder="LinkedIn URL" className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-heading uppercase text-xs">GitHub URL</label>
+                    <Input value={github} onChange={(e) => setGithub(e.target.value)} placeholder="GitHub URL" className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" />
+                  </div>
+                  <label className="flex items-center gap-3 cursor-pointer p-3 border-2 border-border bg-muted/50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                    <input type="checkbox" checked={share} onChange={() => setShare(!share)} className="w-4 h-4 accent-primary rounded-none border-2 border-border" />
+                    <span className="text-sm font-bold tracking-tight uppercase">Share identity with recruiters</span>
+                  </label>
+                  <Button onClick={saveProfile} className="w-full border-4 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase">
+                    Save Changes
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Display Name</h4>
+                    <p className="font-medium bg-muted p-2 border-2 border-border inline-block min-w-full text-sm">{user.publicProfile?.displayName || "—"}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">LinkedIn</h4>
+                    <p className="font-medium bg-muted p-2 border-2 border-border inline-block min-w-full text-sm truncate">{user.publicProfile?.linkedInUrl || "—"}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">GitHub</h4>
+                    <p className="font-medium bg-muted p-2 border-2 border-border inline-block min-w-full text-sm truncate">{user.publicProfile?.githubUrl || "—"}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Visibility</h4>
+                    <Badge variant={user.publicProfile?.shareIdentityWithRecruiters ? "default" : "secondary"} className="border-2 border-border rounded-none font-bold uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                      {user.publicProfile?.shareIdentityWithRecruiters ? "Shared with Recruiters" : "Anonymous"}
+                    </Badge>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
-        {editMode ? (
-          <div className="space-y-3">
-            <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Display name" className={cn(body.className, "w-full p-2 comic-border-2 rounded-lg bg-[#F8E4C6] focus:outline-none focus:bg-white")} />
-            <input value={linkedIn} onChange={(e) => setLinkedIn(e.target.value)} placeholder="LinkedIn URL" className={cn(body.className, "w-full p-2 comic-border-2 rounded-lg bg-[#F8E4C6] focus:outline-none focus:bg-white")} />
-            <input value={github} onChange={(e) => setGithub(e.target.value)} placeholder="GitHub URL" className={cn(body.className, "w-full p-2 comic-border-2 rounded-lg bg-[#F8E4C6] focus:outline-none focus:bg-white")} />
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={share} onChange={() => setShare(!share)} className="w-5 h-5 accent-green-500" />
-              <span className={cn(body.className, "text-sm")}>Share identity with recruiters</span>
-            </label>
-            <button type="button" onClick={saveProfile} className={cn(display.className, "comic-btn bg-green-400 comic-shadow-3 comic-lift text-sm")}>Save</button>
-          </div>
-        ) : (
-          <div className={cn(body.className, "text-sm space-y-1 text-[#2c2c2c]/80")}>
-            <p>Display: {user?.publicProfile?.displayName || "—"}</p>
-            <p>LinkedIn: {user?.publicProfile?.linkedInUrl || "—"}</p>
-            <p>GitHub: {user?.publicProfile?.githubUrl || "—"}</p>
-            <p>Share with recruiters: {user?.publicProfile?.shareIdentityWithRecruiters ? "Yes" : "No"}</p>
-          </div>
-        )}
-      </ComicCard>
 
-      {/* Resumes */}
-      <div>
-        <h2 className={cn(display.className, "text-2xl mb-3")}>Your Resumes</h2>
-        {resumes.length === 0 ? (
-          <ComicCard variant="peach" shadow="small" className="text-center py-8">
-            <p className={cn(body.className, "text-sm text-[#2c2c2c]/70")}>
-              You haven&apos;t uploaded anything yet. Try uploading one!
-            </p>
-          </ComicCard>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {resumes.map((r) => (
-              <ResumeCard key={r._id} id={r._id} version={r.version} status={r.status} overall={r.aiScore?.overall} createdAt={r.createdAt} />
-            ))}
+        {/* Resumes */}
+        <div className="md:col-span-2">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-heading uppercase">Your Resumes</h2>
           </div>
-        )}
+          {resumes.length === 0 ? (
+            <Card className="border-4 border-border border-dashed bg-muted/50 rounded-none text-center p-8">
+              <CardDescription className="text-base text-muted-foreground">
+                You haven't uploaded any resumes yet.
+              </CardDescription>
+              <Link href="/upload">
+                <Button className="mt-4 border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none font-heading uppercase">
+                  Upload Now
+                </Button>
+              </Link>
+            </Card>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {resumes.map((r) => (
+                <ResumeCard key={r._id} id={r._id} version={r.version} status={r.status} overall={r.aiScore?.overall} createdAt={r.createdAt} candidateAlias={r.candidateAlias || r.userId?.anonymousUsername || "Anonymous"} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

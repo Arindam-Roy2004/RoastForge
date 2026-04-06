@@ -1,74 +1,139 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: #fdf6ec;
-  --color-foreground: #2c2c2c;
-  --color-card: #f2d5a3;
-  --color-card-foreground: #2c2c2c;
-  --color-primary: #2c2c2c;
-  --color-primary-foreground: #fdf6ec;
-  --color-muted-foreground: #6b6350;
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--card-border));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover-border: hsl(var(--popover-border));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --font-sans: var(--font-chakra), sans-serif;
+  --font-heading: var(--font-russo), sans-serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-body {
-  background: var(--color-background);
-  color: var(--color-foreground);
+:root {
+  /* Warm cream background */
+  --background: 35 67% 96%;
+  --foreground: 0 0% 7%;
+  
+  --border: 0 0% 7%;
+  --input: 0 0% 7%;
+  --ring: 0 0% 7%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 7%;
+  --card-border: 0 0% 7%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 7%;
+  --popover-border: 0 0% 7%;
+
+  /* Teal Accent */
+  --primary: 181 44% 71%;
+  --primary-foreground: 0 0% 7%;
+
+  --secondary: 35 67% 90%;
+  --secondary-foreground: 0 0% 7%;
+
+  --muted: 35 20% 90%;
+  --muted-foreground: 0 0% 40%;
+
+  --accent: 181 44% 71%;
+  --accent-foreground: 0 0% 7%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+
+  --radius: 0.5rem; 
+  
+  --shadow-2xs: 2px 2px 0px 0px hsl(0 0% 7%);
+  --shadow-xs: 3px 3px 0px 0px hsl(0 0% 7%);
+  --shadow-sm: 4px 4px 0px 0px hsl(0 0% 7%);
+  --shadow: 5px 5px 0px 0px hsl(0 0% 7%);
+  --shadow-md: 6px 6px 0px 0px hsl(0 0% 7%);
+  --shadow-lg: 8px 8px 0px 0px hsl(0 0% 7%);
+  --shadow-xl: 12px 12px 0px 0px hsl(0 0% 7%);
+  --shadow-2xl: 16px 16px 0px 0px hsl(0 0% 7%);
 }
 
-/* ─── Comic-book utility classes (RoastForge-style) ─── */
+.dark {
+  --background: 0 0% 7%;
+  --foreground: 35 67% 96%;
+  
+  --border: 35 67% 96%;
+  --input: 35 67% 96%;
+  --ring: 35 67% 96%;
 
-@layer components {
-  .comic-border {
-    @apply border-[3px] border-[#2c2c2c];
-  }
-  .comic-border-2 {
-    @apply border-2 border-[#2c2c2c];
-  }
-  .comic-border-4 {
-    @apply border-4 border-[#2c2c2c];
-  }
+  --card: 0 0% 12%;
+  --card-foreground: 35 67% 96%;
+  --card-border: 35 67% 96%;
 
-  .comic-shadow-2 {
-    box-shadow: 2px 2px 0 #2c2c2c;
-  }
-  .comic-shadow-3 {
-    box-shadow: 3px 3px 0 #2c2c2c;
-  }
-  .comic-shadow-4 {
-    box-shadow: 4px 4px 0 #2c2c2c;
-  }
-  .comic-shadow-6 {
-    box-shadow: 6px 6px 0 #2c2c2c;
-  }
-  .comic-shadow-8 {
-    box-shadow: 8px 8px 0 #2c2c2c;
-  }
+  --popover: 0 0% 12%;
+  --popover-foreground: 35 67% 96%;
+  --popover-border: 35 67% 96%;
 
-  .comic-lift {
-    transition: transform 200ms;
-  }
-  .comic-lift:hover {
-    transform: translateY(-2px);
-  }
+  --primary: 181 44% 71%;
+  --primary-foreground: 0 0% 7%;
 
-  .comic-btn {
-    @apply inline-flex items-center gap-2 rounded-full px-4 py-2 font-bold text-base;
-    @apply border-[3px] border-[#2c2c2c];
-  }
-  .comic-pill {
-    @apply inline-flex items-center gap-2 rounded-full px-3 py-2 font-bold text-base;
-    @apply border-[3px] border-[#2c2c2c];
-  }
-  .comic-icon-btn {
-    @apply flex items-center justify-center w-12 h-12 rounded-full;
-    @apply border-[3px] border-[#2c2c2c];
-  }
+  --secondary: 0 0% 18%;
+  --secondary-foreground: 35 67% 96%;
 
-  .bg-cream { background-color: #efd7b7; }
-  .bg-peach { background-color: #f8e4c6; }
-  .bg-yellow { background-color: #f2d5a3; }
-  .bg-teal { background-color: #97d4d5; }
-  .bg-beige { background-color: #ebddbf; }
+  --muted: 0 0% 20%;
+  --muted-foreground: 0 0% 60%;
+
+  --accent: 181 44% 71%;
+  --accent-foreground: 0 0% 7%;
+
+  --destructive: 0 62% 30%;
+  --destructive-foreground: 35 67% 96%;
+  
+  --shadow-2xs: 2px 2px 0px 0px hsl(35 67% 96%);
+  --shadow-xs: 3px 3px 0px 0px hsl(35 67% 96%);
+  --shadow-sm: 4px 4px 0px 0px hsl(35 67% 96%);
+  --shadow: 5px 5px 0px 0px hsl(35 67% 96%);
+  --shadow-md: 6px 6px 0px 0px hsl(35 67% 96%);
+  --shadow-lg: 8px 8px 0px 0px hsl(35 67% 96%);
+  --shadow-xl: 12px 12px 0px 0px hsl(35 67% 96%);
+  --shadow-2xl: 16px 16px 0px 0px hsl(35 67% 96%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading uppercase tracking-wide;
+  }
 }

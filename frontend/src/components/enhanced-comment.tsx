@@ -1,21 +1,16 @@
 "use client";
 
-import { display, body } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { commentApi, type Comment } from "@/lib/api";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/store/auth";
-import {
-  FaChevronDown,
-  FaChevronUp,
-  FaReply,
-  FaThumbsDown,
-  FaThumbsUp,
-  FaTrash,
-} from "react-icons/fa";
-import { ComicCard } from "./comic-card";
+import { ChevronDown, ChevronUp, Reply, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 export function EnhancedComment({
   comment,
@@ -38,16 +33,15 @@ export function EnhancedComment({
   const replies = allComments.filter((c) => c.parentId === comment._id);
   const alias = comment.userId?.anonymousUsername || "Anon";
 
-  // Extract roast type from text if prepended (e.g. "[STRENGTH] Looks good")
   const roastMatch = comment.text.match(/^\[(STRENGTH|WEAKNESS|SUGGESTION)\](.*)/i);
   const extractedType = roastMatch ? roastMatch[1].toLowerCase() : "comment";
   const cleanText = roastMatch ? roastMatch[2].trim() : comment.text;
 
-  const typeColor: Record<string, string> = {
-    strength: "bg-green-300",
-    weakness: "bg-red-300",
-    suggestion: "bg-blue-300",
-    comment: "bg-white",
+  const typeStyles: Record<string, string> = {
+    strength: "bg-green-400 text-black",
+    weakness: "bg-red-400 text-black",
+    suggestion: "bg-blue-400 text-black",
+    comment: "bg-muted text-foreground",
   };
 
   async function vote(value: 1 | -1) {
@@ -98,64 +92,69 @@ export function EnhancedComment({
   }
 
   return (
-    <div className={cn(isReply ? "ml-6 mt-2" : "mt-3")}>
-      <ComicCard variant={isReply ? "light" : "cream"} shadow="small" className="p-3">
-        <div className="flex items-start gap-2">
-          <div className="w-8 h-8 rounded-full comic-border-2 bg-teal flex items-center justify-center text-sm font-bold shrink-0 uppercase">
+    <div className={cn(isReply ? "ml-6 sm:ml-12 pl-4 border-l-4 border-border mt-4" : "mt-4")}>
+      <Card className="border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-card p-4 sm:p-6 transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 rounded-full border-4 border-border bg-primary/20 flex flex-col items-center justify-center text-lg font-heading uppercase shrink-0 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
             {alias.charAt(0)}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className={cn(display.className, "text-sm")}>{alias}</span>
-              <span className={cn("rounded-full comic-border-2 px-2 py-0.5 text-[10px] font-bold uppercase", typeColor[extractedType] || "bg-white")}>
+            <div className="flex items-center gap-2 flex-wrap mb-2">
+              <span className="font-heading uppercase text-lg tracking-wide">{alias}</span>
+              <Badge variant="outline" className={cn("border-2 border-border rounded-none font-bold uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] py-0 text-[10px]", typeStyles[extractedType])}>
                 {extractedType}
-              </span>
-              <span className="text-[10px] text-[#2c2c2c]/50">
+              </Badge>
+              <span className="text-xs text-muted-foreground font-mono">
                 {new Date(comment.createdAt).toLocaleDateString()}
               </span>
             </div>
-            <p className={cn(body.className, "text-sm whitespace-pre-wrap")}>{cleanText}</p>
+            <p className="text-sm font-medium whitespace-pre-wrap leading-relaxed">{cleanText}</p>
 
             {/* Actions */}
-            <div className="flex items-center gap-2 mt-2 flex-wrap">
-              <button type="button" onClick={() => vote(1)} className="flex items-center gap-1 px-2 py-1 rounded-full comic-border-2 bg-green-200 hover:bg-green-300 comic-shadow-2 comic-lift text-xs">
-                <FaThumbsUp /> {comment.upvotesCount}
-              </button>
-              <button type="button" onClick={() => vote(-1)} className="flex items-center gap-1 px-2 py-1 rounded-full comic-border-2 bg-red-200 hover:bg-red-300 comic-shadow-2 comic-lift text-xs">
-                <FaThumbsDown /> {comment.downvotesCount}
-              </button>
+            <div className="flex items-center gap-3 mt-4 flex-wrap">
+              <div className="flex items-center border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] bg-muted shrink-0">
+                <button type="button" onClick={() => vote(1)} className="px-3 py-1.5 hover:bg-green-200 transition-colors border-r-2 border-border flex items-center gap-1 font-bold text-xs font-heading">
+                  <ThumbsUp className="w-3 h-3" /> {comment.upvotesCount}
+                </button>
+                <button type="button" onClick={() => vote(-1)} className="px-3 py-1.5 hover:bg-red-200 transition-colors flex items-center gap-1 font-bold text-xs font-heading">
+                  <ThumbsDown className="w-3 h-3" /> {comment.downvotesCount}
+                </button>
+              </div>
+              
               {!isReply && (
-                <button type="button" onClick={() => user ? setShowReplyForm(!showReplyForm) : router.push("/login")} className="flex items-center gap-1 px-2 py-1 rounded-full comic-border-2 bg-blue-200 hover:bg-blue-300 comic-shadow-2 comic-lift text-xs">
-                  <FaReply /> Reply
-                </button>
+                <Button variant="outline" size="sm" onClick={() => user ? setShowReplyForm(!showReplyForm) : router.push("/login")} className="border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all rounded-none font-heading uppercase text-xs h-8 px-3 hover:-translate-y-0.5">
+                  <Reply className="w-3 h-3 mr-1.5" /> Reply
+                </Button>
               )}
+              
               {replies.length > 0 && (
-                <button type="button" onClick={() => setShowReplies(!showReplies)} className="flex items-center gap-1 px-2 py-1 rounded-full comic-border-2 bg-yellow hover:bg-[#e8c98a] comic-shadow-2 comic-lift text-xs">
-                  {showReplies ? <FaChevronUp /> : <FaChevronDown />} {replies.length} {replies.length === 1 ? "reply" : "replies"}
-                </button>
+                <Button variant="default" size="sm" onClick={() => setShowReplies(!showReplies)} className="border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all rounded-none font-heading uppercase text-xs h-8 px-3 bg-yellow text-black hover:bg-yellow hover:-translate-y-0.5">
+                  {showReplies ? <ChevronUp className="w-3 h-3 mr-1.5" /> : <ChevronDown className="w-3 h-3 mr-1.5" />} {replies.length} {replies.length === 1 ? "reply" : "replies"}
+                </Button>
               )}
+              
               {user?.id === comment.userId?._id && (
-                <button type="button" onClick={deleteComment} className="flex items-center gap-1 px-2 py-1 rounded-full comic-border-2 bg-red-400 hover:bg-red-500 comic-shadow-2 comic-lift text-xs ml-auto">
-                  <FaTrash /> Delete
-                </button>
+                <Button variant="destructive" size="sm" onClick={deleteComment} className="border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all rounded-none font-heading uppercase text-xs h-8 px-3 ml-auto hover:-translate-y-0.5">
+                  <Trash2 className="w-3 h-3 mr-1.5" /> Delete
+                </Button>
               )}
             </div>
           </div>
         </div>
-      </ComicCard>
+      </Card>
 
       {showReplyForm && (
-        <form onSubmit={reply} className="ml-10 mt-2 flex gap-2">
-          <input
+        <form onSubmit={reply} className="mt-4 flex gap-2 w-full max-w-2xl bg-card p-3 border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <Input
             value={replyText}
             onChange={(e) => setReplyText(e.target.value)}
             placeholder="Write a reply..."
-            className={cn(body.className, "flex-1 p-2 comic-border-2 rounded-lg bg-[#F8E4C6] focus:outline-none focus:bg-white text-sm")}
+            className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus-visible:ring-0 font-medium"
             required
           />
-          <button type="submit" disabled={submitting} className={cn(display.className, "comic-btn bg-green-400 comic-shadow-2 comic-lift text-xs py-1")}>
+          <Button type="submit" disabled={submitting} className="border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none font-heading uppercase hover:shadow-none transition-all shrink-0">
             {submitting ? "..." : "Post"}
-          </button>
+          </Button>
         </form>
       )}
 

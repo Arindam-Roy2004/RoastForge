@@ -1,35 +1,70 @@
-import { display, body } from "@/lib/fonts";
-import { cn } from "@/lib/utils";
+import { Flame } from "lucide-react";
 import Link from "next/link";
-import { AiOutlineHome, AiOutlineUpload, AiOutlineUser } from "react-icons/ai";
 
 export default function Footer() {
   return (
-    <footer className="bg-teal comic-border rounded-none border-x-0 border-b-0 mt-12">
-      <div className="mx-auto max-w-7xl px-4 py-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col items-center md:items-start gap-1">
-            <span className={cn(display.className, "text-2xl text-[#2c2c2c]")}>ROASTFORGE</span>
-            <p className={cn(body.className, "text-sm text-[#2c2c2c]/70")}>
-              Get your resume roasted &amp; discover high-signal talent!
+    <footer className="border-t-4 border-border bg-card mt-auto">
+      <div className="container mx-auto px-6 py-12 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12">
+          <div className="md:col-span-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <Flame className="w-8 h-8 text-primary" />
+              <span className="font-heading text-2xl tracking-tight">RoastForge</span>
+            </div>
+            <p className="text-base text-muted-foreground leading-relaxed max-w-sm">
+              The only resume feedback platform that tells you what your friends are too polite to say.
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <Link href="/" className="comic-btn bg-cream comic-shadow-2 comic-lift text-sm">
-              <AiOutlineHome /> Home
-            </Link>
-            <Link href="/upload" className="comic-btn bg-peach comic-shadow-2 comic-lift text-sm">
-              <AiOutlineUpload /> Upload
-            </Link>
-            <Link href="/profile" className="comic-btn bg-yellow comic-shadow-2 comic-lift text-sm">
-              <AiOutlineUser /> Profile
-            </Link>
+
+          <div className="md:col-span-3 space-y-4">
+            <h3 className="font-heading uppercase text-base tracking-widest text-foreground">Explore</h3>
+            <ul className="space-y-4 text-base">
+              <li>
+                <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-home">
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-browse">
+                  Browse Roasts
+                </Link>
+              </li>
+              <li>
+                <Link href="/upload" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-upload">
+                  Upload Resume
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div className="md:col-span-3 space-y-4">
+            <h3 className="font-heading uppercase text-base tracking-widest text-foreground">Account</h3>
+            <ul className="space-y-4 text-base">
+              <li>
+                <Link href="/profile" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-profile">
+                  My Profile
+                </Link>
+              </li>
+              <li>
+                <Link href="/projects" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-projects">
+                  My Projects
+                </Link>
+              </li>
+              <li>
+                <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="footer-link-login">
+                  Login
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
-        <div className="mt-6 text-center">
-          <p className={cn(body.className, "text-xs text-[#2c2c2c]/60")}>
-            &copy; {new Date().getFullYear()} RoastForge. Keep it kind!
-          </p>
+
+        <div className="border-t-2 border-border mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Flame className="w-4 h-4 text-destructive" />
+            <span>RoastForge — Forging better careers through brutal honesty.</span>
+          </div>
+          <span>Resumes are public. Feelings are not guaranteed.</span>
         </div>
       </div>
     </footer>

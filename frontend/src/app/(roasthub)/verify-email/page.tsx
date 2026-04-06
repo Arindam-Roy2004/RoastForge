@@ -3,10 +3,10 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ComicCard } from "@/components/comic-card";
-import { display, body } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
+import { Card, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 function VerifyContent() {
   const searchParams = useSearchParams();
@@ -29,26 +29,30 @@ function VerifyContent() {
   }, [token]);
 
   return (
-    <div className="flex items-center justify-center py-16">
-      <ComicCard variant="teal" shadow="large" className="text-center max-w-md">
-        <h1 className={cn(display.className, "text-3xl mb-2")}>Email Verification</h1>
-        <p className={cn(body.className, "text-sm text-[#2c2c2c]/70 mb-4")}>
+    <div className="flex items-center justify-center py-16 p-4">
+      <Card className="w-full max-w-md border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center p-8 bg-card">
+        <CardTitle className="font-heading uppercase text-3xl mb-4">Email Verification</CardTitle>
+        <CardDescription className="mb-2 text-base font-medium">
           {status === "idle" && "Confirming your token..."}
           {status === "ok" && "You can sign in now!"}
           {status === "err" && "Something went wrong."}
+        </CardDescription>
+        <p className={cn("text-sm font-bold uppercase tracking-wider mb-6", status === "err" ? "text-destructive" : "text-green-600")}>
+          {msg}
         </p>
-        <p className={cn(body.className, "text-sm mb-4")}>{msg}</p>
-        <Link href="/login" className={cn(display.className, "comic-btn bg-green-400 comic-shadow-3 comic-lift text-base")}>
-          Go to Sign In
+        <Link href="/login">
+          <Button className="border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all w-full font-heading uppercase text-lg h-12">
+            Go to Sign In
+          </Button>
         </Link>
-      </ComicCard>
+      </Card>
     </div>
   );
 }
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center py-32 text-[#2c2c2c]/50">Loading...</div>}>
+    <Suspense fallback={<div className="flex items-center justify-center py-32 text-muted-foreground font-heading uppercase tracking-widest text-xl">Loading...</div>}>
       <VerifyContent />
     </Suspense>
   );

@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Chakra_Petch, Russo_One } from "next/font/google";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const chakraPetch = Chakra_Petch({
+  weight: ["300", "400", "500", "600", "700"],
   subsets: ["latin"],
+  variable: "--font-chakra",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const russoOne = Russo_One({
+  weight: ["400"],
   subsets: ["latin"],
+  variable: "--font-russo",
 });
 
 export const metadata: Metadata = {
@@ -27,9 +29,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${chakraPetch.variable} ${russoOne.variable} h-full antialiased`}
     >
-      <body className="min-h-full font-sans">
+      <body className="min-h-full font-sans bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
         <Providers>
           {children}
         </Providers>

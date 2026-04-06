@@ -3,10 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { display, body } from "@/lib/fonts";
-import { cn } from "@/lib/utils";
-import { ComicCard } from "@/components/comic-card";
+import { Flame } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -33,41 +34,89 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex items-center justify-center py-16">
-      <ComicCard variant="peach" shadow="large" className="w-full max-w-md">
-        <h1 className={cn(display.className, "text-3xl text-center mb-1")}>Create Account</h1>
-        <p className={cn(body.className, "text-center text-sm text-[#2c2c2c]/70 mb-6")}>
-          Candidate or recruiter — you can tune visibility later.
-        </p>
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div>
-            <label className={cn(display.className, "text-sm block mb-1")}>Name</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} required className={cn(body.className, "w-full p-3 comic-border rounded-lg comic-shadow-3 bg-[#F2D5A3] focus:outline-none focus:bg-white transition-colors")} />
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 py-16">
+      <Card className="w-full max-w-md border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-card overflow-hidden">
+        <CardHeader className="text-center space-y-2 p-8 pb-4">
+          <div className="mx-auto bg-primary w-12 h-12 flex items-center justify-center rounded-full border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mb-2">
+            <Flame className="w-6 h-6 text-primary-foreground" />
           </div>
-          <div>
-            <label className={cn(display.className, "text-sm block mb-1")}>Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className={cn(body.className, "w-full p-3 comic-border rounded-lg comic-shadow-3 bg-[#F2D5A3] focus:outline-none focus:bg-white transition-colors")} />
-          </div>
-          <div>
-            <label className={cn(display.className, "text-sm block mb-1")}>Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} className={cn(body.className, "w-full p-3 comic-border rounded-lg comic-shadow-3 bg-[#F2D5A3] focus:outline-none focus:bg-white transition-colors")} />
-          </div>
-          <div>
-            <label className={cn(display.className, "text-sm block mb-1")}>I am a</label>
-            <div className="flex gap-2">
-              <button type="button" onClick={() => setRole("candidate")} className={cn(display.className, "flex-1 comic-btn justify-center comic-shadow-3 comic-lift", role === "candidate" ? "bg-green-400" : "bg-beige")}>Candidate</button>
-              <button type="button" onClick={() => setRole("recruiter")} className={cn(display.className, "flex-1 comic-btn justify-center comic-shadow-3 comic-lift", role === "recruiter" ? "bg-green-400" : "bg-beige")}>Recruiter</button>
+          <CardTitle className="text-3xl font-heading uppercase">Join the Forge</CardTitle>
+          <CardDescription>Candidate or recruiter? Choose your weapon and build your profile.</CardDescription>
+        </CardHeader>
+        <CardContent className="px-8 pb-8">
+          <form onSubmit={onSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <label className="font-heading uppercase text-xs">Name</label>
+              <Input
+                placeholder="John Doe"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none"
+              />
             </div>
-          </div>
-          <button type="submit" disabled={loading} className={cn(display.className, "w-full comic-btn bg-green-400 comic-shadow-4 comic-lift justify-center text-lg")}>
-            {loading ? "Creating..." : "Create Account 🚀"}
-          </button>
-          <p className={cn(body.className, "text-center text-sm text-[#2c2c2c]/70")}>
+            <div className="space-y-2">
+              <label className="font-heading uppercase text-xs">Email</label>
+              <Input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="font-heading uppercase text-xs">Password</label>
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
+                className="border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="font-heading uppercase text-xs">I am a</label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={role === "candidate" ? "default" : "outline"}
+                  onClick={() => setRole("candidate")}
+                  className={`flex-1 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading ${role === "candidate" ? "" : "bg-muted"}`}
+                >
+                  Candidate
+                </Button>
+                <Button
+                  type="button"
+                  variant={role === "recruiter" ? "default" : "outline"}
+                  onClick={() => setRole("recruiter")}
+                  className={`flex-1 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading ${role === "recruiter" ? "" : "bg-muted"}`}
+                >
+                  Recruiter
+                </Button>
+              </div>
+            </div>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading text-lg"
+            >
+              {loading ? "Creating..." : "Create Account 🚀"}
+            </Button>
+          </form>
+        </CardContent>
+        <div className="flex justify-center border-t-4 border-border bg-muted p-6">
+          <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="font-bold underline">Sign in</Link>
+            <Link href="/login" className="font-heading uppercase text-primary hover:underline tracking-wider" data-testid="link-go-login">
+              Sign in
+            </Link>
           </p>
-        </form>
-      </ComicCard>
+        </div>
+      </Card>
     </div>
   );
 }
