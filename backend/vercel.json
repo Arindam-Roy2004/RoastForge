@@ -2,6 +2,11 @@
   "version": 2,
   "installCommand": "npm install --include=dev",
   "outputDirectory": "public",
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "node_modules/pdf-parse/**,src/modules/analysis/roast-system-prompt.txt"
+    }
+  },
   "rewrites": [
     {
       "source": "/(.*)",
