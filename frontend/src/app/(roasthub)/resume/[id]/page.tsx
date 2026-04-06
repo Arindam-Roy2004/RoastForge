@@ -169,7 +169,6 @@ export default function ResumeDetail() {
     );
   }
 
-  const topLevel = comments.filter((c) => !c.parentId);
   const isPdf = resume.fileType === "pdf";
 
   return (
@@ -382,7 +381,7 @@ export default function ResumeDetail() {
 
         {/* Right: Discussion */}
         <div className="xl:col-span-1 space-y-6 flex flex-col h-full">
-          <Card className="flex-1 border-4 border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col overflow-hidden h-[min(80vh,900px)] xl:h-auto xl:min-h-[560px] xl:max-h-[900px]">
+          <Card className="flex-1 border-4 border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col overflow-hidden h-[min(70vh,640px)] xl:h-auto xl:min-h-[560px] xl:max-h-[720px]">
             <CardHeader className="bg-muted border-b-4 border-border shrink-0 py-4">
                <div className="flex items-center justify-between">
                  <CardTitle className="font-heading uppercase text-xl flex items-center gap-2">
@@ -394,7 +393,7 @@ export default function ResumeDetail() {
 
             {/* Scrollable comments area */}
             <div className="bg-background flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
-              {topLevel.length === 0 ? (
+              {comments.length === 0 ? (
                 <div className="text-center py-12 border-4 border-border border-dashed text-muted-foreground bg-muted/30">
                    <MessageSquare className="w-8 h-8 mx-auto mb-3 opacity-40" />
                    <p className="font-heading uppercase">No feedback yet.</p>
@@ -402,7 +401,7 @@ export default function ResumeDetail() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {topLevel.map((c) => (
+                  {comments.map((c) => (
                     <EnhancedComment key={c._id} comment={c} onRefresh={loadComments} />
                   ))}
                 </div>
@@ -425,7 +424,7 @@ export default function ResumeDetail() {
                   </div>
                   {isOwner && (
                     <p className="text-[10px] text-destructive font-bold uppercase tracking-wider mb-1">
-                      You cannot roast your own resume, but you can reply to comments!
+                      You cannot roast your own resume, but you can add comments.
                     </p>
                   )}
                   <div className="flex gap-2">
