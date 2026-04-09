@@ -3,13 +3,14 @@
 import { cn } from "@/lib/utils";
 import { getToken } from "@/lib/api";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { UploadCloud, FileText, X } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/store/auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -21,6 +22,13 @@ export default function UploadPage() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const ref = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (loading) return;
+    if (user?.role === "recruiter") {
+      router.replace("/recruiter");
+    }
+  }, [loading, user?.role, router]);
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
@@ -68,8 +76,18 @@ export default function UploadPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16 p-4">
-        <Card className="w-full max-w-md border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center p-8 animate-pulse">
-           <CardTitle className="font-heading uppercase text-xl">Loading...</CardTitle>
+        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center p-8 animate-pulse">
+           <CardTitle className="font-heading uppercase text-xl tracking-wide">Loading...</CardTitle>
+        </Card>
+      </div>
+    );
+  }
+
+  if (user?.role === "recruiter") {
+    return (
+      <div className="flex items-center justify-center py-16 p-4">
+        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center p-8 bg-card">
+          <CardTitle className="font-heading uppercase text-xl tracking-wide">Redirecting…</CardTitle>
         </Card>
       </div>
     );
@@ -78,11 +96,11 @@ export default function UploadPage() {
   if (!user) {
     return (
       <div className="flex items-center justify-center p-4 py-16">
-        <Card className="w-full max-w-md border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center p-8 bg-card">
-          <h1 className="font-heading uppercase text-3xl mb-4">Sign In Required</h1>
-          <p className="text-sm text-muted-foreground mb-6">You need to sign in to upload your resume for roasting!</p>
+        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center p-8 bg-card">
+          <h1 className="font-heading uppercase text-3xl mb-4 tracking-tighter font-black">Sign In Required</h1>
+          <p className="text-sm text-muted-foreground mb-6 font-medium">You need to sign in to upload your resume for roasting!</p>
           <Link href="/login">
-            <Button className="border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-lg px-8">
+            <Button className="border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-lg px-8 h-12 tracking-wide">
               Sign In to Upload
             </Button>
           </Link>
@@ -93,12 +111,14 @@ export default function UploadPage() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center p-4 py-12">
-      <Card className="w-full max-w-lg border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-        <CardHeader className="text-center space-y-3 pb-6 border-b-4 border-border bg-muted">
-          <div className="mx-auto bg-primary w-14 h-14 flex items-center justify-center rounded-full border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-2">
+      <Card className="border-[3px] border-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card rounded-none overflow-hidden max-w-2xl mx-auto w-full">
+        <CardHeader className="text-center bg-muted/50 border-b-[3px] border-border py-8 md:py-12 relative overflow-hidden">
+          <div className="mx-auto bg-primary w-14 h-14 flex items-center justify-center rounded-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-3">
             <UploadCloud className="w-7 h-7 text-primary-foreground" />
           </div>
-          <CardTitle className="text-4xl font-heading uppercase drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">Enter The Forge</CardTitle>
+          <CardTitle className="text-4xl font-heading uppercase tracking-tight text-foreground">
+            Enter the Forge
+          </CardTitle>
           <CardDescription className="text-base text-muted-foreground font-medium max-w-sm mx-auto">
             Submit your PDF resume to the forge. Let the community and AI mercilessly break it down so recruiters do not have to (constructively).
           </CardDescription>
@@ -107,7 +127,7 @@ export default function UploadPage() {
           <form onSubmit={submit} className="space-y-6">
             {!file ? (
               <div 
-                className="border-4 border-dashed border-border bg-muted/30 p-10 flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                className="border-[3px] border-dashed border-border bg-muted/30 p-10 flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-muted/50 transition-colors"
                 onClick={() => ref.current?.click()}
               >
                 <div className="w-16 h-16 rounded-full bg-background border-2 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center">
@@ -123,67 +143,56 @@ export default function UploadPage() {
                 </Button>
               </div>
             ) : (
-              <div className="border-4 border-border bg-primary/10 p-4 flex items-center justify-between shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                <div className="flex items-center gap-3 overflow-hidden">
-                   <div className="w-10 h-10 bg-primary/20 border-2 border-border flex items-center justify-center shrink-0">
-                     <FileText className="w-5 h-5 text-primary" />
-                   </div>
-                   <div className="min-w-0">
-                     <p className="font-heading text-sm truncate">{file.name}</p>
-                     <p className="text-xs text-muted-foreground font-mono">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                   </div>
+              <div className="border-[3px] border-border p-4 bg-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-4">
+                <div className="p-2 bg-primary/20 border-2 border-border text-primary shrink-0">
+                  <FileText className="w-6 h-6" />
                 </div>
-                <Button 
-                   type="button" 
-                   variant="destructive" 
-                   size="icon"
-                   className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all shrink-0" 
-                   onClick={() => { setFile(null); if (ref.current) ref.current.value = ""; }}
-                >
+                <div className="flex-1 min-w-0">
+                  <p className="font-heading uppercase truncate text-sm">{file.name}</p>
+                  <p className="text-xs text-muted-foreground font-mono">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                </div>
+                <Button variant="destructive" size="icon" onClick={() => { setFile(null); if (ref.current) ref.current.value = ""; }} className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all shrink-0 w-8 h-8">
                   <X className="w-4 h-4" />
                 </Button>
               </div>
             )}
 
             {error && (
-              <div className="border-4 border-destructive bg-destructive/10 p-3 flex flex-col gap-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-medium text-sm">
-                 <span className="font-heading uppercase text-destructive text-xs">Error</span>
-                 {error}
+              <div className="bg-destructive/10 border-[3px] border-destructive p-3">
+                <p className="text-xs font-bold text-destructive uppercase tracking-widest mb-1">Error</p>
+                <p className="text-sm font-medium">{error}</p>
               </div>
             )}
 
             {/* Title input */}
             <div className="space-y-2">
-              <label className="font-heading uppercase text-sm tracking-wider" htmlFor="resume-title">Post Title</label>
-              <input
-                id="resume-title"
-                type="text"
-                maxLength={200}
-                required
+              <label className="text-sm font-heading uppercase tracking-wide">Post Title</label>
+              <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder='e.g. "Roast my SWE intern resume" or "3 YOE Frontend Dev"'
-                className="w-full p-3 border-4 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm"
+                placeholder="e.g. New grad SWE trying to break into FAANG"
+                className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus-visible:ring-0 focus-visible:ring-offset-0 font-medium h-12"
+                required
               />
               <p className="text-xs text-muted-foreground">This title will be shown on the Hall of Shame card.</p>
             </div>
 
-            <Button
-              type="submit"
-              disabled={!file || !title.trim() || uploading}
-              className="w-full h-14 border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-xl"
+            <Button 
+              type="submit" 
+              disabled={uploading || !title.trim()} 
+              className="w-full h-14 text-lg border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase tracking-wide bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              {uploading ? "Uploading to Forge..." : "Upload & Roast! 🔥"}
+              {uploading ? "Forging..." : "Upload & Roast! 🔥"}
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="bg-muted p-6 border-t-4 border-border flex flex-col items-start gap-2">
-           <p className="font-heading uppercase tracking-wider text-sm">Tips for a good roast:</p>
-           <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-             <li>Upload a clean, readable PDF (no scanned images).</li>
-             <li>Include your target role for context.</li>
-             <li>Feedback here is brutally honest — don't take it personally!</li>
-           </ul>
+        <CardFooter className="bg-muted/40 border-t-[3px] border-border p-6 md:p-8 flex flex-col items-start text-left">
+          <h3 className="font-heading uppercase text-sm mb-3 tracking-wide">Tips for a good roast:</h3>
+          <ul className="text-sm text-muted-foreground space-y-2 list-disc pl-5 font-medium marker:text-border">
+            <li>Upload a clean, readable PDF (no scanned images).</li>
+            <li>Include your target role for context.</li>
+            <li>Feedback here is brutally honest — don't take it personally!</li>
+          </ul>
         </CardFooter>
       </Card>
     </div>

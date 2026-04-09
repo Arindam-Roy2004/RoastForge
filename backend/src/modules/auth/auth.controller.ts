@@ -15,9 +15,8 @@ const COOKIE_OPTS = {
 };
 
 export const register = async (req: Request, res: Response) => {
-  const { user, accessToken, refreshToken } = await authService.register(req.body);
-  res.cookie("refreshToken", refreshToken, COOKIE_OPTS);
-  ApiResponse.created(res, "Account created", { user, accessToken });
+  const { user } = await authService.register(req.body);
+  ApiResponse.created(res, "Account created.", { user });
 };
 
 export const login = async (req: Request, res: Response) => {
@@ -43,9 +42,21 @@ export const getMe = async (req: Request, res: Response) => {
   ApiResponse.ok(res, "Profile", user);
 };
 
+export const updateProfile = async (req: Request, res: Response) => {
+  const result = await authService.updateProfile((req as any).user.id, req.body);
+  ApiResponse.ok(res, "Profile updated", result);
+};
+
 export const regenerateUsername = async (req: Request, res: Response) => {
   const userId = (req as any).user.id; 
   const result = await authService.regenerateUsername(userId);
   ApiResponse.ok(res, "Username regenerated successfully", result);
+};
+
+export const deleteAccount = async (req: Request, res: Response) => {
+  const userId = (req as any).user.id;
+  await authService.deleteAccount(userId, req.body.password);
+  res.clearCookie("refreshToken", { path: "/", sameSite: COOKIE_OPTS.sameSite, secure: COOKIE_OPTS.secure });
+  ApiResponse.ok(res, "Account deleted");
 };
 

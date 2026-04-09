@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authenticate } from "../auth/auth.middleware.js";
+import { authenticate, requireCandidate } from "../auth/auth.middleware.js";
 import { upload } from "../../common/middleware/upload.middleware.js";
 import { asyncHandler } from "../../common/middleware/async-handler.js";
 import { uploadResumePdf, uploadResumeImage, uploadAvatar } from "../../common/utils/cloudinary-upload.js";
@@ -11,6 +11,7 @@ const router = Router();
 router.post(
   "/resume",
   authenticate,
+  requireCandidate,
   upload.single("file"),
   asyncHandler(async (req: any, res: any) => {
     if (!req.file?.buffer) throw ApiError.badRequest("No file uploaded");

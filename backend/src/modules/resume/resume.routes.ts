@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as controller from "./resume.controller.js";
-import { authenticate, optionalAuth } from "../auth/auth.middleware.js";
+import { authenticate, optionalAuth, requireCandidate } from "../auth/auth.middleware.js";
 import { asyncHandler } from "../../common/middleware/async-handler.js";
 import validate from "../../common/middleware/validate.middleware.js";
 import CreateResumeDto from "./dto/create-resume.dto.js";
@@ -14,9 +14,9 @@ router.get("/my", authenticate, asyncHandler(controller.getMyResumes));
 router.get("/:id", optionalAuth, asyncHandler(controller.getResume));
 
 // Protected
-router.post("/", authenticate, validate(CreateResumeDto), asyncHandler(controller.createResume));
-router.put("/:id", authenticate, validate(UpdateResumeDto), asyncHandler(controller.updateResume));
-router.delete("/:id", authenticate, asyncHandler(controller.deleteResume));
+router.post("/", authenticate, requireCandidate, validate(CreateResumeDto), asyncHandler(controller.createResume));
+router.put("/:id", authenticate, requireCandidate, validate(UpdateResumeDto), asyncHandler(controller.updateResume));
+router.delete("/:id", authenticate, requireCandidate, asyncHandler(controller.deleteResume));
 router.post("/:id/like", authenticate, asyncHandler(controller.toggleLike));
 
 export default router;

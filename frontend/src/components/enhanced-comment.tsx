@@ -58,14 +58,14 @@ export function EnhancedComment({
   }
 
   return (
-    <div className="border-2 border-border rounded-none bg-card p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+    <div className="border-[3px] border-border rounded-none bg-card p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 rounded-full border-2 border-border bg-primary/20 flex items-center justify-center text-sm font-heading uppercase shrink-0">
+        <div className="w-7 h-7 rounded-full border-2 border-border bg-primary/20 flex items-center justify-center text-xs font-mono font-bold uppercase shrink-0">
           {alias.charAt(0)}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className="font-heading uppercase text-sm tracking-wide">{alias}</span>
+            <span className="font-mono text-xs font-bold tracking-tight text-foreground">u/{alias}</span>
             <Badge variant="outline" className={cn("border border-border rounded-none font-bold uppercase py-0 text-[10px]", typeStyles[extractedType])}>
               {extractedType}
             </Badge>
@@ -77,8 +77,8 @@ export function EnhancedComment({
 
           {/* Actions */}
           <div className="flex items-center gap-2 mt-2 flex-wrap">
-            <div className="flex items-center border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] bg-muted shrink-0">
-              <button type="button" onClick={() => vote(1)} className="px-2 py-1 hover:bg-green-200 transition-colors border-r-2 border-border flex items-center gap-1 font-bold text-xs font-heading">
+            <div className="flex items-center border-[3px] border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] bg-muted shrink-0">
+              <button type="button" onClick={() => vote(1)} className="px-2 py-1 hover:bg-green-200 transition-colors border-r-[3px] border-border flex items-center gap-1 font-bold text-xs font-heading">
                 <ThumbsUp className="w-3 h-3" /> {comment.upvotesCount}
               </button>
               <button type="button" onClick={() => vote(-1)} className="px-2 py-1 hover:bg-red-200 transition-colors flex items-center gap-1 font-bold text-xs font-heading">

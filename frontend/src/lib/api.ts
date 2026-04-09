@@ -51,7 +51,51 @@ async function tryRefreshToken(): Promise<boolean> {
 }
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
-export type User = { id: string; name: string; email: string; avatar: string; anonymousUsername?: string; role?: string };
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  anonymousUsername?: string;
+  role?: string;
+};
+
+export type RecruiterCandidateProfile = {
+  userId: string;
+  anonymousUsername?: string;
+  avatar: string;
+  talentComposite: number;
+  identity: {
+    displayName: string;
+    linkedInUrl: string;
+    githubUrl: string;
+  } | null;
+  projects: Array<{
+    _id: string;
+    title: string;
+    description: string;
+    techStack: string[];
+    githubUrl: string;
+    liveDemo: string;
+    aiStatus?: string;
+    aiEvaluation?: { codeQuality: number; complexity: number; summary: string; extractedSkills?: string[] };
+    createdAt: string;
+  }>;
+  resumes: Array<{
+    _id: string;
+    title?: string;
+    blurb?: string;
+    likesCount: number;
+    commentsCount: number;
+    createdAt: string;
+    aiScoreOverall?: number;
+  }>;
+};
+
+export const recruiterApi = {
+  candidateProfile: (userId: string) =>
+    apiFetch<RecruiterCandidateProfile>(`/api/recruiter/candidate/${encodeURIComponent(userId)}/profile`),
+};
 
 export const authApi = {
   register: (body: { name: string; email: string; password: string }) =>
@@ -64,6 +108,9 @@ export const authApi = {
     }),
   logout: () => apiFetch("/api/auth/logout", { method: "POST" }),
   me: () => apiFetch<User>("/api/auth/me"),
+  /** Permanently deletes the account and all related resumes, projects, comments, likes, and votes. */
+  deleteAccount: (password: string) =>
+    apiFetch("/api/auth/account", { method: "DELETE", body: JSON.stringify({ password }) }),
 };
 
 // ─── Resumes ─────────────────────────────────────────────────────────────────
@@ -78,11 +125,14 @@ export type AiRoast = {
 export type Resume = {
   _id: string;
   userId: { _id: string; name: string; avatar: string; anonymousUsername?: string };
-  title: string;
-  name: string;
-  blurb: string;
+  title?: string;
+  name?: string;
+  blurb?: string;
   fileUrl: string;
   fileType: "pdf" | "image";
+  version?: number;
+  candidateAlias?: string;
+  aiScore?: { [key: string]: number };
   likesCount: number;
   commentsCount: number;
   isLiked?: boolean;
@@ -100,10 +150,14 @@ export type ResumeListResult = {
   pages: number;
 };
 
+/** Must match `PAGE_SIZE` in backend `resume.service.ts`. */
+export const RESUME_GALLERY_PAGE_SIZE = 8;
+
 export const resumeApi = {
   list: (params: { page?: number; sort?: string; search?: string } = {}) => {
     const q = new URLSearchParams();
-    if (params.page) q.set("page", String(params.page));
+    const page = params.page != null && params.page > 0 ? params.page : 1;
+    q.set("page", String(page));
     if (params.sort) q.set("sort", params.sort);
     if (params.search) q.set("search", params.search);
     return apiFetch<ResumeListResult>(`/api/resumes?${q}`);

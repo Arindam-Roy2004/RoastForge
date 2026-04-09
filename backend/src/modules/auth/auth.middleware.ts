@@ -2,6 +2,14 @@ import ApiError from "../../common/utils/api-error.js";
 import { verifyAccessToken } from "../../common/utils/jwt.utils.js";
 import User from "./auth.model.js";
 
+/** Resumes upload, projects, and candidate resume APIs only. */
+export const requireCandidate = (req: any, res: any, next: any) => {
+  if (req.user?.role === "recruiter") {
+    return next(ApiError.forbidden("Recruiter accounts cannot use this action."));
+  }
+  next();
+};
+
 export const authenticate = async (req: any, res: any, next: any) => {
   try {
     const header = req.headers.authorization;
@@ -10,7 +18,7 @@ export const authenticate = async (req: any, res: any, next: any) => {
     const decoded = verifyAccessToken(token) as { id: string };
     const user = await User.findById(decoded.id);
     if (!user) throw ApiError.unauthorized("User no longer exists");
-    req.user = { id: String(user._id), name: user.name, email: user.email, avatar: user.avatar };
+    req.user = { id: String(user._id), name: user.name, email: user.email, avatar: user.avatar, role: user.role };
     next();
   } catch (e) {
     next(e);
@@ -25,7 +33,7 @@ export const optionalAuth = async (req: any, res: any, next: any) => {
       const token = header.split(" ")[1];
       const decoded = verifyAccessToken(token) as { id: string };
       const user = await User.findById(decoded.id);
-      if (user) req.user = { id: String(user._id), name: user.name, email: user.email, avatar: user.avatar };
+      if (user) req.user = { id: String(user._id), name: user.name, email: user.email, avatar: user.avatar, role: user.role };
     }
   } catch {}
   next();

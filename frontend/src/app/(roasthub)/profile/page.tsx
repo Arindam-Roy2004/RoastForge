@@ -74,6 +74,7 @@ export default function ProfilePage() {
             _id: raw._id ?? (raw as { id?: string }).id ?? authUser.id,
             name: raw.name ?? authUser.name,
             email: raw.email ?? authUser.email,
+            anonymousPublicId: (raw as { anonymousUsername?: string }).anonymousUsername ?? raw.anonymousPublicId ?? authUser.anonymousUsername,
           }
         : profileRowFromAuth(authUser);
       setUser(row);
@@ -83,8 +84,12 @@ export default function ProfilePage() {
         setGithub(row.publicProfile.githubUrl || "");
         setShare(row.publicProfile.shareIdentityWithRecruiters || false);
       }
-      const r = await apiFetch<Resume[]>("/api/resumes/my");
-      setResumes(r.data || []);
+      if (authUser.role !== "recruiter") {
+        const r = await apiFetch<Resume[]>("/api/resumes/my");
+        setResumes(r.data || []);
+      } else {
+        setResumes([]);
+      }
     } catch {
       setUser(profileRowFromAuth(authUser));
     } finally {
@@ -133,11 +138,14 @@ export default function ProfilePage() {
   if (!authUser) {
     return (
       <div className="flex items-center justify-center p-4 py-16">
-        <Card className="w-full max-w-md border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center p-8 bg-card">
-          <h1 className="font-heading uppercase text-3xl mb-4">Sign In Required</h1>
-          <p className="text-sm text-muted-foreground mb-6">You need to sign in to view your profile and manage your resumes.</p>
-          <Link href="/login">
-            <Button className="border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase">
+        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center p-8 bg-card flex flex-col items-center">
+          <div className="w-16 h-16 bg-muted border-[3px] border-border rounded-full flex items-center justify-center mb-6 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            <LogOut className="w-6 h-6 text-muted-foreground" />
+          </div>
+          <h1 className="font-heading uppercase text-3xl mb-3 tracking-wide">Sign In Required</h1>
+          <p className="text-sm text-muted-foreground mb-8 text-balance">You need to sign in to view your profile, manage your resumes, and interact with the community.</p>
+          <Link href="/login" className="w-full">
+            <Button className="w-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase tracking-wide">
               Sign In Now
             </Button>
           </Link>
@@ -151,31 +159,35 @@ export default function ProfilePage() {
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       {/* User Header */}
-      <Card className="border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-        <div className="bg-primary p-6 md:p-8 flex flex-col md:flex-row items-center gap-6">
-          <div className="w-24 h-24 rounded-full border-4 border-border bg-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center text-4xl font-heading uppercase shrink-0">
+      <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+        <div className="bg-primary p-6 md:p-10 flex flex-col md:flex-row items-center gap-6">
+          <div className="w-24 h-24 rounded-full border-[3px] border-border bg-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center text-4xl font-heading uppercase shrink-0">
             {displayUser.name.charAt(0).toUpperCase() || "?"}
           </div>
-          <div className="flex-1 text-center md:text-left text-primary-foreground space-y-1">
-            <h1 className="text-3xl md:text-4xl font-heading uppercase drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">{displayUser.name}</h1>
+          <div className="flex-1 text-center md:text-left text-primary-foreground space-y-2">
+            <h1 className="text-3xl md:text-4xl font-heading uppercase tracking-tighter font-black text-foreground">{displayUser.name}</h1>
             <p className="font-medium opacity-90">{displayUser.email}</p>
-            {displayUser.anonymousPublicId && <p className="text-sm opacity-80 uppercase tracking-widest mt-2 border border-primary-foreground/30 inline-block px-2 py-1 rounded-sm">Alias: {displayUser.anonymousPublicId}</p>}
-            {displayUser.talentMetrics && (
-              <Badge variant="secondary" className="mt-2 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none font-bold">
-                Talent Score: {displayUser.talentMetrics.composite}
-              </Badge>
-            )}
+            <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start mt-1">
+              {displayUser.anonymousPublicId && (
+                <span className="font-mono text-xs tracking-tight text-primary-foreground/70">u/{displayUser.anonymousPublicId}</span>
+              )}
+              {displayUser.talentMetrics && (
+                <Badge variant="secondary" className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none font-bold px-3 py-1">
+                  Talent Score: {displayUser.talentMetrics.composite}
+                </Badge>
+              )}
+            </div>
           </div>
-          <div className="flex flex-col gap-3">
-            <Badge variant="outline" className="border-2 border-primary-foreground text-primary-foreground rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] bg-primary/50 text-sm py-1.5 px-3 flex items-center gap-2 font-heading uppercase">
+          <div className="flex flex-col gap-3 w-full md:w-auto mt-4 md:mt-0">
+            <Badge variant="outline" className="border-2 border-primary-foreground text-primary-foreground rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] bg-primary/50 text-sm py-1.5 px-4 flex items-center justify-center md:justify-start gap-2 font-heading uppercase tracking-wide">
               <FileText className="w-4 h-4" /> {resumes.length} Resume{resumes.length !== 1 ? "s" : ""}
             </Badge>
             <Button
               variant="destructive"
               onClick={() => { clearToken(); router.push("/"); }}
-              className="border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase text-xs"
+              className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase text-xs tracking-wide w-full"
             >
-              <LogOut className="w-3 h-3 mr-2" /> Sign Out
+              <LogOut className="w-4 h-4 mr-2" /> Sign Out
             </Button>
           </div>
         </div>
@@ -184,19 +196,19 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Public Profile Settings */}
         <div className="md:col-span-1">
-          <Card className="border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b-4 border-border bg-muted">
-              <CardTitle className="font-heading uppercase text-lg">Public Profile</CardTitle>
+          <Card className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] h-full flex flex-col">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 py-3 px-4 border-b-[3px] border-border bg-muted/40">
+              <CardTitle className="font-heading uppercase text-base tracking-wide">Public Profile</CardTitle>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setEditMode(!editMode)}
-                className="border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase text-xs h-8"
+                className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase text-[10px] h-7 px-3"
               >
                 <Edit2 className="w-3 h-3 mr-1" /> {editMode ? "Cancel" : "Edit"}
               </Button>
             </CardHeader>
-            <CardContent className="pt-6">
+            <CardContent className="p-4 flex-1">
               {editMode ? (
                 <div className="space-y-4">
                   <div className="space-y-1">
@@ -215,7 +227,7 @@ export default function ProfilePage() {
                     <input type="checkbox" checked={share} onChange={() => setShare(!share)} className="w-4 h-4 accent-primary rounded-none border-2 border-border" />
                     <span className="text-sm font-bold tracking-tight uppercase">Share identity with recruiters</span>
                   </label>
-                  <Button onClick={saveProfile} className="w-full border-4 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase">
+                  <Button onClick={saveProfile} className="w-full border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase tracking-wide mt-2">
                     Save Changes
                   </Button>
                 </div>
@@ -234,8 +246,8 @@ export default function ProfilePage() {
                     <p className="font-medium bg-muted p-2 border-2 border-border inline-block min-w-full text-sm truncate">{displayUser.publicProfile?.githubUrl || "—"}</p>
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Visibility</h4>
-                    <Badge variant={displayUser.publicProfile?.shareIdentityWithRecruiters ? "default" : "secondary"} className="border-2 border-border rounded-none font-bold uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                    <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Visibility</h4>
+                    <Badge variant={displayUser.publicProfile?.shareIdentityWithRecruiters ? "default" : "secondary"} className="border-2 border-border rounded-none font-bold uppercase shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] text-[10px] px-2 py-0.5">
                       {displayUser.publicProfile?.shareIdentityWithRecruiters ? "Shared with Recruiters" : "Anonymous"}
                     </Badge>
                   </div>
@@ -245,34 +257,60 @@ export default function ProfilePage() {
           </Card>
         </div>
 
-        {/* Resumes */}
-        <div className="md:col-span-2">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-heading uppercase">Your Resumes</h2>
+        {/* Resumes — candidates only */}
+        <div className="md:col-span-2 flex min-h-0 flex-col">
+          <div className="flex items-center justify-between mb-4 mt-2 md:mt-0">
+            <h2 className="text-2xl font-heading uppercase tracking-wide">
+              {authUser?.role === "recruiter" ? "Candidate discovery" : "Your Resumes"}
+            </h2>
           </div>
-          {detailLoading ? (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Skeleton className="h-48 w-full border-4 border-border rounded-none" />
-              <Skeleton className="h-48 w-full border-4 border-border rounded-none" />
-            </div>
-          ) : resumes.length === 0 ? (
-            <Card className="border-4 border-border border-dashed bg-muted/50 rounded-none text-center p-8">
-              <CardDescription className="text-base text-muted-foreground">
-                You haven't uploaded any resumes yet.
-              </CardDescription>
-              <Link href="/upload">
-                <Button className="mt-4 border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none font-heading uppercase">
-                  Upload Now
-                </Button>
-              </Link>
-            </Card>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {resumes.map((r) => (
-                <ResumeCard key={r._id} id={r._id} title={r.title} version={r.version} status={r.status} overall={r.aiScore?.overall} createdAt={r.createdAt} candidateAlias={r.candidateAlias || r.userId?.anonymousUsername || "Anonymous"} />
-              ))}
-            </div>
-          )}
+          <div
+            className="min-h-0 max-h-[min(40rem,calc(100vh-14rem))] overflow-y-auto overscroll-y-contain rounded-none border-[3px] border-border bg-muted/20 p-4 sm:p-6 [scrollbar-gutter:stable]"
+            aria-label={authUser?.role === "recruiter" ? "Recruiter tools" : "Your resumes"}
+          >
+            {authUser?.role === "recruiter" ? (
+              detailLoading ? (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Skeleton className="h-48 w-full border-[3px] border-border rounded-none" />
+                </div>
+              ) : (
+                <Card className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-card p-8 text-center">
+                  <CardDescription className="text-base font-medium text-foreground mb-4">
+                    Recruiter accounts don&apos;t upload resumes or projects. Use the dashboard to search candidates.
+                  </CardDescription>
+                  <Link href="/recruiter">
+                    <Button className="border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase tracking-wide px-6">
+                      Open recruiter dashboard
+                    </Button>
+                  </Link>
+                </Card>
+              )
+            ) : detailLoading ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Skeleton className="h-48 w-full border-[3px] border-border rounded-none" />
+                <Skeleton className="h-48 w-full border-[3px] border-border rounded-none" />
+              </div>
+            ) : resumes.length === 0 ? (
+              <Card className="border-[3px] border-border border-dashed bg-muted/30 rounded-none text-center p-10 flex-1 flex flex-col items-center justify-center">
+                <FileText className="w-8 h-8 text-muted-foreground mb-4 opacity-50" />
+                <CardDescription className="text-base font-medium text-foreground mb-1">
+                  No resumes uploaded yet
+                </CardDescription>
+                <p className="text-sm text-muted-foreground mb-6">Drop your first PDF to get roasted by the community.</p>
+                <Link href="/upload">
+                  <Button className="border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase tracking-wide px-6">
+                    Upload Resume
+                  </Button>
+                </Link>
+              </Card>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {resumes.map((r) => (
+                  <ResumeCard key={r._id} id={r._id} title={r.title} version={r.version} status={r.status} overall={r.aiScore?.overall} createdAt={r.createdAt} candidateAlias={r.candidateAlias || r.userId?.anonymousUsername || "Anonymous"} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

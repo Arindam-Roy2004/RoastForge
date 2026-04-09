@@ -10,19 +10,19 @@ import {
 
 const hashToken = (token: string) => crypto.createHash("sha256").update(token).digest("hex");
 
-export const register = async ({ name, email, password }: { name: string; email: string; password: string }) => {
+export const register = async ({ name, email, password, role }: { name: string; email: string; password: string; role?: string }) => {
   const existing = await User.findOne({ email });
   if (existing) throw ApiError.conflict("Email already exists");
 
   const anonymousUsername = generateAnonymousUsername();
-  const user = await User.create({ name, email, password, anonymousUsername });
-  const accessToken = generateAccessToken({ id: user._id });
-  const refreshToken = generateRefreshToken({ id: user._id });
+  const user = await User.create({
+    name, email, password, anonymousUsername,
+    role: role === "recruiter" ? "recruiter" : "user",
+  });
 
-  user.refreshToken = hashToken(refreshToken);
-  await user.save({ validateBeforeSave: false });
-
-  return { user: { id: user._id, name: user.name, email: user.email, avatar: user.avatar, anonymousUsername: user.anonymousUsername }, accessToken, refreshToken };
+  return {
+    user: { id: user._id, name: user.name, email: user.email, avatar: user.avatar, anonymousUsername: user.anonymousUsername, role: user.role },
+  };
 };
 
 export const login = async ({ email, password }: { email: string; password: string }) => {
@@ -38,7 +38,10 @@ export const login = async ({ email, password }: { email: string; password: stri
   user.refreshToken = hashToken(refreshToken);
   await user.save({ validateBeforeSave: false });
 
-  return { user: { id: user._id, name: user.name, email: user.email, avatar: user.avatar, anonymousUsername: user.anonymousUsername }, accessToken, refreshToken };
+  return {
+    user: { id: user._id, name: user.name, email: user.email, avatar: user.avatar, anonymousUsername: user.anonymousUsername, role: user.role },
+    accessToken, refreshToken,
+  };
 };
 
 export const refresh = async (token: string) => {
@@ -59,13 +62,33 @@ export const logout = async (userId: string) => {
 export const getMe = async (userId: string) => {
   const user = await User.findById(userId);
   if (!user) throw ApiError.notfound("User not found");
-  return { id: user._id, name: user.name, email: user.email, avatar: user.avatar, anonymousUsername: user.anonymousUsername };
+  return {
+    id: user._id, name: user.name, email: user.email, avatar: user.avatar,
+    anonymousUsername: user.anonymousUsername, role: user.role,
+    publicProfile: user.publicProfile,
+    talentMetrics: user.talentMetrics,
+  };
 };
 
 export const updateAvatar = async (userId: string, avatar: string) => {
   const user = await User.findByIdAndUpdate(userId, { avatar }, { new: true });
   if (!user) throw ApiError.notfound("User not found");
   return { id: user._id, name: user.name, email: user.email, avatar: user.avatar, anonymousUsername: user.anonymousUsername };
+};
+
+export const updateProfile = async (
+  userId: string,
+  data: { displayName?: string; linkedInUrl?: string; githubUrl?: string; shareIdentityWithRecruiters?: boolean },
+) => {
+  const update: Record<string, unknown> = {};
+  if (data.displayName !== undefined) update["publicProfile.displayName"] = data.displayName;
+  if (data.linkedInUrl !== undefined) update["publicProfile.linkedInUrl"] = data.linkedInUrl;
+  if (data.githubUrl !== undefined) update["publicProfile.githubUrl"] = data.githubUrl;
+  if (data.shareIdentityWithRecruiters !== undefined) update["publicProfile.shareIdentityWithRecruiters"] = data.shareIdentityWithRecruiters;
+
+  const user = await User.findByIdAndUpdate(userId, { $set: update }, { new: true });
+  if (!user) throw ApiError.notfound("User not found");
+  return { publicProfile: user.publicProfile };
 };
 
 export const regenerateUsername = async (userId: string) => {
@@ -80,4 +103,14 @@ export const regenerateUsername = async (userId: string) => {
   if (!updatedUser) throw ApiError.notfound("User not found");
 
   return { anonymousUsername: updatedUser.anonymousUsername };
+};
+
+export const deleteAccount = async (userId: string, password: string) => {
+  const user = await User.findById(userId).select("+password");
+  if (!user) throw ApiError.notfound("User not found");
+
+  const match = await (user as any).comparePassword(password);
+  if (!match) throw ApiError.unauthorized("Invalid password");
+
+  await User.findByIdAndDelete(userId);
 };

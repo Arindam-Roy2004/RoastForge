@@ -1,18 +1,20 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { apiFetch, getToken } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import { useCallback, useState } from "react";
+import { useAuth } from "@/store/auth";
 import { toast } from "sonner";
-import { Search, Briefcase, UserX } from "lucide-react";
+import { Search, Briefcase, UserX, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
 type CandidateRow = {
   resumeId: string;
+  candidateUserId?: string;
   aiScore?: { overall: number };
   userId?: { anonymousUsername?: string };
   candidateAlias?: string;
@@ -21,7 +23,7 @@ type CandidateRow = {
 };
 
 export default function RecruiterPage() {
-  const token = getToken();
+  const { user, loading: authLoading } = useAuth();
   const [skills, setSkills] = useState("");
   const [minScore, setMinScore] = useState("");
   const [minTalent, setMinTalent] = useState("");
@@ -43,15 +45,49 @@ export default function RecruiterPage() {
     }
   }, [skills, minScore, minTalent, role]);
 
-  if (!token) {
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center p-4 py-16 min-h-[40vh]">
+        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card text-center p-8 flex flex-col items-center">
+          <Loader2 className="w-10 h-10 text-muted-foreground animate-spin mb-4" />
+          <CardTitle className="font-heading uppercase font-black text-xl mb-1 tracking-tighter">Loading…</CardTitle>
+          <CardDescription className="font-medium">Checking your session.</CardDescription>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!user) {
     return (
       <div className="flex items-center justify-center p-4 py-16">
-        <Card className="w-full max-w-md border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center p-8 bg-card">
-          <CardTitle className="font-heading uppercase text-3xl mb-4">Recruiter Access</CardTitle>
-          <CardDescription className="mb-6 font-medium">Sign in with a recruiter account to discover candidates.</CardDescription>
-          <Link href="/login">
-            <Button className="border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all w-full font-heading uppercase text-lg h-12">
+        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card text-center p-8 flex flex-col items-center">
+          <div className="w-16 h-16 bg-muted border-[3px] border-border rounded-full flex items-center justify-center mb-6 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            <Briefcase className="w-6 h-6 text-muted-foreground" />
+          </div>
+          <CardTitle className="font-heading uppercase font-black text-3xl mb-3 tracking-tighter">Recruiter Access</CardTitle>
+          <CardDescription className="mb-8 font-medium">Sign in with a recruiter account to discover candidates.</CardDescription>
+          <Link href="/login" className="w-full">
+            <Button className="w-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-lg h-12 tracking-wide">
               Sign In
+            </Button>
+          </Link>
+        </Card>
+      </div>
+    );
+  }
+
+  if (user.role !== "recruiter") {
+    return (
+      <div className="flex items-center justify-center p-4 py-16">
+        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card text-center p-8 flex flex-col items-center">
+          <div className="w-16 h-16 bg-muted border-[3px] border-border rounded-full flex items-center justify-center mb-6 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            <Briefcase className="w-6 h-6 text-muted-foreground" />
+          </div>
+          <CardTitle className="font-heading uppercase font-black text-2xl mb-3 tracking-tighter">Recruiters only</CardTitle>
+          <CardDescription className="mb-6 font-medium">This workspace is for recruiter accounts.</CardDescription>
+          <Link href="/" className="w-full">
+            <Button variant="outline" className="w-full border-[3px] border-border rounded-none font-heading uppercase h-12">
+              Back to hub
             </Button>
           </Link>
         </Card>
@@ -62,7 +98,7 @@ export default function RecruiterPage() {
   return (
     <div className="container mx-auto px-4 py-8 space-y-8 max-w-6xl">
       <div>
-        <h1 className="text-4xl font-heading uppercase drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] flex items-center gap-3">
+          <h1 className="text-4xl font-heading uppercase flex items-center gap-3 tracking-tighter font-black">
           <Briefcase className="w-8 h-8 text-primary" /> Recruiter Discovery
         </h1>
         <p className="text-muted-foreground mt-2 font-medium">
@@ -70,32 +106,30 @@ export default function RecruiterPage() {
         </p>
       </div>
 
-      <Card className="border-4 border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card">
-        <CardHeader className="bg-muted border-b-4 border-border pb-4">
-          <CardTitle className="font-heading uppercase text-lg">Filters</CardTitle>
+      <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card">
+        <CardHeader className="bg-muted/40 border-b-[3px] border-border py-4 px-5">
+          <CardTitle className="font-heading uppercase text-base tracking-wide">Filters</CardTitle>
         </CardHeader>
-        <CardContent className="pt-6 border-b-4 border-border">
-          <div className="flex flex-col sm:flex-row flex-wrap gap-4">
-            <div className="flex-1 min-w-[200px]">
-              <label className="text-xs font-bold uppercase tracking-widest mb-1 block">Skills (comma separated)</label>
-              <Input value={skills} onChange={(e) => setSkills(e.target.value)} placeholder="React, Node..." className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus-visible:ring-0" />
+        <CardContent className="flex flex-col md:flex-row items-end gap-4 p-5">
+            <div className="space-y-2 flex-1 w-full min-w-50">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Target Role</label>
+              <Input placeholder="e.g. Backend Engineer" value={role} onChange={(e) => setRole(e.target.value)} className="border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] h-10" />
             </div>
-            <div className="w-full sm:w-36">
-              <label className="text-xs font-bold uppercase tracking-widest mb-1 block">Min Resume</label>
-              <Input value={minScore} onChange={(e) => setMinScore(e.target.value)} placeholder="0-100" className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus-visible:ring-0" />
+            <div className="space-y-2 flex-2 w-full">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Skills</label>
+              <Input placeholder="React, Python, AWS..." value={skills} onChange={(e) => setSkills(e.target.value)} className="border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] h-10" />
             </div>
-            <div className="w-full sm:w-36">
-              <label className="text-xs font-bold uppercase tracking-widest mb-1 block">Min Talent</label>
-              <Input value={minTalent} onChange={(e) => setMinTalent(e.target.value)} placeholder="0-100" className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus-visible:ring-0" />
+            <div className="space-y-2 w-full md:w-32">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Min AI Score</label>
+              <Input type="number" placeholder="0-100" value={minScore} onChange={(e) => setMinScore(e.target.value)} className="border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] h-10" />
             </div>
-            <div className="w-full sm:w-48">
-              <label className="text-xs font-bold uppercase tracking-widest mb-1 block">Role Keyword</label>
-              <Input value={role} onChange={(e) => setRole(e.target.value)} placeholder="e.g. Frontend" className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus-visible:ring-0" />
+            <div className="space-y-2 w-full md:w-32">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Min Talent</label>
+              <Input type="number" placeholder="0-100" value={minTalent} onChange={(e) => setMinTalent(e.target.value)} className="border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] h-10" />
             </div>
-          </div>
-        </CardContent>
-        <div className="bg-muted p-4">
-          <Button onClick={search} className="w-full sm:w-auto border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-sm bg-primary text-primary-foreground h-12 px-8 flex items-center justify-center gap-2">
+          </CardContent>
+        <div className="bg-muted p-4 border-t-[3px] border-border">
+          <Button onClick={search} className="w-full sm:w-auto border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-sm bg-primary text-primary-foreground h-12 px-8 flex items-center justify-center gap-2">
             <Search className="w-4 h-4" /> Search Candidates
           </Button>
         </div>
@@ -103,51 +137,82 @@ export default function RecruiterPage() {
 
       <div className="grid gap-4">
         {rows.length === 0 ? (
-          <div className="border-4 border-border border-dashed bg-muted/50 p-12 text-center text-muted-foreground font-heading uppercase tracking-widest">
+          <div className="border-[3px] border-border border-dashed bg-muted/50 p-12 text-center text-muted-foreground font-heading uppercase tracking-widest">
             No results. Adjust filters and query again.
           </div>
-        ) : rows.map((r) => (
-          <Card key={r.resumeId} className="border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-card overflow-hidden">
-            <div className="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full border-4 border-border bg-primary/20 flex items-center justify-center text-xl font-heading uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] shrink-0">
-                  {(r.userId?.anonymousUsername || r.candidateAlias)?.charAt(0)?.toUpperCase() || "?"}
-                </div>
-                <div>
-                  <p className="font-heading text-xl uppercase">{r.userId?.anonymousUsername || r.candidateAlias || "Anonymous"}</p>
-                  <p className="text-xs text-muted-foreground font-mono bg-muted inline-block px-2 py-0.5 border border-border">ID: {r.resumeId.slice(-6)}</p>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2 sm:justify-end">
-                <Badge variant="outline" className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-bold uppercase py-1 bg-green-100">
-                  Resume {r.aiScore?.overall ?? "—"}
-                </Badge>
-                <Badge variant="outline" className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-bold uppercase py-1 bg-cyan-100">
-                  Talent {r.talentComposite ?? "—"}
-                </Badge>
-                {r.identity ? (
-                  <Badge variant="default" className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-bold uppercase py-1 bg-yellow text-black">
-                    Identity Available
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary" className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-bold uppercase py-1 gap-1">
-                    <UserX className="w-3 h-3" /> Hidden
-                  </Badge>
-                )}
-              </div>
-            </div>
-            {r.identity && (
-              <div className="bg-muted p-4 border-t-4 border-border space-y-2">
-                <p className="font-bold text-sm uppercase tracking-widest text-muted-foreground">Contact Info</p>
-                <div className="flex flex-wrap gap-4 text-sm font-medium">
-                  {r.identity.displayName && <span className="flex items-center gap-2"><span className="underline decoration-2 decoration-primary underline-offset-4">{r.identity.displayName}</span></span>}
-                  {r.identity.linkedInUrl && <a href={r.identity.linkedInUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-800 underline decoration-2 underline-offset-4">LinkedIn Profile</a>}
-                  {r.identity.githubUrl && <a href={r.identity.githubUrl} target="_blank" rel="noreferrer" className="text-primary hover:opacity-80 underline decoration-2 underline-offset-4">GitHub Profile</a>}
-                </div>
-              </div>
-            )}
-          </Card>
-        ))}
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {rows.map((r) => (
+              <Card key={r.resumeId} className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all bg-card flex flex-col h-full">
+                <CardHeader className="border-b-[3px] border-border bg-muted/40 py-4 px-5">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-primary/20 border-2 border-border rounded-full flex items-center justify-center font-mono text-sm font-bold uppercase shrink-0">
+                      {(r.userId?.anonymousUsername || r.candidateAlias)?.charAt(0)?.toUpperCase() || "?"}
+                    </div>
+                    <div className="min-w-0">
+                      <CardTitle className="font-mono text-sm font-bold tracking-tight truncate mb-1">
+                        u/{r.userId?.anonymousUsername || r.candidateAlias || "Anonymous"}
+                      </CardTitle>
+                      <p className="text-xs text-muted-foreground font-mono">
+                        ID: {r.resumeId.slice(-6)}
+                      </p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-5 flex-1 space-y-4">
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="outline" className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-none text-[10px] px-2 py-0.5 font-bold uppercase">
+                      Resume {r.aiScore?.overall ?? "—"}
+                    </Badge>
+                    <Badge variant="outline" className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-none text-[10px] px-2 py-0.5 font-bold uppercase">
+                      Talent {r.talentComposite ?? "—"}
+                    </Badge>
+                    {r.identity ? (
+                      <Badge variant="default" className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-none text-[10px] px-2 py-0.5 font-bold uppercase">
+                        Identity Available
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-none text-[10px] px-2 py-0.5 font-bold uppercase gap-1">
+                        <UserX className="w-3 h-3" /> Hidden
+                      </Badge>
+                    )}
+                  </div>
+                  {r.identity && (
+                    <div className="space-y-2">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Contact Info</p>
+                      <div className="flex flex-wrap gap-4 text-sm font-medium">
+                        {r.identity.displayName && <span className="flex items-center gap-2"><span className="underline decoration-2 decoration-primary underline-offset-4">{r.identity.displayName}</span></span>}
+                        {r.identity.linkedInUrl && <a href={r.identity.linkedInUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-800 underline decoration-2 underline-offset-4">LinkedIn Profile</a>}
+                        {r.identity.githubUrl && <a href={r.identity.githubUrl} target="_blank" rel="noreferrer" className="text-primary hover:opacity-80 underline decoration-2 underline-offset-4">GitHub Profile</a>}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+                <CardFooter className="p-4 border-t-[3px] border-border bg-muted/20 flex flex-col gap-2">
+                  {r.candidateUserId ? (
+                    <Link href={`/recruiter/candidate/${r.candidateUserId}`} className="w-full">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading uppercase text-xs h-9"
+                      >
+                        View portfolio
+                      </Button>
+                    </Link>
+                  ) : null}
+                  <Link href={`/resume/${r.resumeId}`} className="w-full">
+                    <Button
+                      size="sm"
+                      className="w-full border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading uppercase text-xs h-9"
+                    >
+                      Open resume
+                    </Button>
+                  </Link>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import Like from "./like.model.js";
 import ApiError from "../../common/utils/api-error.js";
 import mongoose from "mongoose";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 8;
 
 /** AI roast is private to the uploader — never expose in public list/API. */
 function stripPrivateRoastFields<T extends Record<string, unknown>>(doc: T): T {
