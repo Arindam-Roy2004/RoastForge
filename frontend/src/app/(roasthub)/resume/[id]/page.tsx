@@ -222,7 +222,7 @@ export default function ResumeDetail() {
       <div
         className={cn(
           "grid grid-cols-1 gap-6 lg:[--panel-h:clamp(520px,calc(100dvh-14rem),920px)]",
-          isOwner ? "lg:grid-cols-[minmax(0,1.2fr)_minmax(0,2.3fr)_minmax(0,1.2fr)]" : "lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1.2fr)]",
+          isOwner ? "lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1.9fr)_minmax(0,1.4fr)]" : "lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1.4fr)]",
         )}
       >
         {/* Left: AI Roast & Details — owner only */}

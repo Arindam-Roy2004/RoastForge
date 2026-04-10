@@ -13,7 +13,7 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b-[3px] border-border bg-card">
-      <div className="mx-auto flex min-h-16 w-full max-w-[1600px] items-center justify-between gap-4 px-4 py-2 sm:min-h-[4.25rem] sm:py-2.5">
+      <div className="mx-auto flex min-h-16 w-full max-w-[1600px] items-center justify-between gap-4 px-4 py-2 sm:min-h-[4.25rem] sm:px-6 sm:py-2.5">
         <Link
           href="/"
           className="inline-flex items-center gap-3 group shrink-0 py-1"
