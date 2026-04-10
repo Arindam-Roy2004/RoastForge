@@ -8,40 +8,40 @@ export default function Footer() {
   const { user } = useAuth();
   const hideCandidateLinks = user?.role === "recruiter";
   return (
-    <footer className="border-t-[3px] border-border bg-card mt-auto">
-      <div className="mx-auto w-full max-w-[1600px] px-6 py-12 lg:px-8">
-        <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
-          <div className="space-y-5 lg:max-w-md shrink-0">
+    <footer className="mt-auto w-full border-t-[3px] border-border bg-card">
+      <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
+          <div className="shrink-0 space-y-2 lg:max-w-sm">
             <Link
               href="/"
-              className="inline-flex items-center gap-3 group w-fit"
+              className="group inline-flex w-fit items-center gap-2.5"
               data-testid="footer-brand"
             >
               <div
-                className="size-10 shrink-0 bg-primary rounded-full border-[3px] border-border flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] group-hover:shadow-none group-hover:translate-x-0.5 group-hover:translate-y-0.5 transition-all"
+                className="flex size-9 shrink-0 items-center justify-center rounded-full border-[3px] border-border bg-primary shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:shadow-none"
                 aria-hidden
               >
-                <Flame className="size-5 text-primary-foreground" strokeWidth={2.25} />
+                <Flame className="size-[1.125rem] text-primary-foreground" strokeWidth={2.25} />
               </div>
-              <span className="font-heading text-2xl sm:text-[1.75rem] tracking-tighter text-foreground leading-none h-10 inline-flex items-center">
+              <span className="inline-flex h-9 items-center font-heading text-xl tracking-tighter text-foreground leading-none">
                 RoastForge
               </span>
             </Link>
-            <p className="text-base text-muted-foreground leading-relaxed">
-              The only resume feedback platform that tells you what your friends are too polite to say.
+            <p className="text-sm leading-snug text-muted-foreground">
+              Resume feedback without the sugar-coating.
             </p>
           </div>
 
           <nav
-            className="flex flex-col gap-10 sm:flex-row sm:gap-0 lg:ml-auto"
+            className="flex flex-col gap-8 sm:flex-row sm:gap-0 lg:ml-auto"
             aria-label="Footer navigation"
           >
-            <div className="sm:min-w-50 sm:border-r-2 sm:border-border sm:pr-10 md:pr-12">
-              <h3 className="font-heading text-foreground text-xs uppercase tracking-[0.2em] mb-1">
+            <div className="sm:min-w-44 sm:border-r-2 sm:border-border sm:pr-8 md:pr-10">
+              <h3 className="mb-1 font-heading text-xs uppercase tracking-[0.18em] text-foreground">
                 Explore
               </h3>
-              <div className="h-0.5 w-16 bg-primary/80 mb-4 rounded-full" aria-hidden />
-              <ul className="flex flex-col gap-0.5 text-sm sm:text-base font-medium">
+              <div className="mb-3 h-0.5 w-12 rounded-full bg-primary/80" aria-hidden />
+              <ul className="flex flex-col gap-0.5 text-sm font-medium">
                 <li>
                   <Link
                     href="/"
@@ -85,12 +85,12 @@ export default function Footer() {
               </ul>
             </div>
 
-            <div className="sm:min-w-50 sm:pl-10 md:pl-12">
-              <h3 className="font-heading text-foreground text-xs uppercase tracking-[0.2em] mb-1">
+            <div className="sm:min-w-44 sm:pl-8 md:pl-10">
+              <h3 className="mb-1 font-heading text-xs uppercase tracking-[0.18em] text-foreground">
                 Account
               </h3>
-              <div className="h-0.5 w-16 bg-primary/80 mb-4 rounded-full" aria-hidden />
-              <ul className="flex flex-col gap-0.5 text-sm sm:text-base font-medium">
+              <div className="mb-3 h-0.5 w-12 rounded-full bg-primary/80" aria-hidden />
+              <ul className="flex flex-col gap-0.5 text-sm font-medium">
                 <li>
                   <Link
                     href="/profile"
@@ -123,25 +123,6 @@ export default function Footer() {
               </ul>
             </div>
           </nav>
-        </div>
-
-        <div className="border-t-[3px] border-border mt-16 pt-8 flex flex-col md:flex-row md:items-center justify-between gap-4 text-sm font-medium text-muted-foreground">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div
-              className="size-8 shrink-0 rounded-full border-2 border-border bg-destructive/15 flex items-center justify-center"
-              aria-hidden
-            >
-              <Flame className="size-4 text-destructive" strokeWidth={2.25} />
-            </div>
-            <span className="leading-snug">
-              <span className="text-foreground font-heading tracking-tight">RoastForge</span>
-              {" — "}
-              Forging better careers through brutal honesty.
-            </span>
-          </div>
-          <span className="leading-snug md:text-right shrink-0">
-            Resumes are public. Feelings are not guaranteed.
-          </span>
         </div>
       </div>
     </footer>
