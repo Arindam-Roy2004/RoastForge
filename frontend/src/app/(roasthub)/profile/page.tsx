@@ -125,7 +125,7 @@ export default function ProfilePage() {
 
   if (authLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="mx-auto w-full max-w-[1600px] px-4 py-8">
         <Skeleton className="h-48 w-full border-4 border-border rounded-none mb-8" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Skeleton className="h-64 w-full border-4 border-border rounded-none" />
@@ -157,7 +157,7 @@ export default function ProfilePage() {
   const displayUser = user ?? profileRowFromAuth(authUser);
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl flex flex-col md:h-[calc(100dvh-8rem)] gap-8">
+    <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-8 px-4 py-8 md:h-[calc(100dvh-8rem)]">
       {/* User Header */}
       <Card className="shrink-0 border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
         <div className="bg-primary p-6 md:p-10 flex flex-col md:flex-row items-center gap-6">

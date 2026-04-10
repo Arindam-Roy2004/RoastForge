@@ -8,7 +8,7 @@ export default function RoastHubLayout({ children }: { children: React.ReactNode
   return (
     <div className={cn(body.className, "flex min-h-screen flex-col")}>
       <Navbar />
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
+      <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-6">
         {children}
       </main>
       <Footer />

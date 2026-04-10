@@ -9,7 +9,7 @@ export default function Footer() {
   const hideCandidateLinks = user?.role === "recruiter";
   return (
     <footer className="border-t-[3px] border-border bg-card mt-auto">
-      <div className="container mx-auto px-6 py-12 lg:px-8 max-w-7xl">
+      <div className="mx-auto w-full max-w-[1600px] px-6 py-12 lg:px-8">
         <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
           <div className="space-y-5 lg:max-w-md shrink-0">
             <Link

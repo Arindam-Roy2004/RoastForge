@@ -153,7 +153,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="mx-auto w-full max-w-[1600px] px-4 py-8">
       {/* Hero Section */}
       <section className="py-20 text-center space-y-6">
         <motion.div 
