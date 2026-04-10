@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import ApiError from "../../common/utils/api-error.js";
 import { verifyAccessToken } from "../../common/utils/jwt.utils.js";
 import User from "./auth.model.js";
@@ -21,6 +22,10 @@ export const authenticate = async (req: any, res: any, next: any) => {
     req.user = { id: String(user._id), name: user.name, email: user.email, avatar: user.avatar, role: user.role };
     next();
   } catch (e) {
+    if (e instanceof jwt.JsonWebTokenError) {
+      next(ApiError.unauthorized("Invalid or expired token"));
+      return;
+    }
     next(e);
   }
 };

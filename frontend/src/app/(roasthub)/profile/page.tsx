@@ -157,9 +157,9 @@ export default function ProfilePage() {
   const displayUser = user ?? profileRowFromAuth(authUser);
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
+    <div className="container mx-auto px-4 py-8 max-w-7xl flex flex-col md:h-[calc(100dvh-8rem)] gap-8">
       {/* User Header */}
-      <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+      <Card className="shrink-0 border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
         <div className="bg-primary p-6 md:p-10 flex flex-col md:flex-row items-center gap-6">
           <div className="w-24 h-24 rounded-full border-[3px] border-border bg-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center text-4xl font-heading uppercase shrink-0">
             {displayUser.name.charAt(0).toUpperCase() || "?"}
@@ -193,11 +193,11 @@ export default function ProfilePage() {
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 flex-1 min-h-0">
         {/* Public Profile Settings */}
-        <div className="md:col-span-1">
+        <div className="md:col-span-1 min-h-0 h-full">
           <Card className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] h-full flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 py-3 px-4 border-b-[3px] border-border bg-muted/40">
+            <CardHeader className="shrink-0 flex flex-row items-center justify-between space-y-0 py-3 px-4 border-b-[3px] border-border bg-muted/40">
               <CardTitle className="font-heading uppercase text-base tracking-wide">Public Profile</CardTitle>
               <Button
                 variant="outline"
@@ -208,7 +208,7 @@ export default function ProfilePage() {
                 <Edit2 className="w-3 h-3 mr-1" /> {editMode ? "Cancel" : "Edit"}
               </Button>
             </CardHeader>
-            <CardContent className="p-4 flex-1">
+            <CardContent className="p-4 flex-1 overflow-y-auto">
               {editMode ? (
                 <div className="space-y-4">
                   <div className="space-y-1">
@@ -223,11 +223,11 @@ export default function ProfilePage() {
                     <label className="font-heading uppercase text-xs">GitHub URL</label>
                     <Input value={github} onChange={(e) => setGithub(e.target.value)} placeholder="GitHub URL" className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" />
                   </div>
-                  <label className="flex items-center gap-3 cursor-pointer p-3 border-2 border-border bg-muted/50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                  <label className="flex items-center gap-3 cursor-pointer p-3 border-2 border-border bg-muted/50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mt-4">
                     <input type="checkbox" checked={share} onChange={() => setShare(!share)} className="w-4 h-4 accent-primary rounded-none border-2 border-border" />
                     <span className="text-sm font-bold tracking-tight uppercase">Share identity with recruiters</span>
                   </label>
-                  <Button onClick={saveProfile} className="w-full border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase tracking-wide mt-2">
+                  <Button onClick={saveProfile} className="w-full border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase tracking-wide mt-4">
                     Save Changes
                   </Button>
                 </div>
@@ -258,14 +258,14 @@ export default function ProfilePage() {
         </div>
 
         {/* Resumes — candidates only */}
-        <div className="md:col-span-2 flex min-h-0 flex-col">
-          <div className="flex items-center justify-between mb-4 mt-2 md:mt-0">
+        <div className="md:col-span-2 flex flex-col min-h-0 h-full">
+          <div className="flex items-center justify-between mb-4 mt-2 md:mt-0 shrink-0">
             <h2 className="text-2xl font-heading uppercase tracking-wide">
               {authUser?.role === "recruiter" ? "Candidate discovery" : "Your Resumes"}
             </h2>
           </div>
           <div
-            className="min-h-0 max-h-[min(40rem,calc(100vh-14rem))] overflow-y-auto overscroll-y-contain rounded-none border-[3px] border-border bg-muted/20 p-4 sm:p-6 [scrollbar-gutter:stable]"
+            className="flex-1 overflow-y-auto overscroll-y-contain rounded-none border-[3px] border-border bg-muted/20 p-4 sm:p-6 [scrollbar-gutter:stable]"
             aria-label={authUser?.role === "recruiter" ? "Recruiter tools" : "Your resumes"}
           >
             {authUser?.role === "recruiter" ? (

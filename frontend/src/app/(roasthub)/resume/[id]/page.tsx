@@ -7,7 +7,7 @@ import { coalesceVerdictBars, isCompleteRoastPayload, verdictBarFillClass } from
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Flame, FileText, ArrowLeft, RefreshCw, Zap, MessageSquare, Trash2, Trophy, Clock, Sparkles, AlertTriangle, Briefcase } from "lucide-react";
+import { Flame, FileText, ArrowLeft, RefreshCw, Zap, MessageSquare, Trash2, Sparkles, AlertTriangle, Briefcase } from "lucide-react";
 import { useAuth } from "@/store/auth";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -101,7 +101,7 @@ export default function ResumeDetail() {
         if (res.data.cached) {
           toast.success("Loaded cached roast — resume unchanged since last analysis.");
         } else {
-          toast.success("Fresh roast generated! 🔥");
+          toast.success("Fresh roast generated.");
         }
       }
     } catch (err) {
@@ -171,8 +171,11 @@ export default function ResumeDetail() {
 
   const isPdf = resume.fileType === "pdf";
 
+  const panelHeaderClass =
+    "min-h-14 shrink-0 px-4 flex items-center justify-between gap-3 border-b-4 border-border bg-primary text-primary-foreground font-heading uppercase tracking-wide";
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl space-y-8">
+    <div className="container mx-auto px-4 py-8 max-w-[1600px] space-y-8">
       {/* Header */}
       <div className="space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -218,20 +221,20 @@ export default function ResumeDetail() {
 
       <div
         className={cn(
-          "grid grid-cols-1 gap-8 xl:items-stretch",
-          isOwner ? "xl:grid-cols-3" : "xl:grid-cols-2",
+          "grid grid-cols-1 gap-6 lg:[--panel-h:clamp(520px,calc(100dvh-14rem),920px)]",
+          isOwner ? "lg:grid-cols-[minmax(0,1.2fr)_minmax(0,2.3fr)_minmax(0,1.2fr)]" : "lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1.2fr)]",
         )}
       >
-        {/* Left: AI Roast & Details — owner only; vertically centered vs PDF / thread column height */}
+        {/* Left: AI Roast & Details — owner only */}
         {isOwner && (
-        <div className="xl:col-span-1 min-h-0 xl:h-full xl:flex xl:flex-col xl:justify-center">
-          <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col overflow-hidden max-h-[calc(100vh-8rem)]">
-            <CardHeader className="bg-primary border-b-[3px] border-border text-primary-foreground py-3 px-4 shrink-0">
-              <CardTitle className="font-heading uppercase text-lg tracking-wide flex items-center gap-2">
-                <Sparkles className="w-5 h-5 shrink-0" /> AI Analysis
+        <div className="flex flex-col h-[500px] lg:h-[var(--panel-h)]">
+          <Card className="border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col overflow-hidden h-full bg-card">
+            <CardHeader className={cn(panelHeaderClass, "justify-start")}>
+              <CardTitle className="text-base flex items-center gap-2.5 font-black tracking-tight text-primary-foreground">
+                <Sparkles className="w-5 h-5 shrink-0" strokeWidth={2.5} /> AI Analysis
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-4 overflow-y-auto min-h-0">
+            <CardContent className="p-0 overflow-hidden min-h-0 flex-1 flex flex-col bg-background">
               <AnimatePresence mode="wait">
                 {/* State: No roast yet */}
                 {!isCompleteRoastPayload(roastData) && !roasting && !roastError && (
@@ -240,22 +243,24 @@ export default function ResumeDetail() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="flex flex-col items-center gap-5 py-6"
+                    className="flex flex-col flex-1 min-h-0 justify-between p-5"
                   >
-                    <div className="w-32 h-32 rounded-full border-[3px] border-dashed border-border flex items-center justify-center bg-muted/30">
-                      <Zap className="w-12 h-12 text-muted-foreground" />
+                    <div className="flex flex-1 flex-col items-center justify-center gap-6 px-1 py-4">
+                      <div className="w-36 h-36 rounded-full border-[5px] border-dashed border-border flex items-center justify-center bg-muted/40 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)]">
+                        <Zap className="w-14 h-14 text-foreground/70" strokeWidth={2} />
+                      </div>
+                      <p className="text-sm text-muted-foreground text-center font-medium leading-relaxed max-w-[14rem]">
+                        {isPdf
+                          ? "No roast yet. Hit the button to unleash the AI."
+                          : "AI roast is only available for PDF resumes."}
+                      </p>
                     </div>
-                    <p className="text-sm text-muted-foreground text-center font-medium">
-                      {isPdf
-                        ? "No roast yet. Hit the button to unleash the AI."
-                        : "AI roast is only available for PDF resumes."}
-                    </p>
                     {isPdf && isOwner && user && (
                       <Button
                         onClick={fetchRoast}
-                        className="w-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase tracking-wide bg-yellow text-black hover:bg-yellow"
+                        className="w-full border-4 border-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase tracking-wide bg-background text-foreground hover:bg-muted/80 text-sm font-black py-7 min-h-[3.25rem]"
                       >
-                        <Flame className="w-4 h-4 mr-2" /> Run AI Analysis
+                        <Flame className="w-5 h-5 mr-2 shrink-0" /> Run AI Analysis
                       </Button>
                     )}
                   </motion.div>
@@ -268,9 +273,9 @@ export default function ResumeDetail() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="flex flex-col items-center gap-5 py-6"
+                    className="flex flex-col items-center justify-center gap-5 p-5 flex-1 min-h-0 overflow-y-auto"
                   >
-                    <div className="w-32 h-32 rounded-full border-[3px] border-border flex items-center justify-center bg-background">
+                    <div className="w-32 h-32 rounded-full border-4 border-border flex items-center justify-center bg-background">
                       <motion.div
                         animate={{ rotate: 360 }}
                         transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
@@ -294,14 +299,14 @@ export default function ResumeDetail() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="flex flex-col items-center gap-4 py-6"
+                    className="flex flex-col items-center justify-center gap-4 p-5 flex-1 min-h-0 overflow-y-auto"
                   >
                     <AlertTriangle className="w-12 h-12 text-destructive" />
                     <p className="text-sm text-destructive font-bold text-center">{roastError}</p>
                     <Button
                       onClick={fetchRoast}
                       variant="outline"
-                      className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading uppercase text-xs"
+                      className="border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-heading uppercase text-xs"
                     >
                       Try Again
                     </Button>
@@ -316,14 +321,14 @@ export default function ResumeDetail() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     transition={{ type: "spring", stiffness: 200 }}
-                    className="space-y-3"
+                    className="space-y-3 p-5 flex-1 min-h-0 overflow-y-auto"
                   >
-                    <div className="flex flex-col items-center gap-1.5 pb-1 border-b-[3px] border-border">
+                    <div className="flex flex-col items-center gap-1.5 pb-1 border-b-4 border-border">
                       <motion.div
                         initial={{ scale: 0.5 }}
                         animate={{ scale: 1 }}
                         transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-                        className="w-28 h-28 rounded-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center bg-background gap-0"
+                        className="w-28 h-28 rounded-full border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center bg-background gap-0"
                       >
                         <span className={cn("text-4xl font-heading leading-none", scoreColor(roastData!.score))}>
                           {roastData!.score}
@@ -334,7 +339,7 @@ export default function ResumeDetail() {
                       </p>
                     </div>
 
-                    <div className="border-[3px] border-border bg-muted/30 p-3 overscroll-contain">
+                    <div className="border-4 border-border bg-muted/30 p-3 overscroll-contain">
                       <h4 className="font-heading uppercase text-xs mb-2.5 tracking-wide flex items-center gap-2">
                         Verdict <span className="text-[10px] font-sans font-normal text-muted-foreground normal-case">(1–5 each)</span>
                       </h4>
@@ -365,7 +370,7 @@ export default function ResumeDetail() {
                       type="button"
                       variant="outline"
                       onClick={fetchRoast}
-                      className="w-full border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading uppercase text-xs h-10 gap-2 mt-1"
+                      className="w-full border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-heading uppercase text-xs h-10 gap-2 mt-1"
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
                       Re-roast
@@ -380,12 +385,24 @@ export default function ResumeDetail() {
         )}
 
         {/* Center: PDF Viewer */}
-        <div className="xl:col-span-1 border-[3px] border-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-muted overflow-hidden flex flex-col h-[min(70vh,640px)] xl:h-[calc(100vh-12rem)]">
-          <div className="bg-primary text-primary-foreground p-3 border-b-[3px] border-border font-heading uppercase flex items-center gap-2 shrink-0 tracking-wide">
-             <FileText className="w-5 h-5" /> Resume PDF
-             <a href={resume.fileUrl} target="_blank" rel="noreferrer" className="ml-auto text-xs underline font-sans capitalize font-medium">Open external</a>
+        <div className="border-4 border-border shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-muted overflow-hidden flex flex-col h-[500px] lg:h-[var(--panel-h)]">
+          <div className={cn(panelHeaderClass, "text-sm font-black")}>
+             <div className="flex items-center gap-2.5 min-w-0">
+               <FileText className="w-5 h-5 shrink-0" strokeWidth={2.5} /> <span className="truncate">Resume PDF</span>
+             </div>
+             <a 
+               href={resume.fileUrl} 
+               target="_blank" 
+               rel="noreferrer" 
+               className={cn(
+                 buttonVariants({ variant: "secondary", size: "sm" }),
+                 "border-2 border-border bg-background text-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase text-[10px] h-9 px-3.5 font-bold shrink-0"
+               )}
+             >
+               Open external
+             </a>
           </div>
-          <div className="flex-1 bg-white relative">
+          <div className="flex-1 bg-white relative min-h-0">
             {resume.fileType === "pdf" ? (
               <iframe src={resume.fileUrl} className="absolute inset-0 w-full h-full border-none" title="Resume PDF" />
             ) : (
@@ -395,27 +412,35 @@ export default function ResumeDetail() {
         </div>
 
         {/* Right: Discussion */}
-        <div className="xl:col-span-1 flex flex-col">
-          <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col overflow-hidden h-[min(70vh,640px)] xl:h-[calc(100vh-12rem)]">
-            <CardHeader className="bg-muted/40 border-b-[3px] border-border shrink-0 py-3 px-4">
-               <div className="flex items-center justify-between">
-                 <CardTitle className="font-heading uppercase text-base tracking-wide flex items-center gap-2">
-                   <Flame className="w-4 h-4 text-destructive" /> Roast Thread
+        <div className="flex flex-col h-[500px] lg:h-[var(--panel-h)]">
+          <Card className="border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col overflow-hidden h-full bg-card">
+            <CardHeader className={panelHeaderClass}>
+               <div className="flex items-center gap-2.5 min-w-0">
+                 <Flame className="w-5 h-5 shrink-0 text-yellow-200" strokeWidth={2.5} aria-hidden />
+                 <CardTitle className="text-base font-black tracking-tight text-primary-foreground truncate">
+                   Roast Thread
                  </CardTitle>
-                 <Badge variant="outline" className="border-2 border-border rounded-none shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] font-bold text-[10px] uppercase">{comments.length} comments</Badge>
                </div>
+               <Badge
+                 variant="secondary"
+                 className="border-2 border-border rounded-none shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] font-heading font-bold text-[10px] uppercase bg-background text-foreground px-2.5 py-1 shrink-0"
+               >
+                 {comments.length} {comments.length === 1 ? "comment" : "comments"}
+               </Badge>
             </CardHeader>
 
             {/* Scrollable comments area */}
-            <div className="bg-background flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
+            <div className="bg-background flex-1 overflow-y-auto p-4 min-h-0 flex flex-col">
               {comments.length === 0 ? (
-                <div className="text-center py-12 border-[3px] border-border border-dashed text-muted-foreground bg-muted/20">
-                   <MessageSquare className="w-8 h-8 mx-auto mb-3 opacity-40" />
-                   <p className="font-heading uppercase">No feedback yet.</p>
-                   <p className="text-sm mt-1">Be the first to roast!</p>
+                <div className="flex flex-1 min-h-[12rem] flex-col items-center justify-center">
+                  <div className="w-full max-w-sm border-[5px] border-dashed border-border bg-muted/25 px-6 py-10 text-center shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]">
+                    <MessageSquare className="w-10 h-10 mx-auto mb-4 text-muted-foreground/80" strokeWidth={1.75} />
+                    <p className="font-heading uppercase text-sm font-black tracking-tight text-foreground">No feedback yet.</p>
+                    <p className="text-sm mt-2 text-muted-foreground leading-relaxed">Be the first to roast!</p>
+                  </div>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-3 w-full">
                   {comments.map((c) => (
                     <EnhancedComment key={c._id} comment={c} onRefresh={loadComments} />
                   ))}
@@ -424,9 +449,9 @@ export default function ResumeDetail() {
             </div>
 
             {/* Post form — pinned at bottom */}
-            <div className="shrink-0 border-t-[3px] border-border bg-card">
+            <div className="shrink-0 border-t-4 border-border bg-card">
               {user ? (
-                <form onSubmit={postComment} className="p-4 space-y-3">
+                <form onSubmit={postComment} className="p-4 space-y-3 flex flex-col bg-muted/30">
                   {!isOwner && (
                     <div className="flex gap-1.5 flex-wrap">
                       {(["strength", "weakness", "suggestion", "comment"] as const).map((t) => (
@@ -435,7 +460,7 @@ export default function ResumeDetail() {
                           type="button"
                           onClick={() => setCommentType(t)}
                           className={cn(
-                            "cursor-pointer uppercase rounded-none border-[3px] border-border px-2.5 py-1 text-[10px] font-heading font-bold transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5",
+                            "cursor-pointer uppercase rounded-none border-2 border-border px-2.5 py-1 text-[10px] font-heading font-bold transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5",
                             commentType === t
                               ? t === "comment"
                                 ? "bg-yellow text-black"
@@ -448,21 +473,21 @@ export default function ResumeDetail() {
                       ))}
                     </div>
                   )}
-                  <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
-                    <textarea
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      placeholder={isOwner ? "Add a comment..." : "Write your roast / feedback..."}
-                      rows={3}
-                      className="flex-1 min-h-[5rem] w-full p-3 border-[3px] border-border rounded-none shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background resize-y text-sm font-medium bg-background"
-                      required
-                    />
+                  <textarea
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder={isOwner ? "Add a comment..." : "Write your roast / feedback..."}
+                    rows={3}
+                    className="w-full min-h-[5.5rem] p-3 border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background resize-none text-sm font-medium bg-background leading-relaxed"
+                    required
+                  />
+                  <div className="flex justify-end pt-0.5">
                     <Button
                       type="submit"
                       disabled={posting}
-                      className="w-full sm:w-auto shrink-0 min-h-[3rem] sm:min-h-[3.25rem] px-8 border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-sm tracking-wide"
+                      className="min-h-11 min-w-[5.5rem] px-6 border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-sm tracking-wide bg-primary text-primary-foreground font-black"
                     >
-                      {posting ? "Posting…" : "Post"}
+                      {posting ? "…" : "Post"}
                     </Button>
                   </div>
                 </form>
@@ -472,7 +497,7 @@ export default function ResumeDetail() {
                     href="/login"
                     className={cn(
                       buttonVariants({ variant: "outline" }),
-                      "inline-flex border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-heading uppercase text-xs no-underline hover:no-underline",
+                      "inline-flex border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-heading uppercase text-xs no-underline hover:no-underline",
                     )}
                   >
                     Log in to join the roast
@@ -485,8 +510,8 @@ export default function ResumeDetail() {
       </div>
 
       {resume.blurb && (
-        <Card className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-yellow/10">
-          <CardHeader className="py-4 border-b-[3px] border-border bg-yellow/20">
+        <Card className="border-4 border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-yellow/10">
+          <CardHeader className="py-4 border-b-4 border-border bg-yellow/20">
             <CardTitle className="font-heading uppercase text-base tracking-wide flex items-center gap-2">
               <FileText className="w-4 h-4" /> Author&apos;s Note
             </CardTitle>
