@@ -221,14 +221,14 @@ export default function ResumeDetail() {
 
       <div
         className={cn(
-          "grid grid-cols-1 gap-6 lg:[--panel-h:clamp(520px,calc(100dvh-14rem),920px)]",
+          "grid grid-cols-1 gap-6 lg:[--panel-h:clamp(520px,calc(100vh-14rem),920px)]",
           isOwner ? "lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1.9fr)_minmax(0,1.4fr)]" : "lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1.4fr)]",
         )}
       >
         {/* Left: AI Roast & Details — owner only */}
         {isOwner && (
-        <div className="flex flex-col h-[500px] lg:h-[var(--panel-h)]">
-          <Card className="border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col overflow-hidden h-full bg-card">
+        <div className="flex flex-col lg:h-fit">
+          <Card className="border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col h-auto bg-card">
             <CardHeader className={cn(panelHeaderClass, "justify-start")}>
               <CardTitle className="text-base flex items-center gap-2.5  tracking-tight text-primary-foreground">
                 <Sparkles className="w-5 h-5 shrink-0" strokeWidth={2.5} /> AI Analysis
