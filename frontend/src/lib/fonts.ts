@@ -1,13 +1,14 @@
-import { Russo_One, Chakra_Petch } from "next/font/google";
+import { Geist } from "next/font/google";
+import localFont from "next/font/local";
 
-export const display = Russo_One({
-  subsets: ["latin"],
-  weight: "400",
+export const display = localFont({
+  src: "../fonts/heming-variable.ttf",
+  variable: "--font-heming",
   display: "swap",
 });
 
-export const body = Chakra_Petch({
+export const body = Geist({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-geist",
   display: "swap",
 });

@@ -1,19 +1,7 @@
 import type { Metadata } from "next";
-import { Chakra_Petch, Russo_One } from "next/font/google";
+import { body, display } from "@/lib/fonts";
 import { Providers } from "@/components/providers";
 import "./globals.css";
-
-const chakraPetch = Chakra_Petch({
-  weight: ["300", "400", "500", "600", "700"],
-  subsets: ["latin"],
-  variable: "--font-chakra",
-});
-
-const russoOne = Russo_One({
-  weight: ["400"],
-  subsets: ["latin"],
-  variable: "--font-russo",
-});
 
 export const metadata: Metadata = {
   title: "RoastForge — Resume Roasting & Talent Discovery",
@@ -29,7 +17,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${chakraPetch.variable} ${russoOne.variable} h-full antialiased`}
+      className={`${body.variable} ${display.variable} h-full antialiased`}
     >
       <body className="min-h-full font-sans bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
         <Providers>
