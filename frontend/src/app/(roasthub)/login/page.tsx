@@ -38,7 +38,7 @@ export default function LoginPage() {
           <div className="mx-auto bg-primary w-12 h-12 flex items-center justify-center rounded-full border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mb-2">
             <Flame className="w-6 h-6 text-primary-foreground" />
           </div>
-          <CardTitle className="text-3xl font-heading uppercase tracking-tighter font-black">Welcome Back</CardTitle>
+          <CardTitle className="text-3xl font-heading tracking-tighter ">Welcome Back</CardTitle>
           <CardDescription className="text-muted-foreground font-medium">Access your portal. Step back into the forge and face the heat.</CardDescription>
         </CardHeader>
         <CardContent className="px-8 pb-8">
@@ -70,7 +70,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-lg h-12 tracking-wide"
+              className="w-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading text-lg h-12 tracking-wide"
               data-testid="button-submit-login"
             >
               {loading ? "Logging in..." : "Login"}
@@ -80,7 +80,7 @@ export default function LoginPage() {
         <div className="flex justify-center border-t-[3px] border-border bg-muted p-6">
           <p className="text-sm text-muted-foreground">
             Don't have an account?{" "}
-            <Link href="/register" className="font-heading uppercase text-primary hover:underline tracking-wider" data-testid="link-go-register">
+            <Link href="/register" className="font-heading text-primary hover:underline tracking-wider" data-testid="link-go-register">
               Sign up
             </Link>
           </p>

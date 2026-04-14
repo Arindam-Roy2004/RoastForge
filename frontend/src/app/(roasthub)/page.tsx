@@ -167,7 +167,7 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-5xl md:text-8xl font-heading normal-case text-foreground tracking-tighter leading-[0.9] font-black"
+          className="text-5xl md:text-8xl font-heading text-foreground tracking-tighter leading-[0.9]"
         >
           Brutal Honesty.
           <br /> Better Resumes.
@@ -190,13 +190,13 @@ export default function HomePage() {
         >
           {user?.role === "recruiter" ? (
             <Link href="/recruiter" data-testid="link-hero-recruiter">
-              <Button size="lg" className="text-lg px-8 border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase tracking-wide h-14">
+              <Button size="lg" className="text-lg px-8 border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading tracking-wide h-14">
                 Recruiter dashboard
               </Button>
             </Link>
           ) : (
             <Link href="/upload" data-testid="link-hero-upload">
-              <Button size="lg" className="text-lg px-8 border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase tracking-wide h-14">
+              <Button size="lg" className="text-lg px-8 border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading tracking-wide h-14">
                 Roast My Resume
               </Button>
             </Link>
@@ -209,7 +209,7 @@ export default function HomePage() {
         {/* Header: title + sort + search */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-4xl md:text-5xl font-heading uppercase tracking-tighter font-black mb-2 text-foreground">
+            <h1 className="text-4xl md:text-5xl font-heading tracking-tighter mb-2 text-foreground">
               Hall of Shame
             </h1>
             <p className="text-muted-foreground text-lg tracking-tight">The most roasted resumes on the internet. Proceed with caution.</p>
@@ -225,7 +225,7 @@ export default function HomePage() {
                 data-testid="input-search"
               />
             </div>
-            <Button type="submit" variant="secondary" className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase text-xs h-10" data-testid="button-search">Search</Button>
+            <Button type="submit" variant="secondary" className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs h-10" data-testid="button-search">Search</Button>
           </form>
         </div>
 
@@ -243,7 +243,7 @@ export default function HomePage() {
                 setPage(1);
               }}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 font-heading uppercase text-sm border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all whitespace-nowrap active:scale-95",
+                "flex items-center gap-2 px-4 py-2 font-heading text-sm border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all whitespace-nowrap active:scale-95",
                 sort === tab.id 
                   ? "bg-primary text-primary-foreground translate-x-0.5 translate-y-0.5 shadow-none" 
                   : "bg-card hover:bg-muted hover:-translate-y-0.5"
@@ -330,7 +330,7 @@ export default function HomePage() {
                           <div className="mt-2 flex-1 min-h-0 flex flex-col items-center justify-center gap-3 py-5 px-3 bg-muted border-2 border-border border-dashed">
                             <Flame className="w-10 h-10 text-destructive" />
                             <div className="text-center space-y-1">
-                              <p className="font-heading text-sm uppercase tracking-wide text-foreground leading-tight">
+                              <p className="font-heading text-sm tracking-wide text-foreground leading-tight">
                                 Resume + roast thread
                               </p>
                               <p className="text-[11px] text-muted-foreground font-medium tabular-nums">
@@ -352,12 +352,12 @@ export default function HomePage() {
                               href={`/recruiter/candidate/${ownerId}`}
                               onClick={(e) => e.stopPropagation()}
                               data-testid={`link-candidate-${ownerId}`}
-                              className="font-heading uppercase text-[10px] tracking-wider px-2 py-1 border-[3px] border-border bg-card text-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
+                              className="font-heading text-[10px] tracking-wider px-2 py-1 border-[3px] border-border bg-card text-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
                             >
                               Portfolio
                             </Link>
                           ) : null}
-                          <span className="font-heading uppercase text-[10px] tracking-wider">Open resume →</span>
+                          <span className="font-heading text-[10px] tracking-wider">Open resume →</span>
                         </div>
                       </CardFooter>
                     </Card>

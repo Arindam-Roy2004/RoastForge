@@ -77,7 +77,7 @@ export default function UploadPage() {
     return (
       <div className="flex items-center justify-center py-16 p-4">
         <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center p-8 animate-pulse">
-           <CardTitle className="font-heading uppercase text-xl tracking-wide">Loading...</CardTitle>
+           <CardTitle className="font-heading text-xl tracking-wide">Loading...</CardTitle>
         </Card>
       </div>
     );
@@ -87,7 +87,7 @@ export default function UploadPage() {
     return (
       <div className="flex items-center justify-center py-16 p-4">
         <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center p-8 bg-card">
-          <CardTitle className="font-heading uppercase text-xl tracking-wide">Redirecting…</CardTitle>
+          <CardTitle className="font-heading text-xl tracking-wide">Redirecting…</CardTitle>
         </Card>
       </div>
     );
@@ -97,10 +97,10 @@ export default function UploadPage() {
     return (
       <div className="flex items-center justify-center p-4 py-16">
         <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center p-8 bg-card">
-          <h1 className="font-heading uppercase text-3xl mb-4 tracking-tighter font-black">Sign In Required</h1>
+          <h1 className="font-heading text-3xl mb-4 tracking-tighter ">Sign In Required</h1>
           <p className="text-sm text-muted-foreground mb-6 font-medium">You need to sign in to upload your resume for roasting!</p>
           <Link href="/login">
-            <Button className="border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-lg px-8 h-12 tracking-wide">
+            <Button className="border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading text-lg px-8 h-12 tracking-wide">
               Sign In to Upload
             </Button>
           </Link>
@@ -116,7 +116,7 @@ export default function UploadPage() {
           <div className="mx-auto bg-primary w-14 h-14 flex items-center justify-center rounded-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-3">
             <UploadCloud className="w-7 h-7 text-primary-foreground" />
           </div>
-          <CardTitle className="text-4xl font-heading uppercase tracking-tight text-foreground">
+          <CardTitle className="text-4xl font-heading tracking-tight text-foreground">
             Enter the Forge
           </CardTitle>
           <CardDescription className="text-base text-muted-foreground font-medium max-w-sm mx-auto">
@@ -134,11 +134,11 @@ export default function UploadPage() {
                   <FileText className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <div className="text-center">
-                  <p className="font-heading uppercase text-lg">Click to Upload</p>
+                  <p className="font-heading text-lg">Click to Upload</p>
                   <p className="text-sm text-muted-foreground mt-1">PDF up to 5MB</p>
                 </div>
                 <input ref={ref} type="file" accept="application/pdf" className="hidden" onChange={handleFile} />
-                <Button type="button" variant="outline" className="mt-2 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase" onClick={(e: React.MouseEvent) => { e.stopPropagation(); ref.current?.click(); }}>
+                <Button type="button" variant="outline" className="mt-2 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading" onClick={(e: React.MouseEvent) => { e.stopPropagation(); ref.current?.click(); }}>
                    Select File
                 </Button>
               </div>
@@ -148,7 +148,7 @@ export default function UploadPage() {
                   <FileText className="w-6 h-6" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-heading uppercase truncate text-sm">{file.name}</p>
+                  <p className="font-heading truncate text-sm">{file.name}</p>
                   <p className="text-xs text-muted-foreground font-mono">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                 </div>
                 <Button variant="destructive" size="icon" onClick={() => { setFile(null); if (ref.current) ref.current.value = ""; }} className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all shrink-0 w-8 h-8">
@@ -166,7 +166,7 @@ export default function UploadPage() {
 
             {/* Title input */}
             <div className="space-y-2">
-              <label className="text-sm font-heading uppercase tracking-wide">Post Title</label>
+              <label className="text-sm font-heading tracking-wide">Post Title</label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -180,14 +180,14 @@ export default function UploadPage() {
             <Button 
               type="submit" 
               disabled={uploading || !title.trim()} 
-              className="w-full h-14 text-lg border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase tracking-wide bg-primary text-primary-foreground hover:bg-primary/90"
+              className="w-full h-14 text-lg border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading tracking-wide bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {uploading ? "Forging..." : "Upload & Roast! 🔥"}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="bg-muted/40 border-t-[3px] border-border p-6 md:p-8 flex flex-col items-start text-left">
-          <h3 className="font-heading uppercase text-sm mb-3 tracking-wide">Tips for a good roast:</h3>
+          <h3 className="font-heading text-sm mb-3 tracking-wide">Tips for a good roast:</h3>
           <ul className="text-sm text-muted-foreground space-y-2 list-disc pl-5 font-medium marker:text-border">
             <li>Upload a clean, readable PDF (no scanned images).</li>
             <li>Include your target role for context.</li>

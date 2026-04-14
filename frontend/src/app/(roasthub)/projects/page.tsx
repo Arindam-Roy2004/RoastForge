@@ -76,7 +76,7 @@ export default function ProjectsPage() {
     return (
       <div className="flex items-center justify-center p-4 py-16 min-h-[40vh]">
         <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card p-8">
-          <CardTitle className="font-heading uppercase text-center text-xl tracking-wide text-muted-foreground">Loading…</CardTitle>
+          <CardTitle className="font-heading text-center text-xl tracking-wide text-muted-foreground">Loading…</CardTitle>
           <div className="mt-6 grid grid-cols-2 gap-3">
             <Skeleton className="h-10 w-full border-2 border-border rounded-none" />
             <Skeleton className="h-10 w-full border-2 border-border rounded-none" />
@@ -119,7 +119,7 @@ export default function ProjectsPage() {
     return (
       <div className="flex items-center justify-center p-4 py-16">
         <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card text-center p-8">
-          <CardTitle className="font-heading uppercase text-xl tracking-wide">Redirecting…</CardTitle>
+          <CardTitle className="font-heading text-xl tracking-wide">Redirecting…</CardTitle>
         </Card>
       </div>
     );
@@ -129,10 +129,10 @@ export default function ProjectsPage() {
     return (
       <div className="flex items-center justify-center p-4 py-16">
         <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center p-8 bg-card">
-          <h1 className="font-heading uppercase text-3xl mb-4 tracking-tighter font-black text-foreground">Sign In Required</h1>
+          <h1 className="font-heading text-3xl mb-4 tracking-tighter  text-foreground">Sign In Required</h1>
           <p className="text-sm text-muted-foreground mb-6">Sign in to add and manage your projects.</p>
           <Link href="/login">
-            <Button className="border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase tracking-wide px-8 h-12">
+            <Button className="border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading tracking-wide px-8 h-12">
               Sign In Now
             </Button>
           </Link>
@@ -145,15 +145,15 @@ export default function ProjectsPage() {
     <div className="container mx-auto px-4 py-8 md:py-12 max-w-4xl">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-4xl md:text-5xl font-heading uppercase tracking-tighter font-black text-foreground mb-2">Projects</h1>
+          <h1 className="text-4xl md:text-5xl font-heading tracking-tighter  text-foreground mb-2">Projects</h1>
           <p className="text-muted-foreground text-lg tracking-tight">Showcase what you've built beyond your resume.</p>
         </div>
 
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger render={<Button className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading uppercase tracking-wide w-full sm:w-auto h-11 px-6"><Plus className="w-4 h-4 mr-2" /> Add Project</Button>} />
+          <DialogTrigger render={<Button className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading tracking-wide w-full sm:w-auto h-11 px-6"><Plus className="w-4 h-4 mr-2" /> Add Project</Button>} />
           <DialogContent className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] max-w-md p-6">
             <DialogHeader>
-              <DialogTitle className="font-heading uppercase text-xl tracking-wide">New Project</DialogTitle>
+              <DialogTitle className="font-heading text-xl tracking-wide">New Project</DialogTitle>
             </DialogHeader>
             <form onSubmit={create} className="space-y-4 pt-2">
               <div className="space-y-1.5">
@@ -177,10 +177,10 @@ export default function ProjectsPage() {
                 <Input value={demo} onChange={(e) => setDemo(e.target.value)} placeholder="https://myproject.com" className="border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] h-10" />
               </div>
               <div className="flex gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1 border-[3px] border-border rounded-none font-heading uppercase tracking-wide h-10">
+                <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1 border-[3px] border-border rounded-none font-heading tracking-wide h-10">
                   Cancel
                 </Button>
-                <Button type="submit" disabled={saving} className="flex-1 border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading uppercase tracking-wide h-10">
+                <Button type="submit" disabled={saving} className="flex-1 border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading tracking-wide h-10">
                   {saving ? "Adding..." : "Add Project"}
                 </Button>
               </div>
@@ -203,9 +203,9 @@ export default function ProjectsPage() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Card className="border-[3px] border-border border-dashed bg-muted/30 rounded-none text-center p-12 flex flex-col items-center justify-center">
               <Code className="w-12 h-12 text-muted-foreground mb-4 opacity-50" />
-              <h3 className="font-heading text-xl uppercase tracking-wide mb-1">No projects yet</h3>
+              <h3 className="font-heading text-xl tracking-wide mb-1">No projects yet</h3>
               <p className="text-muted-foreground text-sm mb-6">Add your projects to strengthen your profile.</p>
-              <Button onClick={() => setOpen(true)} className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading uppercase tracking-wide h-11 px-6">
+              <Button onClick={() => setOpen(true)} className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading tracking-wide h-11 px-6">
                 <Plus className="w-4 h-4 mr-2" /> Add Your First Project
               </Button>
             </Card>
@@ -218,7 +218,7 @@ export default function ProjectsPage() {
                   <Card className="h-full flex flex-col border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all bg-card">
                     <CardHeader className="border-b-[3px] border-border bg-muted/40 px-5 py-4">
                       <div className="flex items-start justify-between gap-3">
-                        <h3 className="font-heading text-lg uppercase leading-tight tracking-wide">{project.title}</h3>
+                        <h3 className="font-heading text-lg leading-tight tracking-wide">{project.title}</h3>
                         <div className="flex items-center gap-2 shrink-0">
                           <span className={cn("rounded-none border-2 border-border px-2 py-0.5 text-[10px] font-bold uppercase shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]", project.aiStatus === "READY" ? "bg-green-300" : project.aiStatus === "FAILED" ? "bg-red-300" : "bg-primary text-primary-foreground")}>
                             {project.aiStatus || "—"}
@@ -254,14 +254,14 @@ export default function ProjectsPage() {
                       <CardFooter className="border-t-[3px] border-border px-5 py-4 gap-3 bg-muted/20 mt-auto">
                         {project.githubUrl && (
                           <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-                            <Button variant="outline" size="sm" className="w-full border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-xs font-heading uppercase h-9">
+                            <Button variant="outline" size="sm" className="w-full border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-xs font-heading h-9">
                               <FaGithub className="w-4 h-4 mr-2" /> Repo
                             </Button>
                           </a>
                         )}
                         {project.liveDemo && (
                           <a href={project.liveDemo} target="_blank" rel="noopener noreferrer" className="flex-1">
-                            <Button size="sm" className="w-full border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-xs font-heading uppercase h-9">
+                            <Button size="sm" className="w-full border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-xs font-heading h-9">
                               <ExternalLink className="w-4 h-4 mr-2" /> Live
                             </Button>
                           </a>

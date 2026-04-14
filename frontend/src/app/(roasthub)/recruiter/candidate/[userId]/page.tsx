@@ -70,10 +70,10 @@ export default function RecruiterCandidateProfilePage() {
     return (
       <div className="container mx-auto px-4 py-16 max-w-md">
         <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-8 text-center bg-card">
-          <CardTitle className="font-heading uppercase text-2xl mb-4 tracking-tighter font-black">Sign in</CardTitle>
+          <CardTitle className="font-heading text-2xl mb-4 tracking-tighter ">Sign in</CardTitle>
           <p className="text-muted-foreground text-sm mb-6">Recruiters must sign in to view candidate portfolios.</p>
           <Link href="/login">
-            <Button className="w-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 rounded-none font-heading uppercase">
+            <Button className="w-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 rounded-none font-heading">
               Sign In
             </Button>
           </Link>
@@ -87,12 +87,12 @@ export default function RecruiterCandidateProfilePage() {
       <div className="container mx-auto px-4 py-16 max-w-lg text-center">
         <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-8 bg-card">
           <Briefcase className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-          <h1 className="font-heading uppercase text-2xl font-black mb-2">Unavailable</h1>
+          <h1 className="font-heading text-2xl  mb-2">Unavailable</h1>
           <p className="text-muted-foreground text-sm mb-6">{error || "This page is for recruiter accounts only."}</p>
           <Button
             variant="outline"
             onClick={() => router.push("/")}
-            className="border-[3px] border-border rounded-none font-heading uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
+            className="border-[3px] border-border rounded-none font-heading shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
           >
             Hall of Shame
           </Button>
@@ -115,7 +115,7 @@ export default function RecruiterCandidateProfilePage() {
         <Button
           variant="outline"
           onClick={() => router.back()}
-          className="w-fit border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 rounded-none font-heading uppercase text-xs h-9"
+          className="w-fit border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 rounded-none font-heading text-xs h-9"
         >
           <ArrowLeft className="w-3 h-3 mr-2" /> Back
         </Button>
@@ -125,7 +125,7 @@ export default function RecruiterCandidateProfilePage() {
             <div className="flex flex-col sm:flex-row sm:items-center gap-6">
               <div
                 className={cn(
-                  "size-20 shrink-0 rounded-full border-[3px] border-border flex items-center justify-center text-3xl font-heading uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
+                  "size-20 shrink-0 rounded-full border-[3px] border-border flex items-center justify-center text-3xl font-heading shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
                   data.avatar ? "bg-muted overflow-hidden p-0" : "bg-primary/25",
                 )}
               >
@@ -138,7 +138,7 @@ export default function RecruiterCandidateProfilePage() {
               <div className="min-w-0 flex-1 space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <UserRound className="w-5 h-5 text-primary shrink-0" />
-                  <h1 className="font-heading text-3xl md:text-4xl uppercase tracking-tighter font-black text-foreground leading-tight">
+                  <h1 className="font-heading text-3xl md:text-4xl uppercase tracking-tighter  text-foreground leading-tight">
                     {display || `u/${alias}`}
                   </h1>
                 </div>
@@ -167,7 +167,7 @@ export default function RecruiterCandidateProfilePage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-2 border-[3px] border-border bg-card text-sm font-heading uppercase tracking-wide shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all",
+                          "inline-flex items-center gap-1.5 px-3 py-2 border-[3px] border-border bg-card text-sm font-heading tracking-wide shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all",
                         )}
                       >
                         <FaLinkedin className="w-4 h-4" /> LinkedIn
@@ -180,7 +180,7 @@ export default function RecruiterCandidateProfilePage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-2 border-[3px] border-border bg-card text-sm font-heading uppercase tracking-wide shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all",
+                          "inline-flex items-center gap-1.5 px-3 py-2 border-[3px] border-border bg-card text-sm font-heading tracking-wide shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all",
                         )}
                       >
                         <FaGithub className="w-4 h-4" /> GitHub
@@ -198,7 +198,7 @@ export default function RecruiterCandidateProfilePage() {
       <section className="flex min-h-0 flex-col space-y-4">
         <div className="flex items-center gap-2 border-b-[3px] border-border pb-3">
           <FileText className="w-6 h-6 text-primary" />
-          <h2 className="font-heading text-2xl uppercase tracking-tighter font-black">Resumes on RoastForge</h2>
+          <h2 className="font-heading text-2xl tracking-tighter ">Resumes on RoastForge</h2>
         </div>
         <div
           className="min-h-0 max-h-[min(40rem,calc(100vh-14rem))] overflow-y-auto overscroll-y-contain rounded-none border-[3px] border-border bg-muted/20 p-4 sm:p-6 [scrollbar-gutter:stable]"
@@ -220,11 +220,11 @@ export default function RecruiterCandidateProfilePage() {
                   <Link href={`/resume/${r._id}`} className="block h-full group">
                     <Card className="h-full border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group-hover:shadow-none group-hover:translate-x-1 group-hover:translate-y-1 transition-all bg-card">
                       <CardHeader className="pb-2 border-b-[3px] border-border bg-muted/40">
-                        <CardTitle className="font-heading text-base uppercase leading-tight line-clamp-2">
+                        <CardTitle className="font-heading text-base leading-tight line-clamp-2">
                           {r.title || "Untitled"}
                         </CardTitle>
                         {r.aiScoreOverall != null && (
-                          <Badge className="w-fit mt-2 border-2 border-border rounded-none text-[10px] font-heading uppercase shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                          <Badge className="w-fit mt-2 border-2 border-border rounded-none text-[10px] font-heading shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                             AI {r.aiScoreOverall}
                           </Badge>
                         )}
@@ -239,7 +239,7 @@ export default function RecruiterCandidateProfilePage() {
                         </p>
                       </CardContent>
                       <CardFooter className="border-t-[3px] border-border bg-muted/30 pt-3">
-                        <span className="font-heading uppercase text-xs tracking-wide text-primary">Open thread →</span>
+                        <span className="font-heading text-xs tracking-wide text-primary">Open thread →</span>
                       </CardFooter>
                     </Card>
                   </Link>
@@ -253,7 +253,7 @@ export default function RecruiterCandidateProfilePage() {
       <section className="flex min-h-0 flex-col space-y-4">
         <div className="flex items-center gap-2 border-b-[3px] border-border pb-3">
           <Sparkles className="w-6 h-6 text-primary" />
-          <h2 className="font-heading text-2xl uppercase tracking-tighter font-black">Projects</h2>
+          <h2 className="font-heading text-2xl tracking-tighter ">Projects</h2>
         </div>
         <div
           className="min-h-0 max-h-[min(40rem,calc(100vh-14rem))] overflow-y-auto overscroll-y-contain rounded-none border-[3px] border-border bg-muted/20 p-4 sm:p-6 [scrollbar-gutter:stable]"
@@ -275,7 +275,7 @@ export default function RecruiterCandidateProfilePage() {
                   <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card overflow-hidden">
                     <CardHeader className="border-b-[3px] border-border flex flex-row flex-wrap items-start justify-between gap-3 bg-muted/30 p-5">
                       <div className="min-w-0">
-                        <CardTitle className="font-heading text-lg uppercase tracking-wide leading-tight">
+                        <CardTitle className="font-heading text-lg tracking-wide leading-tight">
                           {project.title}
                         </CardTitle>
                         <Badge
@@ -300,7 +300,7 @@ export default function RecruiterCandidateProfilePage() {
                           {project.techStack.map((tech) => (
                             <span
                               key={tech}
-                              className="text-[10px] font-heading uppercase tracking-wider px-2 py-1 border-2 border-border bg-muted shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                              className="text-[10px] font-heading tracking-wider px-2 py-1 border-2 border-border bg-muted shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
                             >
                               {tech}
                             </span>
@@ -326,7 +326,7 @@ export default function RecruiterCandidateProfilePage() {
                             >
                               <Button
                                 variant="outline"
-                                className="w-full border-[3px] border-border rounded-none font-heading uppercase text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
+                                className="w-full border-[3px] border-border rounded-none font-heading text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
                               >
                                 <FaGithub className="w-4 h-4 mr-2" /> Repo
                               </Button>
@@ -334,7 +334,7 @@ export default function RecruiterCandidateProfilePage() {
                           )}
                           {project.liveDemo && (
                             <a href={project.liveDemo} target="_blank" rel="noopener noreferrer" className="flex-1">
-                              <Button className="w-full border-[3px] border-border rounded-none font-heading uppercase text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5">
+                              <Button className="w-full border-[3px] border-border rounded-none font-heading text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5">
                                 <ExternalLink className="w-4 h-4 mr-2" /> Live demo
                               </Button>
                             </a>

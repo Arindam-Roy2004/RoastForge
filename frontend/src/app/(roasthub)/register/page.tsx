@@ -43,7 +43,7 @@ export default function RegisterPage() {
           <div className="mx-auto bg-primary w-12 h-12 flex items-center justify-center rounded-full border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mb-2">
             <Flame className="w-6 h-6 text-primary-foreground" />
           </div>
-          <CardTitle className="text-3xl font-heading uppercase tracking-tighter font-black">Join the Forge</CardTitle>
+          <CardTitle className="text-3xl font-heading tracking-tighter ">Join the Forge</CardTitle>
           <CardDescription className="text-muted-foreground font-medium">Candidate or recruiter? Choose your weapon and build your profile.</CardDescription>
         </CardHeader>
         <CardContent className="px-8 pb-8">
@@ -88,7 +88,7 @@ export default function RegisterPage() {
                   type="button"
                   variant={role === "user" ? "default" : "outline"}
                   onClick={() => setRole("user")}
-                  className={`flex-1 border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase text-xs h-10 ${role === "user" ? "" : "bg-muted"}`}
+                  className={`flex-1 border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs h-10 ${role === "user" ? "" : "bg-muted"}`}
                 >
                   Candidate
                 </Button>
@@ -96,7 +96,7 @@ export default function RegisterPage() {
                   type="button"
                   variant={role === "recruiter" ? "default" : "outline"}
                   onClick={() => setRole("recruiter")}
-                  className={`flex-1 border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase text-xs h-10 ${role === "recruiter" ? "" : "bg-muted"}`}
+                  className={`flex-1 border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs h-10 ${role === "recruiter" ? "" : "bg-muted"}`}
                 >
                   Recruiter
                 </Button>
@@ -105,7 +105,7 @@ export default function RegisterPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-lg h-12 tracking-wide"
+              className="w-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading text-lg h-12 tracking-wide"
             >
               {loading ? "Creating..." : "Create Account"}
             </Button>
@@ -114,7 +114,7 @@ export default function RegisterPage() {
         <div className="flex justify-center border-t-[3px] border-border bg-muted p-6">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="cursor-pointer font-heading uppercase text-primary hover:underline tracking-wider" data-testid="link-go-login">
+            <Link href="/login" className="cursor-pointer font-heading text-primary hover:underline tracking-wider" data-testid="link-go-login">
               Sign in
             </Link>
           </p>

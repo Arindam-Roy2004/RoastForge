@@ -50,7 +50,7 @@ export default function RecruiterPage() {
       <div className="flex items-center justify-center p-4 py-16 min-h-[40vh]">
         <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card text-center p-8 flex flex-col items-center">
           <Loader2 className="w-10 h-10 text-muted-foreground animate-spin mb-4" />
-          <CardTitle className="font-heading uppercase font-black text-xl mb-1 tracking-tighter">Loading…</CardTitle>
+          <CardTitle className="font-heading  text-xl mb-1 tracking-tighter">Loading…</CardTitle>
           <CardDescription className="font-medium">Checking your session.</CardDescription>
         </Card>
       </div>
@@ -64,10 +64,10 @@ export default function RecruiterPage() {
           <div className="w-16 h-16 bg-muted border-[3px] border-border rounded-full flex items-center justify-center mb-6 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
             <Briefcase className="w-6 h-6 text-muted-foreground" />
           </div>
-          <CardTitle className="font-heading uppercase font-black text-3xl mb-3 tracking-tighter">Recruiter Access</CardTitle>
+          <CardTitle className="font-heading  text-3xl mb-3 tracking-tighter">Recruiter Access</CardTitle>
           <CardDescription className="mb-8 font-medium">Sign in with a recruiter account to discover candidates.</CardDescription>
           <Link href="/login" className="w-full">
-            <Button className="w-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-lg h-12 tracking-wide">
+            <Button className="w-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading text-lg h-12 tracking-wide">
               Sign In
             </Button>
           </Link>
@@ -83,10 +83,10 @@ export default function RecruiterPage() {
           <div className="w-16 h-16 bg-muted border-[3px] border-border rounded-full flex items-center justify-center mb-6 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
             <Briefcase className="w-6 h-6 text-muted-foreground" />
           </div>
-          <CardTitle className="font-heading uppercase font-black text-2xl mb-3 tracking-tighter">Recruiters only</CardTitle>
+          <CardTitle className="font-heading  text-2xl mb-3 tracking-tighter">Recruiters only</CardTitle>
           <CardDescription className="mb-6 font-medium">This workspace is for recruiter accounts.</CardDescription>
           <Link href="/" className="w-full">
-            <Button variant="outline" className="w-full border-[3px] border-border rounded-none font-heading uppercase h-12">
+            <Button variant="outline" className="w-full border-[3px] border-border rounded-none font-heading h-12">
               Back to hub
             </Button>
           </Link>
@@ -98,7 +98,7 @@ export default function RecruiterPage() {
   return (
     <div className="container mx-auto px-4 py-8 space-y-8 max-w-6xl">
       <div>
-          <h1 className="text-4xl font-heading uppercase flex items-center gap-3 tracking-tighter font-black">
+          <h1 className="text-4xl font-heading flex items-center gap-3 tracking-tighter ">
           <Briefcase className="w-8 h-8 text-primary" /> Recruiter Discovery
         </h1>
         <p className="text-muted-foreground mt-2 font-medium">
@@ -108,7 +108,7 @@ export default function RecruiterPage() {
 
       <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card">
         <CardHeader className="bg-muted/40 border-b-[3px] border-border py-4 px-5">
-          <CardTitle className="font-heading uppercase text-base tracking-wide">Filters</CardTitle>
+          <CardTitle className="font-heading text-base tracking-wide">Filters</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col md:flex-row items-end gap-4 p-5">
             <div className="space-y-2 flex-1 w-full min-w-50">
@@ -129,7 +129,7 @@ export default function RecruiterPage() {
             </div>
           </CardContent>
         <div className="bg-muted p-4 border-t-[3px] border-border">
-          <Button onClick={search} className="w-full sm:w-auto border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase text-sm bg-primary text-primary-foreground h-12 px-8 flex items-center justify-center gap-2">
+          <Button onClick={search} className="w-full sm:w-auto border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading text-sm bg-primary text-primary-foreground h-12 px-8 flex items-center justify-center gap-2">
             <Search className="w-4 h-4" /> Search Candidates
           </Button>
         </div>
@@ -137,7 +137,7 @@ export default function RecruiterPage() {
 
       <div className="grid gap-4">
         {rows.length === 0 ? (
-          <div className="border-[3px] border-border border-dashed bg-muted/50 p-12 text-center text-muted-foreground font-heading uppercase tracking-widest">
+          <div className="border-[3px] border-border border-dashed bg-muted/50 p-12 text-center text-muted-foreground font-heading tracking-widest">
             No results. Adjust filters and query again.
           </div>
         ) : (
@@ -194,7 +194,7 @@ export default function RecruiterPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading uppercase text-xs h-9"
+                        className="w-full border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading text-xs h-9"
                       >
                         View portfolio
                       </Button>
@@ -203,7 +203,7 @@ export default function RecruiterPage() {
                   <Link href={`/resume/${r.resumeId}`} className="w-full">
                     <Button
                       size="sm"
-                      className="w-full border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading uppercase text-xs h-9"
+                      className="w-full border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading text-xs h-9"
                     >
                       Open resume
                     </Button>

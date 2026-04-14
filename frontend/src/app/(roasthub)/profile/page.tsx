@@ -142,10 +142,10 @@ export default function ProfilePage() {
           <div className="w-16 h-16 bg-muted border-[3px] border-border rounded-full flex items-center justify-center mb-6 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
             <LogOut className="w-6 h-6 text-muted-foreground" />
           </div>
-          <h1 className="font-heading uppercase text-3xl mb-3 tracking-wide">Sign In Required</h1>
+          <h1 className="font-heading text-3xl mb-3 tracking-wide">Sign In Required</h1>
           <p className="text-sm text-muted-foreground mb-8 text-balance">You need to sign in to view your profile, manage your resumes, and interact with the community.</p>
           <Link href="/login" className="w-full">
-            <Button className="w-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase tracking-wide">
+            <Button className="w-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading tracking-wide">
               Sign In Now
             </Button>
           </Link>
@@ -157,15 +157,15 @@ export default function ProfilePage() {
   const displayUser = user ?? profileRowFromAuth(authUser);
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-8 py-8 md:h-[calc(100dvh-9rem)] md:min-h-0">
+    <div className="flex w-full min-w-0 flex-col gap-8 py-8">
       {/* User Header */}
       <Card className="shrink-0 border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
         <div className="bg-primary p-6 md:p-10 flex flex-col md:flex-row items-center gap-6">
-          <div className="w-24 h-24 rounded-full border-[3px] border-border bg-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center text-4xl font-heading uppercase shrink-0">
+          <div className="w-24 h-24 rounded-full border-[3px] border-border bg-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center text-4xl font-heading shrink-0">
             {displayUser.name.charAt(0).toUpperCase() || "?"}
           </div>
           <div className="flex-1 text-center md:text-left text-primary-foreground space-y-2">
-            <h1 className="text-3xl md:text-4xl font-heading uppercase tracking-tighter font-black text-foreground">{displayUser.name}</h1>
+            <h1 className="text-3xl md:text-4xl font-heading tracking-tighter text-foreground">{displayUser.name}</h1>
             <p className="font-medium opacity-90">{displayUser.email}</p>
             <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start mt-1">
               {displayUser.anonymousPublicId && (
@@ -179,13 +179,13 @@ export default function ProfilePage() {
             </div>
           </div>
           <div className="flex flex-col gap-3 w-full md:w-auto mt-4 md:mt-0">
-            <Badge variant="outline" className="border-2 border-primary-foreground text-primary-foreground rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] bg-primary/50 text-sm py-1.5 px-4 flex items-center justify-center md:justify-start gap-2 font-heading uppercase tracking-wide">
+            <Badge variant="outline" className="border-2 border-primary-foreground text-primary-foreground rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] bg-primary/50 text-sm py-1.5 px-4 flex items-center justify-center md:justify-start gap-2 font-heading tracking-wide">
               <FileText className="w-4 h-4" /> {resumes.length} Resume{resumes.length !== 1 ? "s" : ""}
             </Badge>
             <Button
               variant="destructive"
               onClick={() => { clearToken(); router.push("/"); }}
-              className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase text-xs tracking-wide w-full"
+              className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs tracking-wide w-full"
             >
               <LogOut className="w-4 h-4 mr-2" /> Sign Out
             </Button>
@@ -193,17 +193,17 @@ export default function ProfilePage() {
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 flex-1 min-h-0">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
         {/* Public Profile Settings */}
-        <div className="md:col-span-1 min-h-0 h-full">
-          <Card className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] h-full flex flex-col">
+        <div className="md:col-span-1">
+          <Card className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col">
             <CardHeader className="shrink-0 flex flex-row items-center justify-between space-y-0 py-3 px-4 border-b-[3px] border-border bg-muted/40">
-              <CardTitle className="font-heading uppercase text-base tracking-wide">Public Profile</CardTitle>
+              <CardTitle className="font-heading text-base tracking-wide">Public Profile</CardTitle>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setEditMode(!editMode)}
-                className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase text-[10px] h-7 px-3"
+                className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-[10px] h-7 px-3"
               >
                 <Edit2 className="w-3 h-3 mr-1" /> {editMode ? "Cancel" : "Edit"}
               </Button>
@@ -212,22 +212,22 @@ export default function ProfilePage() {
               {editMode ? (
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <label className="font-heading uppercase text-xs">Display Name</label>
+                    <label className="font-heading text-xs">Display Name</label>
                     <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Display name" className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" />
                   </div>
                   <div className="space-y-1">
-                    <label className="font-heading uppercase text-xs">LinkedIn URL</label>
+                    <label className="font-heading text-xs">LinkedIn URL</label>
                     <Input value={linkedIn} onChange={(e) => setLinkedIn(e.target.value)} placeholder="LinkedIn URL" className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" />
                   </div>
                   <div className="space-y-1">
-                    <label className="font-heading uppercase text-xs">GitHub URL</label>
+                    <label className="font-heading text-xs">GitHub URL</label>
                     <Input value={github} onChange={(e) => setGithub(e.target.value)} placeholder="GitHub URL" className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" />
                   </div>
                   <label className="flex items-center gap-3 cursor-pointer p-3 border-2 border-border bg-muted/50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mt-4">
                     <input type="checkbox" checked={share} onChange={() => setShare(!share)} className="w-4 h-4 accent-primary rounded-none border-2 border-border" />
                     <span className="text-sm font-bold tracking-tight uppercase">Share identity with recruiters</span>
                   </label>
-                  <Button onClick={saveProfile} className="w-full border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading uppercase tracking-wide mt-4">
+                  <Button onClick={saveProfile} className="w-full border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading tracking-wide mt-4">
                     Save Changes
                   </Button>
                 </div>
@@ -258,14 +258,14 @@ export default function ProfilePage() {
         </div>
 
         {/* Resumes — candidates only */}
-        <div className="md:col-span-2 flex flex-col min-h-0 h-full">
+        <div className="md:col-span-2 flex flex-col">
           <div className="flex items-center justify-between mb-4 mt-2 md:mt-0 shrink-0">
-            <h2 className="text-2xl font-heading uppercase tracking-wide">
+            <h2 className="text-2xl font-heading tracking-wide uppercase">
               {authUser?.role === "recruiter" ? "Candidate discovery" : "Your Resumes"}
             </h2>
           </div>
           <div
-            className="flex-1 overflow-y-auto overscroll-y-contain rounded-none border-[3px] border-border bg-muted/20 p-4 sm:p-6 [scrollbar-gutter:stable]"
+            className="flex flex-col gap-4 overflow-y-auto overscroll-y-contain max-h-[800px] md:max-h-[calc(100vh-16rem)] rounded-none border-[3px] border-border bg-muted/20 p-4 sm:p-6 [scrollbar-gutter:stable]"
             aria-label={authUser?.role === "recruiter" ? "Recruiter tools" : "Your resumes"}
           >
             {authUser?.role === "recruiter" ? (
@@ -279,7 +279,7 @@ export default function ProfilePage() {
                     Recruiter accounts don&apos;t upload resumes or projects. Use the dashboard to search candidates.
                   </CardDescription>
                   <Link href="/recruiter">
-                    <Button className="border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase tracking-wide px-6">
+                    <Button className="border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading tracking-wide px-6">
                       Open recruiter dashboard
                     </Button>
                   </Link>
@@ -298,7 +298,7 @@ export default function ProfilePage() {
                 </CardDescription>
                 <p className="text-sm text-muted-foreground mb-6">Drop your first PDF to get roasted by the community.</p>
                 <Link href="/upload">
-                  <Button className="border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading uppercase tracking-wide px-6">
+                  <Button className="border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading tracking-wide px-6">
                     Upload Resume
                   </Button>
                 </Link>
