@@ -1,153 +1,282 @@
 # RoastForge
 
-RoastForge is a full-stack web app for sharing resumes and collecting feedback through comments, replies, votes, and likes. The repository is split into a TypeScript backend API and a Next.js frontend.
+RoastForge is a full-stack platform where candidates upload resumes and projects, receive AI resume analysis, and collect community feedback through comments, replies, votes, and likes. Recruiters can search candidate profiles and review talent signals in one place.
+
+## Monorepo Layout
+
+- [backend](backend): Express + TypeScript API
+- [frontend](frontend): Next.js App Router frontend
 
 ## What Is Implemented
 
 ### Backend
 
-- JWT authentication with register, login, refresh, logout, `me`, and username regeneration endpoints
-- Resume CRUD with list, detail, my-resumes, and like/unlike support
-- Commenting on resumes with replies and comment voting
-- Resume and avatar uploads to Cloudinary
-- MongoDB persistence through Mongoose
-- Request validation with DTOs and middleware
-- CORS, cookie parsing, async error handling, and a `/health` endpoint
+- JWT auth flow: register, login, refresh, logout, me
+- Profile and identity updates: me profile update, anonymous username regeneration
+- Account deletion with cascade cleanup
+- Resume CRUD, pagination/search/sort, like toggle
+- Resume comments, replies, and voting
+- Resume and avatar upload to Cloudinary
+- AI roast analysis endpoint for resumes
+- Candidate project module
+- Recruiter candidate search and candidate profile endpoints
+- MongoDB persistence (Mongoose), request validation, centralized error handling
+- CORS + cookies support and health endpoint
 
 ### Frontend
 
-- App Router pages for home, login, register, verify email, profile, recruiter, projects, resume detail, and upload
-- Shared UI components for navbar, footer, resume cards, comment threads, and reusable form controls
-- Frontend state management for authentication
-- API helpers and shared utilities
+- Next.js App Router structure with route groups
+- Auth screens and protected candidate/recruiter flows
+- Resume gallery/detail, comments, likes, uploads
+- Project and recruiter views
+- Shared component library and UI primitives
+- Central API client with token refresh handling
+- Global auth store
 
-## Code Structure
-
-### Backend
+## Project Structure
 
 ```text
 backend/
-├── server.ts                # Starts the HTTP server and connects to MongoDB
+├── server.ts
+├── env.example
 ├── src/
-│   ├── app.ts               # Express app, middleware, routes, and health check
-│   ├── common/              # Shared config, middleware, DTO base class, and utilities
-│   │   ├── config/db.ts     # MongoDB connection setup
-│   │   ├── dto/             # Shared DTO base definitions
-│   │   ├── middleware/      # Validation, error handling, async wrapper, upload config
-│   │   └── utils/           # API response/error helpers, JWT, username, Cloudinary upload
-│   └── modules/             # Feature-based API modules
-│       ├── auth/            # Register/login/session handling and auth middleware
-│       ├── comment/         # Comments, replies, and comment voting
-│       ├── resume/          # Resume CRUD and likes
-│       └── upload/          # Resume and avatar upload endpoints
-```
+│   ├── app.ts
+│   ├── common/
+│   │   ├── config/
+│   │   ├── dto/
+│   │   ├── middleware/
+│   │   └── utils/
+│   └── modules/
+│       ├── analysis/
+│       ├── auth/
+│       ├── comment/
+│       ├── project/
+│       ├── recruiter/
+│       ├── resume/
+│       └── upload/
 
-### Frontend
-
-```text
 frontend/
 ├── src/
-│   ├── app/                 # Next.js App Router entry points and route groups
-│   │   └── (roasthub)/      # Main application pages
-│   ├── components/          # Reusable UI and feature components
-│   ├── hooks/               # Custom hooks
-│   ├── lib/                 # API client and utility helpers
-│   └── store/               # Global state, including auth state
+│   ├── app/
+│   │   └── (roasthub)/
+│   ├── components/
+│   ├── hooks/
+│   ├── lib/
+│   └── store/
 ```
+
+## Dependencies
+
+### Backend runtime
+
+- @google/genai
+- @upstash/redis
+- bcryptjs
+- cloudinary
+- cookie-parser
+- cors
+- dotenv
+- express
+- joi
+- jsonwebtoken
+- mongoose
+- multer
+- multer-cloudinary
+- nanoid
+- pdf-parse
+
+Source: [backend/package.json](backend/package.json)
+
+### Backend development
+
+- @types/bcryptjs
+- @types/cookie-parser
+- @types/cors
+- @types/express
+- @types/jsonwebtoken
+- @types/multer
+- @types/node
+- nodemon
+- ts-node
+- typescript
+
+Source: [backend/package.json](backend/package.json)
+
+### Frontend runtime
+
+- @base-ui/react
+- @radix-ui/react-avatar
+- @radix-ui/react-dialog
+- @radix-ui/react-dropdown-menu
+- @radix-ui/react-label
+- @radix-ui/react-separator
+- @radix-ui/react-slot
+- @radix-ui/react-tabs
+- @tailwindcss/typography
+- class-variance-authority
+- clsx
+- framer-motion
+- lucide-react
+- next
+- react
+- react-dom
+- react-icons
+- socket.io-client
+- sonner
+- tailwind-merge
+
+Source: [frontend/package.json](frontend/package.json)
+
+### Frontend development
+
+- @tailwindcss/postcss
+- @types/node
+- @types/react
+- @types/react-dom
+- eslint
+- eslint-config-next
+- tailwindcss
+- typescript
+
+Source: [frontend/package.json](frontend/package.json)
 
 ## API Routes
 
-- `GET /health` - service health check
-- `POST /api/auth/register` - create account
-- `POST /api/auth/login` - sign in
-- `POST /api/auth/refresh` - refresh tokens
-- `POST /api/auth/logout` - sign out
-- `GET /api/auth/me` - current user profile
-- `PATCH /api/auth/regenerate-username` - regenerate username
-- `GET /api/resumes` - list resumes
-- `GET /api/resumes/my` - current user's resumes
-- `GET /api/resumes/:id` - get one resume
-- `POST /api/resumes` - create resume
-- `PUT /api/resumes/:id` - update resume
-- `DELETE /api/resumes/:id` - delete resume
-- `POST /api/resumes/:id/like` - toggle like
-- `GET /api/comments/resume/:resumeId` - list comments for a resume
-- `POST /api/comments/resume/:resumeId` - add comment
-- `PUT /api/comments/:id` - update comment
-- `DELETE /api/comments/:id` - delete comment
-- `POST /api/comments/:id/replies` - add reply
-- `POST /api/comments/:id/vote` - vote on a comment
-- `POST /api/upload/resume` - upload resume file
-- `POST /api/upload/avatar` - upload avatar image
+### Health
+
+- GET /health
+
+### Auth
+
+- POST /api/auth/register
+- POST /api/auth/login
+- POST /api/auth/refresh
+- POST /api/auth/logout
+- GET /api/auth/me
+- PATCH /api/auth/me/profile
+- PATCH /api/auth/regenerate-username
+- DELETE /api/auth/account
+
+### Resumes
+
+- GET /api/resumes
+- GET /api/resumes/my
+- GET /api/resumes/:id
+- POST /api/resumes
+- PUT /api/resumes/:id
+- DELETE /api/resumes/:id
+- POST /api/resumes/:id/like
+
+### Comments
+
+- GET /api/comments/resume/:resumeId
+- POST /api/comments/resume/:resumeId
+- PUT /api/comments/:id
+- DELETE /api/comments/:id
+- POST /api/comments/:id/replies
+- POST /api/comments/:id/vote
+
+### Upload
+
+- POST /api/upload/resume
+- POST /api/upload/avatar
+
+### Analysis
+
+- POST /api/analysis/:id
+
+### Project
+
+- GET /api/project
+- POST /api/project
+- DELETE /api/project/:id
+
+### Recruiter
+
+- GET /api/recruiter/candidates
+- GET /api/recruiter/candidate/:userId/profile
+
+## Environment Variables
+
+Template: [backend/env.example](backend/env.example)
+
+### Backend required
+
+- PORT
+- NODE_ENV
+- MONGODB_URI
+- JWT_ACCESS_SECRET
+- JWT_REFRESH_SECRET
+- JWT_ACCESS_EXPIRES_IN
+- JWT_REFRESH_EXPIRES_IN
+- CLOUDINARY_CLOUD_NAME
+- CLOUDINARY_API_KEY
+- CLOUDINARY_API_SECRET
+- UPSTASH_REDIS_REST_URL
+- UPSTASH_REDIS_REST_TOKEN
+- GOOGLE_AI_KEY
+- UPLOAD_MAX_BYTES
+- FRONTEND_ORIGIN
+- CROSS_SITE_COOKIES
+
+### Frontend required
+
+- NEXT_PUBLIC_API_URL
 
 ## Local Setup
 
-### Prerequisites
+1. Install backend dependencies.
 
-- Node.js
-- MongoDB connection string
-- Cloudinary account
+	```bash
+	cd backend
+	npm install
+	```
 
-### Backend
+2. Configure backend env.
 
-```bash
-cd backend
-npm install
-```
+	Copy [backend/env.example](backend/env.example) to backend/.env and fill values.
 
-Create `backend/.env` from `backend/env.example` and set the required values:
+3. Run backend.
 
-- `PORT`
-- `NODE_ENV`
-- `MONGODB_URI`
-- `JWT_ACCESS_SECRET`
-- `JWT_REFRESH_SECRET`
-- `JWT_ACCESS_EXPIRES_IN`
-- `JWT_REFRESH_EXPIRES_IN`
-- `CLOUDINARY_CLOUD_NAME`
-- `CLOUDINARY_API_KEY`
-- `CLOUDINARY_API_SECRET`
-- `UPLOAD_MAX_BYTES`
-- `FRONTEND_ORIGIN`
-- `CROSS_SITE_COOKIES`
+	```bash
+	npm run dev
+	```
 
-Run the backend:
+4. Install frontend dependencies.
 
-```bash
-npm run dev
-```
+	```bash
+	cd frontend
+	npm install
+	```
 
-### Frontend
+5. Configure frontend env.
 
-```bash
-cd frontend
-npm install
-```
+	Create frontend/.env.local with:
 
-Create `frontend/.env.local` with the backend API URL:
+	```env
+	NEXT_PUBLIC_API_URL=http://localhost:5000
+	```
 
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5000
-```
+6. Run frontend.
 
-Run the frontend:
+	```bash
+	npm run dev
+	```
 
-```bash
-npm run dev
-```
+Frontend runs on http://localhost:3000 and backend runs on http://localhost:5000.
 
 ## Scripts
 
 ### Backend
 
-- `npm run dev` - start the API in development mode
-- `npm run dev:worker` - start the API with worker mode enabled
-- `npm run build` - compile TypeScript
-- `npm run start` - run the compiled server
+- npm run dev
+- npm run dev:worker
+- npm run build
+- npm run start
 
 ### Frontend
 
-- `npm run dev` - start the Next.js dev server
-- `npm run build` - build the frontend
-- `npm run start` - start the production frontend
-- `npm run lint` - run ESLint
+- npm run dev
+- npm run build
+- npm run start
+- npm run lint
