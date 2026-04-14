@@ -167,7 +167,7 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-5xl md:text-8xl font-heading text-foreground tracking-tighter leading-[0.9] font-black"
+          className="text-5xl md:text-8xl font-heading normal-case text-foreground tracking-tighter leading-[0.9] font-black"
         >
           Brutal Honesty.
           <br /> Better Resumes.
