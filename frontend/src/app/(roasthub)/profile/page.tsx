@@ -193,9 +193,9 @@ export default function ProfilePage() {
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
         {/* Public Profile Settings */}
-        <div className="flex flex-col">
+        <div className="md:col-span-1 flex flex-col">
           <Card className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col">
             <CardHeader className="shrink-0 flex flex-row items-center justify-between space-y-0 py-3 px-4 border-b-[3px] border-border bg-muted/40">
               <CardTitle className="font-heading text-base tracking-wide">Public Profile</CardTitle>
@@ -258,14 +258,14 @@ export default function ProfilePage() {
         </div>
 
         {/* Resumes — candidates only */}
-        <div className="flex flex-col">
+        <div className="md:col-span-2 flex flex-col">
           <div className="flex items-center justify-between mb-4 mt-2 md:mt-0 shrink-0">
             <h2 className="text-2xl font-heading tracking-wide uppercase">
               {authUser?.role === "recruiter" ? "Candidate discovery" : "Your Resumes"}
             </h2>
           </div>
           <div
-            className="flex flex-col gap-4 overflow-y-auto overscroll-y-contain max-h-[800px] md:max-h-[calc(100vh-16rem)] rounded-none border-[3px] border-border bg-muted/20 p-4 sm:p-6 [scrollbar-gutter:stable]"
+            className="flex flex-col gap-4 overflow-y-auto overscroll-y-contain max-h-[500px] rounded-none border-[3px] border-border bg-muted/20 p-4 sm:p-6 [scrollbar-gutter:stable]"
             aria-label={authUser?.role === "recruiter" ? "Recruiter tools" : "Your resumes"}
           >
             {authUser?.role === "recruiter" ? (
