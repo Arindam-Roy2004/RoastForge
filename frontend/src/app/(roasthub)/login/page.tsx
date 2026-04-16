@@ -39,16 +39,16 @@ export default function LoginPage() {
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 py-16">
       <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card overflow-hidden">
-        <CardHeader className="text-center space-y-2 p-8 pb-4">
-          <div className="mx-auto bg-primary w-12 h-12 flex items-center justify-center rounded-full border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mb-2">
+        <CardHeader className="text-center space-y-3 p-8 pb-6">
+          <div className="mx-auto bg-primary w-12 h-12 flex items-center justify-center rounded-full border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
             <Flame className="w-6 h-6 text-primary-foreground" />
           </div>
-          <CardTitle className="text-3xl font-heading tracking-tighter">Sign in to RoastForge</CardTitle>
-          <CardDescription className="text-muted-foreground font-medium">
-            One-tap with Google. New here? We&apos;ll set you up after sign-in.
+          <CardTitle className="text-3xl font-heading tracking-tighter">Sign In</CardTitle>
+          <CardDescription className="text-muted-foreground font-medium text-sm">
+            One tap with Google to continue.
           </CardDescription>
         </CardHeader>
-        <CardContent className="px-8 pb-8 space-y-6">
+        <CardContent className="px-8 pb-8 space-y-4">
           <div
             className={`flex justify-center transition-opacity ${busy ? "opacity-50 pointer-events-none" : ""}`}
             data-testid="google-login-slot"
@@ -63,9 +63,8 @@ export default function LoginPage() {
               useOneTap={false}
             />
           </div>
-          <p className="text-[11px] text-center text-muted-foreground font-medium leading-relaxed">
-            By continuing you agree that we&apos;ll use your Google email and name to create your RoastForge account.
-            We don&apos;t post anything on your behalf.
+          <p className="text-[10px] text-center text-muted-foreground/80 font-medium tracking-wide">
+            We only use your Google name &amp; email. We never post on your behalf.
           </p>
         </CardContent>
         <div className="flex justify-center border-t-[3px] border-border bg-muted p-6">
