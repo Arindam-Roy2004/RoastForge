@@ -5,7 +5,7 @@ import { apiFetch } from "@/lib/api";
 import { useCallback, useState } from "react";
 import { useAuth } from "@/store/auth";
 import { toast } from "sonner";
-import { Search, Briefcase, UserX, Loader2, FileText } from "lucide-react";
+import { Search, Briefcase, UserX, Loader2, FileText, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -146,8 +146,24 @@ export default function RecruiterPage() {
           `[scrollbar-gutter:stable]` keeps the card grid from shifting when
           the scrollbar appears/disappears on re-query. */}
       <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card overflow-hidden">
-        <CardHeader className="bg-muted/40 border-b-[3px] border-border py-4 px-5 flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="font-heading text-base tracking-wide">Results</CardTitle>
+        <CardHeader className="bg-muted/40 border-b-[3px] border-border py-4 px-5 flex flex-row items-center justify-between space-y-0 gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            {rows.length > 0 && (
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setRows([])}
+                aria-label="Back to filters"
+                data-testid="button-back-results"
+                className="h-8 px-3 gap-1.5 border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading text-[11px] tracking-wider uppercase"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" strokeWidth={3} />
+                Back
+              </Button>
+            )}
+            <CardTitle className="font-heading text-base tracking-wide">Results</CardTitle>
+          </div>
           <Badge variant="secondary" className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-none font-bold uppercase text-[10px] px-2 py-0.5">
             {rows.length} {rows.length === 1 ? "Candidate" : "Candidates"}
           </Badge>
