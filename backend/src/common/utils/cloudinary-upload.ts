@@ -59,3 +59,79 @@ export async function uploadAvatar(buffer: Buffer, userId: string): Promise<stri
     publicId: `avatar-${userId}`,
   });
 }
+
+/**
+ * Params that should be part of the signed payload when uploading directly
+ * from the browser. `file`, `api_key`, `resource_type`, and `cloud_name`
+ * must NOT be signed (Cloudinary rejects the upload if they are).
+ */
+export type SignedUploadParams = {
+  timestamp: number;
+  folder: string;
+  public_id: string;
+};
+
+export type SignedUploadResponse = {
+  cloudName: string;
+  apiKey: string;
+  resourceType: "raw" | "image";
+  uploadUrl: string;
+  /** Passed back in the multipart body alongside `file`. */
+  params: SignedUploadParams & { signature: string };
+};
+
+/**
+ * Generates a short-lived Cloudinary upload signature so the browser can POST
+ * the file directly. This sidesteps Vercel's ~4.5 MB function body limit and
+ * offloads the CPU/memory cost of large PDFs entirely.
+ *
+ * The server is the only party that knows `CLOUDINARY_API_SECRET`, and it
+ * decides the folder + public_id — the client can't target arbitrary paths
+ * or overwrite other users' files.
+ */
+export function signResumeUpload(
+  userId: string,
+  fileType: "pdf" | "image",
+  imageMime?: string,
+): SignedUploadResponse {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  if (!cloudName || !apiKey || !apiSecret) {
+    throw new Error("Cloudinary is not configured");
+  }
+
+  const timestamp = Math.floor(Date.now() / 1000);
+  const folder = "roasthub/resumes";
+  // Mirror the server-upload naming so Cloudinary-hosted resumes share a layout
+  // whether they went through the function or the direct path.
+  const publicId =
+    fileType === "pdf"
+      ? `${userId}-${Date.now()}.pdf`
+      : `${userId}-${Date.now()}`;
+  const resourceType: "raw" | "image" = fileType === "pdf" ? "raw" : "image";
+
+  const paramsToSign: SignedUploadParams = { timestamp, folder, public_id: publicId };
+  // Cloudinary signature: SHA-1 of "key1=val1&key2=val2..." (keys alphabetized) + api_secret.
+  const toSign = Object.keys(paramsToSign)
+    .sort()
+    .map((k) => `${k}=${(paramsToSign as Record<string, unknown>)[k]}`)
+    .join("&");
+  const signature = cloudinary.utils.api_sign_request(paramsToSign, apiSecret);
+  // `api_sign_request` reproduces the same string-to-sign internally; we keep
+  // `toSign` only for the defensive log in dev.
+  if (process.env.NODE_ENV !== "production" && !signature) {
+    console.warn("Empty Cloudinary signature for params:", toSign);
+  }
+
+  // Suppress unused-var lint for the imageMime arg — reserved for future formats.
+  void imageMime;
+
+  return {
+    cloudName,
+    apiKey,
+    resourceType,
+    uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
+    params: { ...paramsToSign, signature },
+  };
+}

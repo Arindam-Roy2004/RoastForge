@@ -269,19 +269,67 @@ export const commentApi = {
 };
 
 // ─── Upload ──────────────────────────────────────────────────────────────────
-// Routed through apiFetch so uploads benefit from single-flight refresh + safe JSON parsing.
+type SignedUpload = {
+  cloudName: string;
+  apiKey: string;
+  resourceType: "raw" | "image";
+  uploadUrl: string;
+  params: {
+    timestamp: number;
+    folder: string;
+    public_id: string;
+    signature: string;
+  };
+};
+
+/**
+ * Uploads resumes directly from the browser to Cloudinary using a signed,
+ * short-lived payload from our API. The file never touches our Vercel function
+ * — sidesteps the ~4.5 MB request-body cap and keeps cold-start CPU free for
+ * the roast path.
+ */
+async function directCloudinaryUpload(file: File): Promise<{ fileUrl: string; fileType: "pdf" | "image" }> {
+  const isPdf = file.type === "application/pdf";
+  const fileType: "pdf" | "image" = isPdf ? "pdf" : "image";
+
+  const signed = await apiFetch<SignedUpload>("/api/upload/sign/resume", {
+    method: "POST",
+    body: JSON.stringify({ fileType, contentType: file.type }),
+  });
+  if (!signed.data) throw new Error(signed.message || "Could not sign upload");
+  const s = signed.data;
+
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("api_key", s.apiKey);
+  fd.append("timestamp", String(s.params.timestamp));
+  fd.append("signature", s.params.signature);
+  fd.append("folder", s.params.folder);
+  fd.append("public_id", s.params.public_id);
+
+  // `credentials: "omit"` — this request goes to api.cloudinary.com, which
+  // doesn't want our session cookie and would otherwise trigger a CORS preflight.
+  const res = await fetch(s.uploadUrl, { method: "POST", body: fd, credentials: "omit" });
+  if (!res.ok) {
+    let detail = "";
+    try {
+      const j = await res.json();
+      detail = j?.error?.message || "";
+    } catch {
+      detail = await res.text().catch(() => "");
+    }
+    throw new Error(detail || `Cloudinary upload failed (${res.status})`);
+  }
+  const json = (await res.json()) as { secure_url?: string };
+  if (!json.secure_url) throw new Error("Cloudinary returned no URL");
+  return { fileUrl: json.secure_url, fileType };
+}
+
 export const uploadApi = {
-  resume: async (file: File): Promise<{ fileUrl: string; fileType: "pdf" | "image" }> => {
-    const fd = new FormData();
-    fd.append("file", file);
-    const res = await apiFetch<{ fileUrl: string; fileType: "pdf" | "image" }>("/api/upload/resume", {
-      method: "POST",
-      body: fd,
-    });
-    if (!res.data) throw new Error(res.message || "Upload failed");
-    return res.data;
-  },
+  resume: directCloudinaryUpload,
   avatar: async (file: File): Promise<string> => {
+    // Avatars stay on the server path — they're small (single-digit KB up to
+    // a few hundred KB) and share the same error handling as other endpoints.
     const fd = new FormData();
     fd.append("avatar", file);
     const res = await apiFetch<{ avatarUrl: string }>("/api/upload/avatar", {

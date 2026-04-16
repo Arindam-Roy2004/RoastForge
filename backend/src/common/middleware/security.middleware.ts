@@ -1,5 +1,6 @@
-import { ipKeyGenerator, rateLimit } from "express-rate-limit";
+import { ipKeyGenerator } from "express-rate-limit";
 import type { NextFunction, Request, Response } from "express";
+import { createRateLimiter } from "./rate-limit.js";
 
 /**
  * Recursively strips keys that start with `$` or contain `.` from an object.
@@ -33,35 +34,43 @@ export const sanitizeBody = (req: Request, _res: Response, next: NextFunction) =
  * cached JWKS, so this protects both us (CPU) and Google (rate limits) from a
  * burst of bogus tokens. Per-IP because the user isn't authenticated yet.
  */
-export const googleAuthRateLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  keyGenerator: (req: Request) => ipKeyGenerator(req.ip ?? ""),
-  message: { success: false, message: "Too many sign-in attempts. Try again in a minute." },
+export const googleAuthRateLimiter = createRateLimiter({
+  prefix: "rl:google-auth",
+  tokens: 20,
+  window: "60 s",
+  message: "Too many sign-in attempts. Try again in a minute.",
 });
 
 /** Looser cap for refresh since browsers fire it on startup and reconnects. */
-export const refreshRateLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 30,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { success: false, message: "Too many refresh attempts." },
+export const refreshRateLimiter = createRateLimiter({
+  prefix: "rl:refresh",
+  tokens: 30,
+  window: "60 s",
+  message: "Too many refresh attempts.",
 });
 
 /** Expensive AI path — per-user (if authenticated) or per-IP key. */
-export const analysisRateLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 5,
-  standardHeaders: true,
-  legacyHeaders: false,
-  keyGenerator: (req: Request) => {
+export const analysisRateLimiter = createRateLimiter({
+  prefix: "rl:analysis",
+  tokens: 5,
+  window: "60 s",
+  keyFn: (req: Request) => {
     const userId = (req as Request & { user?: { id?: string } }).user?.id;
-    if (userId) return userId;
+    if (userId) return `u:${userId}`;
     // ipKeyGenerator normalizes IPv6 into a /64 subnet key so individual IPv6 users can't bypass limits.
-    return ipKeyGenerator(req.ip ?? "");
+    return `ip:${ipKeyGenerator(req.ip ?? "")}`;
   },
-  message: { success: false, message: "Too many analysis requests. Slow down." },
+  message: "Too many analysis requests. Slow down.",
+});
+
+/** Signature endpoint: cheap but abusable (enumerating upload slots). Per-user. */
+export const uploadSignRateLimiter = createRateLimiter({
+  prefix: "rl:upload-sign",
+  tokens: 30,
+  window: "60 s",
+  keyFn: (req: Request) => {
+    const userId = (req as Request & { user?: { id?: string } }).user?.id;
+    return userId ? `u:${userId}` : `ip:${ipKeyGenerator(req.ip ?? "")}`;
+  },
+  message: "Too many upload requests. Slow down.",
 });
