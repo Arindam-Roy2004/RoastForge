@@ -1,4 +1,5 @@
 import * as authService from "./auth.service.js";
+import * as googleAuthService from "./google-auth.service.js";
 import ApiResponse from "../../common/utils/api-response.js";
 import type { Request, Response } from "express";
 
@@ -14,13 +15,12 @@ const COOKIE_OPTS = {
   path: "/",
 };
 
-export const register = async (req: Request, res: Response) => {
-  const { user } = await authService.register(req.body);
-  ApiResponse.created(res, "Account created.", { user });
-};
-
-export const login = async (req: Request, res: Response) => {
-  const { user, accessToken, refreshToken } = await authService.login(req.body);
+export const google = async (req: Request, res: Response) => {
+  // The frontend posts the Google ID token (a Google-signed JWT) it received
+  // via Google Identity Services. We verify, link-or-create, then issue our own
+  // session tokens — the rest of the API doesn't need to know about Google.
+  const { credential } = req.body || {};
+  const { user, accessToken, refreshToken } = await googleAuthService.loginWithGoogle(credential);
   res.cookie("refreshToken", refreshToken, COOKIE_OPTS);
   ApiResponse.ok(res, "Login successful", { user, accessToken });
 };
@@ -55,16 +55,22 @@ export const updateProfile = async (req: Request, res: Response) => {
   ApiResponse.ok(res, "Profile updated", result);
 };
 
+export const completeOnboarding = async (req: Request, res: Response) => {
+  const result = await authService.completeOnboarding((req as any).user.id, req.body.role);
+  ApiResponse.ok(res, "Onboarding complete", { user: result });
+};
+
 export const regenerateUsername = async (req: Request, res: Response) => {
-  const userId = (req as any).user.id; 
+  const userId = (req as any).user.id;
   const result = await authService.regenerateUsername(userId);
   ApiResponse.ok(res, "Username regenerated successfully", result);
 };
 
 export const deleteAccount = async (req: Request, res: Response) => {
   const userId = (req as any).user.id;
-  await authService.deleteAccount(userId, req.body.password);
+  // Body shape changed from { password } to { confirmEmail } since Google-only
+  // accounts have no password to compare against.
+  await authService.deleteAccount(userId, req.body.confirmEmail);
   res.clearCookie("refreshToken", { path: "/", sameSite: COOKIE_OPTS.sameSite, secure: COOKIE_OPTS.secure });
   ApiResponse.ok(res, "Account deleted");
 };
-

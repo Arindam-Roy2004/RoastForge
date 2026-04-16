@@ -21,6 +21,16 @@ function allowedBrowserOrigins(): string[] {
     .filter(Boolean);
 }
 
+// Every Vercel PR preview gets a unique hostname (e.g. `frontend-git-feat-x-user.vercel.app`),
+// so exact-match CORS would reject them. Opt-in via ALLOW_VERCEL_PREVIEWS=true so we don't
+// accidentally trust previews in environments where they shouldn't be allowed.
+const VERCEL_PREVIEW_RE = /^https:\/\/[\w-]+\.vercel\.app$/;
+function isAllowedOrigin(origin: string): boolean {
+  if (allowedBrowserOrigins().includes(origin)) return true;
+  if (process.env.ALLOW_VERCEL_PREVIEWS === "true" && VERCEL_PREVIEW_RE.test(origin)) return true;
+  return false;
+}
+
 const app = express();
 
 // Keep CORP loose so Cloudinary-hosted resume/avatar images load in the browser.
@@ -33,12 +43,12 @@ app.use(
 app.use(
   cors({
     origin(origin, callback) {
-      const allowed = allowedBrowserOrigins();
+      // Same-origin / curl / server-to-server have no Origin header — always allow.
       if (!origin) {
         callback(null, true);
         return;
       }
-      if (allowed.includes(origin)) {
+      if (isAllowedOrigin(origin)) {
         callback(null, true);
         return;
       }

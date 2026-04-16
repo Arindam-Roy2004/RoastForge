@@ -5,34 +5,43 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Flame } from "lucide-react";
-import { apiFetch } from "@/lib/api";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
+import { useAuth } from "@/store/auth";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
+/**
+ * Sign-up surface. Functionally identical to /login — both POST the same Google
+ * ID token to /api/auth/google. The split exists for UX: users who think of
+ * themselves as "new here" want a Sign Up button, users who think of themselves
+ * as "returning" want Sign In. The backend doesn't care; the OnboardingGate
+ * (and the explicit redirect below) routes first-timers through /onboarding/role.
+ */
 export default function RegisterPage() {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"user" | "recruiter">("user");
-  const [loading, setLoading] = useState(false);
+  const { signInWithGoogle } = useAuth();
+  const [busy, setBusy] = useState(false);
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
+  async function onGoogleSuccess(res: CredentialResponse) {
+    if (!res.credential) {
+      toast.error("Google did not return a credential");
+      return;
+    }
+    setBusy(true);
     try {
-      const res = await apiFetch("/api/auth/register", {
-        method: "POST",
-        auth: false,
-        body: JSON.stringify({ name, email, password, role }),
-      });
-      toast.success(res.message);
-      router.push("/login");
+      const user = await signInWithGoogle(res.credential);
+      // Industry standard: brand-new sign-ups go straight into the role picker;
+      // an existing Google account that happened to land on /register skips it.
+      if (user.onboardingCompleted === false) {
+        toast.success("Account created — pick your role");
+        router.push("/onboarding/role");
+      } else {
+        toast.success("Welcome back");
+        router.push("/");
+      }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Registration failed");
+      toast.error(err instanceof Error ? err.message : "Sign-up failed");
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   }
 
@@ -43,78 +52,35 @@ export default function RegisterPage() {
           <div className="mx-auto bg-primary w-12 h-12 flex items-center justify-center rounded-full border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mb-2">
             <Flame className="w-6 h-6 text-primary-foreground" />
           </div>
-          <CardTitle className="text-3xl font-heading tracking-tighter ">Join the Forge</CardTitle>
-          <CardDescription className="text-muted-foreground font-medium">Candidate or recruiter? Choose your weapon and build your profile.</CardDescription>
+          <CardTitle className="text-3xl font-heading tracking-tighter">Join the Forge</CardTitle>
+          <CardDescription className="text-muted-foreground font-medium">
+            Create your account in one tap. You&apos;ll pick Candidate or Recruiter right after.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="px-8 pb-8">
-          <form onSubmit={onSubmit} className="space-y-5">
-            <div className="space-y-1.5">
-              <label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Name</label>
-              <Input
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none h-10"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Email</label>
-              <Input
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none h-10"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Password</label>
-              <Input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
-                className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none h-10"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">I am a</label>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant={role === "user" ? "default" : "outline"}
-                  onClick={() => setRole("user")}
-                  className={`flex-1 border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs h-10 ${role === "user" ? "" : "bg-muted"}`}
-                >
-                  Candidate
-                </Button>
-                <Button
-                  type="button"
-                  variant={role === "recruiter" ? "default" : "outline"}
-                  onClick={() => setRole("recruiter")}
-                  className={`flex-1 border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs h-10 ${role === "recruiter" ? "" : "bg-muted"}`}
-                >
-                  Recruiter
-                </Button>
-              </div>
-            </div>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading text-lg h-12 tracking-wide"
-            >
-              {loading ? "Creating..." : "Create Account"}
-            </Button>
-          </form>
+        <CardContent className="px-8 pb-8 space-y-6">
+          <div
+            className={`flex justify-center transition-opacity ${busy ? "opacity-50 pointer-events-none" : ""}`}
+            data-testid="google-signup-slot"
+          >
+            <GoogleLogin
+              onSuccess={onGoogleSuccess}
+              onError={() => toast.error("Google sign-up was cancelled or failed")}
+              theme="outline"
+              shape="rectangular"
+              size="large"
+              text="signup_with"
+              useOneTap={false}
+            />
+          </div>
+          <p className="text-[11px] text-center text-muted-foreground font-medium leading-relaxed">
+            By creating an account you agree that we&apos;ll use your Google email and name to set up your RoastForge profile.
+            We don&apos;t post anything on your behalf.
+          </p>
         </CardContent>
         <div className="flex justify-center border-t-[3px] border-border bg-muted p-6">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="cursor-pointer font-heading text-primary hover:underline tracking-wider" data-testid="link-go-login">
+            <Link href="/login" className="font-heading text-primary hover:underline tracking-wider" data-testid="link-go-login">
               Sign in
             </Link>
           </p>

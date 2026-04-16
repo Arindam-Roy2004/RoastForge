@@ -10,38 +10,17 @@ import {
 
 const hashToken = (token: string) => crypto.createHash("sha256").update(token).digest("hex");
 
-export const register = async ({ name, email, password, role }: { name: string; email: string; password: string; role?: string }) => {
-  const existing = await User.findOne({ email });
-  if (existing) throw ApiError.conflict("Email already exists");
-
-  const anonymousUsername = generateAnonymousUsername();
-  const user = await User.create({
-    name, email, password, anonymousUsername,
-    role: role === "recruiter" ? "recruiter" : "user",
-  });
-
-  return {
-    user: { id: user._id, name: user.name, email: user.email, avatar: user.avatar, anonymousUsername: user.anonymousUsername, role: user.role },
-  };
-};
-
-export const login = async ({ email, password }: { email: string; password: string }) => {
-  const user = await User.findOne({ email }).select("+password +refreshToken");
-  if (!user) throw ApiError.unauthorized("Invalid email or password");
-
-  const match = await (user as any).comparePassword(password);
-  if (!match) throw ApiError.unauthorized("Invalid email or password");
-
-  const accessToken = generateAccessToken({ id: user._id });
-  const refreshToken = generateRefreshToken({ id: user._id });
-
+/**
+ * Issues a fresh access + refresh token pair for a user document, persisting the
+ * SHA-256 hash of the refresh token so we can detect reuse on the next refresh.
+ * Shared between Google login and refresh-token rotation.
+ */
+export const issueTokensFor = async (user: { _id: unknown } & { refreshToken?: string | null; save: (opts?: unknown) => Promise<unknown> }) => {
+  const accessToken = generateAccessToken({ id: user._id as string });
+  const refreshToken = generateRefreshToken({ id: user._id as string });
   user.refreshToken = hashToken(refreshToken);
   await user.save({ validateBeforeSave: false });
-
-  return {
-    user: { id: user._id, name: user.name, email: user.email, avatar: user.avatar, anonymousUsername: user.anonymousUsername, role: user.role },
-    accessToken, refreshToken,
-  };
+  return { accessToken, refreshToken };
 };
 
 export const refresh = async (token: string) => {
@@ -87,6 +66,8 @@ export const getMe = async (userId: string) => {
     id: user._id, name: user.name, email: user.email, avatar: user.avatar,
     anonymousUsername: user.anonymousUsername, role: user.role,
     publicProfile: user.publicProfile,
+    // Onboarding flag drives the post-Google role-picker redirect on the client.
+    onboardingCompleted: user.onboardingCompleted,
     ...(isRecruiter ? {} : { talentMetrics: user.talentMetrics }),
   };
 };
@@ -152,10 +133,10 @@ export const updateProfile = async (
 
 export const regenerateUsername = async (userId: string) => {
   const newUsername = generateAnonymousUsername();
-  
+
   const updatedUser = await User.findByIdAndUpdate(
-    userId, 
-    { anonymousUsername: newUsername }, 
+    userId,
+    { anonymousUsername: newUsername },
     { returnDocument: "after" }
   );
 
@@ -164,12 +145,38 @@ export const regenerateUsername = async (userId: string) => {
   return { anonymousUsername: updatedUser.anonymousUsername };
 };
 
-export const deleteAccount = async (userId: string, password: string) => {
-  const user = await User.findById(userId).select("+password");
+/**
+ * Deletes the user's account. Confirmation is by typing the account email back —
+ * Google-only auth means there's no password to compare against, and a typed
+ * email is the standard low-friction confirmation for irreversible actions.
+ */
+export const deleteAccount = async (userId: string, confirmEmail: string) => {
+  const user = await User.findById(userId);
   if (!user) throw ApiError.notfound("User not found");
 
-  const match = await (user as any).comparePassword(password);
-  if (!match) throw ApiError.unauthorized("Invalid password");
+  const provided = (confirmEmail || "").trim().toLowerCase();
+  if (!provided || provided !== user.email.toLowerCase()) {
+    throw ApiError.badRequest("Email confirmation does not match");
+  }
 
   await User.findByIdAndDelete(userId);
+};
+
+/**
+ * Flips `onboardingCompleted` to true and stores the user's chosen role. Only
+ * meaningful right after a fresh Google signup; subsequent calls are no-ops on
+ * already-onboarded accounts (we still update the role if it changed).
+ */
+export const completeOnboarding = async (userId: string, role: "user" | "recruiter") => {
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { $set: { role, onboardingCompleted: true } },
+    { returnDocument: "after" },
+  );
+  if (!user) throw ApiError.notfound("User not found");
+  return {
+    id: user._id, name: user.name, email: user.email, avatar: user.avatar,
+    anonymousUsername: user.anonymousUsername, role: user.role,
+    onboardingCompleted: user.onboardingCompleted,
+  };
 };

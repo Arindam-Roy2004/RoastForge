@@ -28,13 +28,18 @@ export const sanitizeBody = (req: Request, _res: Response, next: NextFunction) =
   next();
 };
 
-/** Stricter limit for password-based login to slow brute force. */
-export const loginRateLimiter = rateLimit({
+/**
+ * Throttle Google ID-token verification. Each call hits Google's tokeninfo /
+ * cached JWKS, so this protects both us (CPU) and Google (rate limits) from a
+ * burst of bogus tokens. Per-IP because the user isn't authenticated yet.
+ */
+export const googleAuthRateLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 10,
+  max: 20,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { success: false, message: "Too many login attempts. Try again in a minute." },
+  keyGenerator: (req: Request) => ipKeyGenerator(req.ip ?? ""),
+  message: { success: false, message: "Too many sign-in attempts. Try again in a minute." },
 });
 
 /** Looser cap for refresh since browsers fire it on startup and reconnects. */

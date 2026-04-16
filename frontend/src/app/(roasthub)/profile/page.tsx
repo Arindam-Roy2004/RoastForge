@@ -1,16 +1,24 @@
 "use client";
 
-import { apiFetch, type User as AuthUser } from "@/lib/api";
+import { apiFetch, authApi, type User as AuthUser } from "@/lib/api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { FileText, LogOut, Edit2 } from "lucide-react";
+import { FileText, LogOut, Edit2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ResumeCard } from "@/components/resume-card";
 import { useAuth } from "@/store/auth";
 
@@ -67,6 +75,11 @@ export default function ProfilePage() {
   // Skills are edited as a comma-separated string for a single-field UX;
   // we normalize + dedupe to an array right before sending to the API.
   const [skillsInput, setSkillsInput] = useState("");
+  // Delete-account dialog state. Typed-email confirmation replaces the legacy
+  // password check now that accounts authenticate exclusively via Google.
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   const loadDetails = useCallback(async () => {
     if (!authUser) return;
@@ -118,6 +131,23 @@ export default function ProfilePage() {
   }, [authLoading, authUser, loadDetails]);
 
   const isRecruiter = authUser?.role === "recruiter";
+
+  async function confirmDeleteAccount() {
+    if (!authUser) return;
+    setDeleting(true);
+    try {
+      await authApi.deleteAccount(deleteConfirm.trim());
+      // Server already cleared the refresh cookie; clear our local token + user
+      // state by routing through the same logout path the Sign Out button uses.
+      await logout();
+      toast.success("Account deleted");
+      router.replace("/");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not delete account");
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   async function saveProfile() {
     try {
@@ -404,6 +434,65 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Danger zone — a single small button. The typed-email confirmation
+          dialog already explains the consequences, so the page-level warning
+          card was overkill. */}
+      <div className="flex justify-end pt-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => { setDeleteConfirm(""); setDeleteOpen(true); }}
+          className="h-8 rounded-none border-2 border-destructive/60 px-3 font-heading text-[11px] uppercase tracking-wider text-destructive hover:bg-destructive hover:text-destructive-foreground"
+          data-testid="button-open-delete-account"
+        >
+          <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Delete account
+        </Button>
+      </div>
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="rounded-none border-[3px] border-destructive shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading tracking-wide text-destructive">Delete account?</DialogTitle>
+            <DialogDescription>
+              This permanently removes your profile, resumes, projects, comments, likes, and votes.
+              Type <span className="font-mono font-bold text-foreground">{authUser?.email}</span> below to confirm.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Input
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value)}
+              placeholder={authUser?.email || "your email"}
+              autoComplete="off"
+              className="rounded-none border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+              data-testid="input-confirm-email"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteOpen(false)}
+              className="rounded-none border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading text-xs"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={
+                deleting ||
+                !authUser?.email ||
+                deleteConfirm.trim().toLowerCase() !== authUser.email.toLowerCase()
+              }
+              onClick={confirmDeleteAccount}
+              className="rounded-none border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all font-heading text-xs"
+              data-testid="button-confirm-delete-account"
+            >
+              {deleting ? "Deleting..." : "Delete forever"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

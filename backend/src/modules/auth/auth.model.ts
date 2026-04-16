@@ -5,11 +5,19 @@ const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true, minlength: 2, maxlength: 50 },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    password: { type: String, required: true, minlength: 8, select: false },
+    // Password is optional now that Google is the sole sign-in method. Existing
+    // bcrypt hashes from the password era stay in place but are never read.
+    password: { type: String, minlength: 8, select: false },
+    // Stable Google subject (`sub` claim). Sparse so accounts created before
+    // Google auth (or never linked) don't all collide on `null`.
+    googleId: { type: String, unique: true, sparse: true, select: false },
     avatar: { type: String, default: "" },
     role: { type: String, enum: ["user", "recruiter"], default: "user" },
     anonymousUsername: { type: String, unique: true },
     refreshToken: { type: String, select: false },
+    // Default true so anyone created before this field existed skips onboarding.
+    // Fresh Google sign-ups explicitly flip this to false until they pick a role.
+    onboardingCompleted: { type: Boolean, default: true },
     publicProfile: {
       displayName: { type: String, trim: true, maxlength: 100, default: "" },
       linkedInUrl: { type: String, trim: true, default: "" },
@@ -38,11 +46,14 @@ userSchema.index({ "publicProfile.targetRole": 1 });
 userSchema.index({ "publicProfile.skills": 1 });
 
 userSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
+  // Password is optional now (Google-only signups have none) — nothing to hash
+  // if the field isn't present or wasn't touched on this save.
+  if (!this.isModified("password") || !this.password) return;
   this.password = await bcrypt.hash(this.password, 12);
 });
 
 userSchema.methods.comparePassword = async function (plain: string) {
+  if (!this.password) return false;
   return bcrypt.compare(plain, this.password);
 };
 

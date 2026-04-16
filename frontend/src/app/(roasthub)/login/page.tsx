@@ -5,29 +5,34 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Flame } from "lucide-react";
+import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { useAuth } from "@/store/auth";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
+/**
+ * Sign-in page. Google is the only auth method — first-time Google users are
+ * routed onward to /onboarding/role to pick Candidate or Recruiter; returning
+ * users go straight to the gallery.
+ */
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { signInWithGoogle } = useAuth();
+  const [busy, setBusy] = useState(false);
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
+  async function onGoogleSuccess(res: CredentialResponse) {
+    if (!res.credential) {
+      toast.error("Google did not return a credential");
+      return;
+    }
+    setBusy(true);
     try {
-      await login(email, password);
-      toast.success("Successfully logged in");
-      router.push("/");
+      const user = await signInWithGoogle(res.credential);
+      toast.success("Welcome to RoastForge");
+      router.push(user.onboardingCompleted === false ? "/onboarding/role" : "/");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Login failed");
+      toast.error(err instanceof Error ? err.message : "Sign-in failed");
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   }
 
@@ -38,50 +43,36 @@ export default function LoginPage() {
           <div className="mx-auto bg-primary w-12 h-12 flex items-center justify-center rounded-full border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mb-2">
             <Flame className="w-6 h-6 text-primary-foreground" />
           </div>
-          <CardTitle className="text-3xl font-heading tracking-tighter ">Welcome Back</CardTitle>
-          <CardDescription className="text-muted-foreground font-medium">Access your portal. Step back into the forge and face the heat.</CardDescription>
+          <CardTitle className="text-3xl font-heading tracking-tighter">Sign in to RoastForge</CardTitle>
+          <CardDescription className="text-muted-foreground font-medium">
+            One-tap with Google. New here? We&apos;ll set you up after sign-in.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="px-8 pb-8">
-          <form onSubmit={onSubmit} className="space-y-5">
-            <div className="space-y-1.5">
-              <label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Email</label>
-              <Input
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none h-10"
-                data-testid="input-email"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Password</label>
-              <Input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none h-10"
-                data-testid="input-password"
-              />
-            </div>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading text-lg h-12 tracking-wide"
-              data-testid="button-submit-login"
-            >
-              {loading ? "Logging in..." : "Login"}
-            </Button>
-          </form>
+        <CardContent className="px-8 pb-8 space-y-6">
+          <div
+            className={`flex justify-center transition-opacity ${busy ? "opacity-50 pointer-events-none" : ""}`}
+            data-testid="google-login-slot"
+          >
+            <GoogleLogin
+              onSuccess={onGoogleSuccess}
+              onError={() => toast.error("Google sign-in was cancelled or failed")}
+              theme="outline"
+              shape="rectangular"
+              size="large"
+              text="continue_with"
+              useOneTap={false}
+            />
+          </div>
+          <p className="text-[11px] text-center text-muted-foreground font-medium leading-relaxed">
+            By continuing you agree that we&apos;ll use your Google email and name to create your RoastForge account.
+            We don&apos;t post anything on your behalf.
+          </p>
         </CardContent>
         <div className="flex justify-center border-t-[3px] border-border bg-muted p-6">
           <p className="text-sm text-muted-foreground">
-            Don't have an account?{" "}
+            New to RoastForge?{" "}
             <Link href="/register" className="font-heading text-primary hover:underline tracking-wider" data-testid="link-go-register">
-              Sign up
+              Create an account
             </Link>
           </p>
         </div>

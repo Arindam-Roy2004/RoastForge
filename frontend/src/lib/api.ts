@@ -1,4 +1,4 @@
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
 export type ApiResult<T = unknown> = { success: boolean; message: string; data?: T };
 
@@ -102,6 +102,9 @@ export type User = {
   avatar: string;
   anonymousUsername?: string;
   role?: string;
+  // False for fresh Google sign-ups until they pick Candidate/Recruiter on
+  // /onboarding/role. The auth store reads this to gate that redirect.
+  onboardingCompleted?: boolean;
 };
 
 export type RecruiterCandidateProfile = {
@@ -144,19 +147,25 @@ export const recruiterApi = {
 };
 
 export const authApi = {
-  register: (body: { name: string; email: string; password: string }) =>
-    apiFetch<{ user: User; accessToken: string }>("/api/auth/register", {
-      method: "POST", auth: false, body: JSON.stringify(body),
+  /** Exchange a Google ID token (from GSI) for our session tokens. */
+  google: (credential: string) =>
+    apiFetch<{ user: User; accessToken: string }>("/api/auth/google", {
+      method: "POST", auth: false, body: JSON.stringify({ credential }),
     }),
-  login: (body: { email: string; password: string }) =>
-    apiFetch<{ user: User; accessToken: string }>("/api/auth/login", {
-      method: "POST", auth: false, body: JSON.stringify(body),
+  /** Complete the Candidate/Recruiter picker shown to first-time Google users. */
+  completeOnboarding: (role: "user" | "recruiter") =>
+    apiFetch<{ user: User }>("/api/auth/me/complete-onboarding", {
+      method: "POST", body: JSON.stringify({ role }),
     }),
   logout: () => apiFetch("/api/auth/logout", { method: "POST" }),
   me: () => apiFetch<User>("/api/auth/me"),
-  /** Permanently deletes the account and all related resumes, projects, comments, likes, and votes. */
-  deleteAccount: (password: string) =>
-    apiFetch("/api/auth/account", { method: "DELETE", body: JSON.stringify({ password }) }),
+  /**
+   * Permanently deletes the account and all related resumes, projects, comments,
+   * likes, and votes. Confirmation is the user's own email typed back — we have
+   * no password to verify since accounts are Google-only.
+   */
+  deleteAccount: (confirmEmail: string) =>
+    apiFetch("/api/auth/account", { method: "DELETE", body: JSON.stringify({ confirmEmail }) }),
 };
 
 // ─── Resumes ─────────────────────────────────────────────────────────────────

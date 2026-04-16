@@ -6,8 +6,10 @@ import { authApi, setToken, clearToken, type User } from "@/lib/api";
 type AuthCtx = {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  /** Hand a Google ID token to the backend, store the session, return the user. */
+  signInWithGoogle: (credential: string) => Promise<User>;
+  /** Sets the user's role and flips onboardingCompleted=true. */
+  completeOnboarding: (role: "user" | "recruiter") => Promise<User>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 };
@@ -34,16 +36,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refresh();
   }, [refresh]);
 
-  const login = async (email: string, password: string) => {
-    const res = await authApi.login({ email, password });
+  const signInWithGoogle = async (credential: string): Promise<User> => {
+    const res = await authApi.google(credential);
     if (res.data?.accessToken) setToken(res.data.accessToken);
     if (res.data?.user) setUser(res.data.user);
+    if (!res.data?.user) throw new Error(res.message || "Google sign-in failed");
+    return res.data.user;
   };
 
-  const register = async (name: string, email: string, password: string) => {
-    const res = await authApi.register({ name, email, password });
-    if (res.data?.accessToken) setToken(res.data.accessToken);
+  const completeOnboarding = async (role: "user" | "recruiter"): Promise<User> => {
+    const res = await authApi.completeOnboarding(role);
     if (res.data?.user) setUser(res.data.user);
+    if (!res.data?.user) throw new Error(res.message || "Could not complete onboarding");
+    return res.data.user;
   };
 
   const logout = async () => {
@@ -53,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refresh }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle, completeOnboarding, logout, refresh }}>
       {children}
     </AuthContext.Provider>
   );
