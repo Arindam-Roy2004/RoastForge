@@ -19,7 +19,7 @@ type ResumeCardProps = {
 export function ResumeCard({ id, title, version, status, overall, createdAt, candidateAlias }: ResumeCardProps) {
   return (
     <Link href={`/resume/${id}`} className="block h-full">
-      <Card className="h-full cursor-pointer border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all bg-card flex flex-col">
+      <Card className="h-full min-h-56 cursor-pointer border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all bg-card flex flex-col">
         <div className="p-5 flex-1">
           <div className="flex items-start gap-4 mb-4">
             <div className="w-12 h-12 rounded-full border-[3px] border-border bg-primary/20 flex items-center justify-center text-xl font-heading uppercase shrink-0 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">

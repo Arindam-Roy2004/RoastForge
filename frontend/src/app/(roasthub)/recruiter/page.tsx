@@ -163,7 +163,7 @@ export default function RecruiterPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {rows.map((r) => (
-              <Card key={r.resumeId} className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all bg-card flex flex-col h-full">
+              <Card key={r.resumeId} className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all bg-card flex flex-col h-full min-h-104">
                 <CardHeader className="border-b-[3px] border-border bg-muted/40 py-4 px-5">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 bg-primary/20 border-2 border-border rounded-full flex items-center justify-center font-mono text-sm font-bold uppercase shrink-0">
