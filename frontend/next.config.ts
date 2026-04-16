@@ -9,6 +9,13 @@ const SECURITY_HEADERS = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  // Google Identity Services opens a consent popup and posts the credential
+  // back via window.postMessage. A stricter `same-origin` COOP blocks that
+  // call (you'll see "Cross-Origin-Opener-Policy policy would block the
+  // window.postMessage call" in the console). `same-origin-allow-popups`
+  // keeps cross-origin isolation for same-origin windows but lets popups
+  // we opened talk back — exactly what GSI needs.
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
 ];
 
 const nextConfig: NextConfig = {
