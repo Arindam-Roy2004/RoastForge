@@ -5,6 +5,9 @@ export const display = localFont({
   src: "../fonts/heming-variable.ttf",
   variable: "--font-heming",
   display: "swap",
+  preload: true,
+  adjustFontFallback: "Arial",
+  fallback: ["Arial", "Helvetica", "sans-serif"],
 });
 
 export const body = Geist({
