@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Flame, Search, ChevronLeft, ChevronRight, Clock, Trophy } from "lucide-react";
+import { Flame, Search, ChevronLeft, ChevronRight, Clock, Trophy, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/store/auth";
 
@@ -255,10 +255,23 @@ export default function HomePage() {
         </div>
 
         {search && (
-          <span className="flex items-center gap-2 text-xs text-muted-foreground font-medium ml-2">
-            Results for &ldquo;<span className="font-bold text-foreground">{search}</span>&rdquo;
-            <button onClick={clearSearch} className="underline hover:text-foreground transition-colors">Clear</button>
-          </span>
+          <div className="flex items-center flex-wrap gap-2 mb-6">
+            <span className="text-xs font-heading uppercase tracking-wide text-muted-foreground">
+              Results for
+            </span>
+            <span className="inline-flex items-center gap-2 bg-card border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] px-3 py-1.5 font-heading text-xs">
+              <Search className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-foreground">{search}</span>
+              <button
+                onClick={clearSearch}
+                aria-label="Clear search"
+                className="-mr-1 flex items-center justify-center w-5 h-5 border-2 border-border bg-background hover:bg-destructive hover:text-destructive-foreground transition-colors active:scale-90"
+                data-testid="button-clear-search"
+              >
+                <X className="w-3 h-3" strokeWidth={3} />
+              </button>
+            </span>
+          </div>
         )}
 
         {/* Total + pagination (above grid so page controls stay visible) */}
