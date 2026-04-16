@@ -5,7 +5,7 @@ import { apiFetch } from "@/lib/api";
 import { useCallback, useState } from "react";
 import { useAuth } from "@/store/auth";
 import { toast } from "sonner";
-import { Search, Briefcase, UserX, Loader2 } from "lucide-react";
+import { Search, Briefcase, UserX, Loader2, FileText } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,11 @@ type CandidateRow = {
   userId?: { anonymousUsername?: string };
   candidateAlias?: string;
   talentComposite?: number;
+  targetRole?: string;
+  skills?: string[];
+  // Number of this candidate's resumes that matched the filters. The card shows
+  // the top-scoring one; anything >1 is a cue to click through to the portfolio.
+  resumeCount?: number;
   identity?: { displayName?: string; linkedInUrl?: string; githubUrl?: string } | null;
 };
 
@@ -135,7 +140,22 @@ export default function RecruiterPage() {
         </div>
       </Card>
 
-      <div className="grid gap-4">
+      {/* Results container: bordered panel with its own header strip and an
+          internally-scrollable body. Caps the viewport footprint so a large
+          result set stays scannable instead of making the whole page scroll.
+          `[scrollbar-gutter:stable]` keeps the card grid from shifting when
+          the scrollbar appears/disappears on re-query. */}
+      <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card overflow-hidden">
+        <CardHeader className="bg-muted/40 border-b-[3px] border-border py-4 px-5 flex flex-row items-center justify-between space-y-0">
+          <CardTitle className="font-heading text-base tracking-wide">Results</CardTitle>
+          <Badge variant="secondary" className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-none font-bold uppercase text-[10px] px-2 py-0.5">
+            {rows.length} {rows.length === 1 ? "Candidate" : "Candidates"}
+          </Badge>
+        </CardHeader>
+        <div
+          className="max-h-[70vh] overflow-y-auto overscroll-y-contain p-4 sm:p-6 [scrollbar-gutter:stable]"
+          aria-label="Candidate search results"
+        >
         {rows.length === 0 ? (
           <div className="border-[3px] border-border border-dashed bg-muted/50 p-12 text-center text-muted-foreground font-heading tracking-widest">
             No results. Adjust filters and query again.
@@ -167,6 +187,15 @@ export default function RecruiterPage() {
                     <Badge variant="outline" className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-none text-[10px] px-2 py-0.5 font-bold uppercase">
                       Talent {r.talentComposite ?? "—"}
                     </Badge>
+                    {/* Backend collapses a candidate's matching resumes into one card
+                        and returns the top-scoring one. If they have more that also
+                        matched the filters, surface a count so the recruiter knows
+                        to open the full portfolio to see the rest. */}
+                    {r.resumeCount && r.resumeCount > 1 && (
+                      <Badge variant="secondary" className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-none text-[10px] px-2 py-0.5 font-bold uppercase gap-1">
+                        <FileText className="w-3 h-3" /> +{r.resumeCount - 1} more
+                      </Badge>
+                    )}
                     {r.identity ? (
                       <Badge variant="default" className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-none text-[10px] px-2 py-0.5 font-bold uppercase">
                         Identity Available
@@ -177,6 +206,31 @@ export default function RecruiterPage() {
                       </Badge>
                     )}
                   </div>
+                  {r.targetRole && (
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Target Role</p>
+                      <Badge variant="secondary" className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-none text-xs px-2 py-1 font-bold">
+                        {r.targetRole}
+                      </Badge>
+                    </div>
+                  )}
+                  {r.skills && r.skills.length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Skills</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {r.skills.slice(0, 6).map((s) => (
+                          <Badge key={s} variant="outline" className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-none text-[10px] px-2 py-0.5 font-bold uppercase">
+                            {s}
+                          </Badge>
+                        ))}
+                        {r.skills.length > 6 && (
+                          <Badge variant="outline" className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-none text-[10px] px-2 py-0.5 font-bold uppercase">
+                            +{r.skills.length - 6}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
                   {r.identity && (
                     <div className="space-y-2">
                       <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Contact Info</p>
@@ -213,7 +267,8 @@ export default function RecruiterPage() {
             ))}
           </div>
         )}
-      </div>
+        </div>
+      </Card>
     </div>
   );
 }

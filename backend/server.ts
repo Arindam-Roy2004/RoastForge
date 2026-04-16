@@ -2,12 +2,19 @@ import "dotenv/config";
 import http from "http";
 import app from "./src/app.js";
 import connectDB from "./src/common/config/db.js";
+import { assertEnv } from "./src/common/config/env.js";
 
 const PORT = process.env.PORT || 5000;
 
 const start = async () => {
   if (!process.env.MONGODB_URI) {
     console.error("MONGODB_URI is not set in environment");
+    process.exit(1);
+  }
+  try {
+    assertEnv();
+  } catch (err) {
+    console.error((err as Error).message);
     process.exit(1);
   }
   await connectDB();

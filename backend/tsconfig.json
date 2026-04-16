@@ -5,13 +5,13 @@
     "moduleResolution": "node16",
     "outDir": "./dist",
     "rootDir": ".",
-    "strict": false,
-    "noImplicitAny": false,
+    "strict": true,
+    "noImplicitAny": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*", "api/**/*", "server.ts"],
+  "include": ["src/**/*", "api/**/*", "server.ts", "scripts/**/*"],
   "exclude": ["node_modules", "dist"]
 }

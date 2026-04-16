@@ -473,11 +473,16 @@ export default function ResumeDetail() {
                       ))}
                     </div>
                   )}
+                  <label htmlFor="comment-text" className="sr-only">
+                    {isOwner ? "Add a comment" : "Write your roast or feedback"}
+                  </label>
                   <textarea
+                    id="comment-text"
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     placeholder={isOwner ? "Add a comment..." : "Write your roast / feedback..."}
                     rows={3}
+                    aria-label={isOwner ? "Add a comment" : "Write your roast or feedback"}
                     className="w-full min-h-[5.5rem] p-3 border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background resize-none text-sm font-medium bg-background leading-relaxed"
                     required
                   />

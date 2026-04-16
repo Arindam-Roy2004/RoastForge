@@ -1,6 +1,7 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
+import helmet from "helmet";
 import authRoute from "./modules/auth/auth.routes.js";
 import resumeRoute from "./modules/resume/resume.routes.js";
 import commentRoute from "./modules/comment/comment.routes.js";
@@ -9,6 +10,7 @@ import analysisRoute from "./modules/analysis/analysis.routes.js";
 import projectRoute from "./modules/project/project.routes.js";
 import recruiterRoute from "./modules/recruiter/recruiter.routes.js";
 import { errorHandler } from "./common/middleware/error.middleware.js";
+import { sanitizeBody } from "./common/middleware/security.middleware.js";
 
 /** Comma-separated FRONTEND_ORIGIN (e.g. prod + previews). Required on Vercel for split deploys. */
 function allowedBrowserOrigins(): string[] {
@@ -21,6 +23,13 @@ function allowedBrowserOrigins(): string[] {
 
 const app = express();
 
+// Keep CORP loose so Cloudinary-hosted resume/avatar images load in the browser.
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: false,
+  }),
+);
 app.use(
   cors({
     origin(origin, callback) {
@@ -41,6 +50,7 @@ app.use(
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(sanitizeBody);
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true, service: "roastforge-api" });

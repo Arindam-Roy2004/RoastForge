@@ -17,11 +17,21 @@ function timeAgo(iso: string) {
   return `${d}d ago`;
 }
 
+// Tailwind JIT cannot detect dynamic class names, so we need full literals.
+const AVATAR_SIZE_CLASS: Record<number, string> = {
+  6: "size-6",
+  7: "size-7",
+  8: "size-8",
+  9: "size-9",
+  10: "size-10",
+};
+
 function Avatar({ name, avatar, size = 8 }: { name: string; avatar?: string; size?: number }) {
+  const sizeClass = AVATAR_SIZE_CLASS[size] ?? "size-8";
   return avatar ? (
-    <img src={avatar} alt={name} className={`size-${size} rounded-full object-cover border border-[var(--color-border)] shrink-0`} />
+    <img src={avatar} alt={name} className={`${sizeClass} rounded-full object-cover border border-[var(--color-border)] shrink-0`} />
   ) : (
-    <div className={`size-${size} rounded-full bg-gradient-to-br from-[var(--color-primary)] to-orange-600 flex items-center justify-center text-xs font-bold text-white shrink-0`}>
+    <div className={`${sizeClass} rounded-full bg-gradient-to-br from-[var(--color-primary)] to-orange-600 flex items-center justify-center text-xs font-bold text-white shrink-0`}>
       {name[0]?.toUpperCase() || "?"}
     </div>
   );
@@ -45,8 +55,13 @@ function CommentItem({ comment, depth = 0, onDeleted, onAdded }: CommentItemProp
   const [editText, setEditText] = useState(comment.text);
   const [currentText, setCurrentText] = useState(comment.text);
 
-  const authorName = comment.userId?.anonymousUsername || comment.userId?.name || "Anonymous";
-  const authorAvatar = comment.userId?.avatar;
+  // `userId === null` means the author deleted themselves (or this comment) but
+  // replies from other users kept the node alive as a tombstone in the thread.
+  const isTombstoned = !comment.userId;
+  const authorName = isTombstoned
+    ? "[deleted]"
+    : comment.userId?.anonymousUsername || comment.userId?.name || "Anonymous";
+  const authorAvatar = isTombstoned ? undefined : comment.userId?.avatar;
 
   const vote = async (type: "upvote" | "downvote") => {
     if (!user) { toast.error("Sign in to vote"); return; }
@@ -99,16 +114,18 @@ function CommentItem({ comment, depth = 0, onDeleted, onAdded }: CommentItemProp
   const isOwner = user?.id === comment.userId?._id;
 
   return (
-    <div className={`comment-box ${depth > 0 ? "reply-box mt-3" : "mt-4"}`}>
+    <div className={`comment-box ${depth > 0 ? "reply-box mt-3" : "mt-4"} ${isTombstoned ? "opacity-60" : ""}`}>
       <div className="flex items-start gap-3">
         <Avatar name={authorName} avatar={authorAvatar} size={7} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-semibold text-sm">{authorName}</span>
+            <span className={`font-semibold text-sm ${isTombstoned ? "italic text-[var(--color-muted)]" : ""}`}>{authorName}</span>
             <span className="text-xs text-[var(--color-muted-foreground)]">{timeAgo(comment.createdAt)}</span>
           </div>
 
-          {editing ? (
+          {isTombstoned ? (
+            <p className="text-sm italic text-[var(--color-muted)]">{currentText}</p>
+          ) : editing ? (
             <div className="space-y-2">
               <textarea
                 value={editText}
@@ -129,30 +146,33 @@ function CommentItem({ comment, depth = 0, onDeleted, onAdded }: CommentItemProp
             <p className="text-sm leading-relaxed text-[var(--color-foreground)]">{currentText}</p>
           )}
 
-          {/* Actions */}
-          <div className="flex items-center gap-3 mt-2 flex-wrap">
-            <button onClick={() => vote("upvote")} className={`vote-btn vote-btn-up ${myVote === "upvote" ? "active" : ""}`}>
-              <ChevronUp className="size-4" /> {upvotes}
-            </button>
-            <button onClick={() => vote("downvote")} className={`vote-btn vote-btn-down ${myVote === "downvote" ? "active" : ""}`}>
-              <ChevronDown className="size-4" /> {downvotes}
-            </button>
-            {depth === 0 && user && (
-              <button onClick={() => setReplying(!replying)} className="flex items-center gap-1 text-xs text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors">
-                <Reply className="size-3.5" /> Reply
+          {/* Actions — hidden on tombstoned comments since there's nothing to vote on,
+              reply directly to, or edit/delete. Nested replies still render below. */}
+          {!isTombstoned && (
+            <div className="flex items-center gap-3 mt-2 flex-wrap">
+              <button onClick={() => vote("upvote")} className={`vote-btn vote-btn-up ${myVote === "upvote" ? "active" : ""}`}>
+                <ChevronUp className="size-4" /> {upvotes}
               </button>
-            )}
-            {isOwner && (
-              <>
-                <button onClick={() => { setEditing(true); setEditText(currentText); }} className="flex items-center gap-1 text-xs text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors">
-                  <Edit2 className="size-3.5" /> Edit
+              <button onClick={() => vote("downvote")} className={`vote-btn vote-btn-down ${myVote === "downvote" ? "active" : ""}`}>
+                <ChevronDown className="size-4" /> {downvotes}
+              </button>
+              {depth === 0 && user && (
+                <button onClick={() => setReplying(!replying)} className="flex items-center gap-1 text-xs text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors">
+                  <Reply className="size-3.5" /> Reply
                 </button>
-                <button onClick={handleDelete} className="flex items-center gap-1 text-xs text-[var(--color-down)] hover:opacity-80 transition-colors">
-                  <Trash2 className="size-3.5" /> Delete
-                </button>
-              </>
-            )}
-          </div>
+              )}
+              {isOwner && (
+                <>
+                  <button onClick={() => { setEditing(true); setEditText(currentText); }} className="flex items-center gap-1 text-xs text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors">
+                    <Edit2 className="size-3.5" /> Edit
+                  </button>
+                  <button onClick={handleDelete} className="flex items-center gap-1 text-xs text-[var(--color-down)] hover:opacity-80 transition-colors">
+                    <Trash2 className="size-3.5" /> Delete
+                  </button>
+                </>
+              )}
+            </div>
+          )}
 
           {/* Reply box */}
           {replying && (

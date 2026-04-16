@@ -1,35 +1,33 @@
-class ApiResponse {
+import type { Response } from "express";
 
-    static ok(res, message, data = null){
+class ApiResponse {
+    static ok(res: Response, message: string, data: unknown = null) {
         return res.status(200).json({
             success: true,
             message,
-            data
-        })
+            data,
+        });
     }
 
-    static created(res, message, data = null){
+    static created(res: Response, message: string, data: unknown = null) {
         return res.status(201).json({
             success: true,
             message,
-            data
-        })
+            data,
+        });
     }
 
-    static noContent(res) {
+    static noContent(res: Response) {
         return res.status(204).send();
     }
 
-    static error(res, message, statusCode = 400, data = null) {
+    static error(res: Response, message: string, statusCode = 400, data: unknown = null) {
         return res.status(statusCode).json({
             success: false,
             message,
             data,
         });
     }
-
 }
 
-
-
-export default ApiResponse
+export default ApiResponse;

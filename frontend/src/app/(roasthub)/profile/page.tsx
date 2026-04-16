@@ -1,6 +1,6 @@
 "use client";
 
-import { apiFetch, clearToken, type User as AuthUser } from "@/lib/api";
+import { apiFetch, type User as AuthUser } from "@/lib/api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -35,6 +35,8 @@ type User = {
     linkedInUrl?: string;
     githubUrl?: string;
     shareIdentityWithRecruiters?: boolean;
+    targetRole?: string;
+    skills?: string[];
   };
   talentMetrics?: { composite: number };
 };
@@ -52,7 +54,7 @@ type Resume = {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user: authUser, loading: authLoading } = useAuth();
+  const { user: authUser, loading: authLoading, logout } = useAuth();
   const [user, setUser] = useState<User | null>(null);
   const [detailLoading, setDetailLoading] = useState(true);
   const [resumes, setResumes] = useState<Resume[]>([]);
@@ -61,6 +63,10 @@ export default function ProfilePage() {
   const [linkedIn, setLinkedIn] = useState("");
   const [github, setGithub] = useState("");
   const [share, setShare] = useState(false);
+  const [targetRole, setTargetRole] = useState("");
+  // Skills are edited as a comma-separated string for a single-field UX;
+  // we normalize + dedupe to an array right before sending to the API.
+  const [skillsInput, setSkillsInput] = useState("");
 
   const loadDetails = useCallback(async () => {
     if (!authUser) return;
@@ -83,6 +89,8 @@ export default function ProfilePage() {
         setLinkedIn(row.publicProfile.linkedInUrl || "");
         setGithub(row.publicProfile.githubUrl || "");
         setShare(row.publicProfile.shareIdentityWithRecruiters || false);
+        setTargetRole(row.publicProfile.targetRole || "");
+        setSkillsInput((row.publicProfile.skills || []).join(", "));
       }
       if (authUser.role !== "recruiter") {
         const r = await apiFetch<Resume[]>("/api/resumes/my");
@@ -109,11 +117,34 @@ export default function ProfilePage() {
     void loadDetails();
   }, [authLoading, authUser, loadDetails]);
 
+  const isRecruiter = authUser?.role === "recruiter";
+
   async function saveProfile() {
     try {
+      // Recruiters don't own candidate search fields; only send what applies to them.
+      // The backend enforces this too, but filtering here keeps payloads clean.
+      const body: Record<string, unknown> = {
+        displayName,
+        linkedInUrl: linkedIn,
+        githubUrl: github,
+      };
+      if (!isRecruiter) {
+        // Split commas → trim → dedupe. Server normalizes again (lowercase/cap) as defense in depth.
+        const parsedSkills = Array.from(
+          new Set(
+            skillsInput
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean),
+          ),
+        ).slice(0, 25);
+        body.shareIdentityWithRecruiters = share;
+        body.targetRole = targetRole;
+        body.skills = parsedSkills;
+      }
       await apiFetch("/api/auth/me/profile", {
         method: "PATCH",
-        body: JSON.stringify({ displayName, linkedInUrl: linkedIn, githubUrl: github, shareIdentityWithRecruiters: share }),
+        body: JSON.stringify(body),
       });
       toast.success("Profile updated!");
       setEditMode(false);
@@ -171,20 +202,29 @@ export default function ProfilePage() {
               {displayUser.anonymousPublicId && (
                 <span className="font-mono text-xs tracking-tight text-primary-foreground/70">u/{displayUser.anonymousPublicId}</span>
               )}
-              {displayUser.talentMetrics && (
+              {/* Talent score is candidate-only; recruiters never receive talentMetrics from the API. */}
+              {!isRecruiter && displayUser.talentMetrics && (
                 <Badge variant="secondary" className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none font-bold px-3 py-1">
                   Talent Score: {displayUser.talentMetrics.composite}
+                </Badge>
+              )}
+              {isRecruiter && (
+                <Badge variant="secondary" className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none font-bold px-3 py-1 uppercase">
+                  Recruiter
                 </Badge>
               )}
             </div>
           </div>
           <div className="flex flex-col gap-3 w-full md:w-auto mt-4 md:mt-0">
-            <Badge variant="outline" className="border-2 border-primary-foreground text-primary-foreground rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] bg-primary/50 text-sm py-1.5 px-4 flex items-center justify-center md:justify-start gap-2 font-heading tracking-wide">
-              <FileText className="w-4 h-4" /> {resumes.length} Resume{resumes.length !== 1 ? "s" : ""}
-            </Badge>
+            {/* Resume count badge is meaningless for recruiters (they can't upload). */}
+            {!isRecruiter && (
+              <Badge variant="outline" className="border-2 border-primary-foreground text-primary-foreground rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] bg-primary/50 text-sm py-1.5 px-4 flex items-center justify-center md:justify-start gap-2 font-heading tracking-wide">
+                <FileText className="w-4 h-4" /> {resumes.length} Resume{resumes.length !== 1 ? "s" : ""}
+              </Badge>
+            )}
             <Button
               variant="destructive"
-              onClick={() => { clearToken(); router.push("/"); }}
+              onClick={async () => { await logout(); router.push("/"); }}
               className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs tracking-wide w-full"
             >
               <LogOut className="w-4 h-4 mr-2" /> Sign Out
@@ -223,10 +263,37 @@ export default function ProfilePage() {
                     <label className="font-heading text-xs">GitHub URL</label>
                     <Input value={github} onChange={(e) => setGithub(e.target.value)} placeholder="GitHub URL" className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" />
                   </div>
-                  <label className="flex items-center gap-3 cursor-pointer p-3 border-2 border-border bg-muted/50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mt-4">
-                    <input type="checkbox" checked={share} onChange={() => setShare(!share)} className="w-4 h-4 accent-primary rounded-none border-2 border-border" />
-                    <span className="text-sm font-bold tracking-tight uppercase">Share identity with recruiters</span>
-                  </label>
+                  {/* Target Role, Skills, and share-identity are candidate-only —
+                      they power the recruiter search. Recruiters don't appear in that
+                      search so these fields would just be noise on their profile. */}
+                  {!isRecruiter && (
+                    <>
+                      <div className="space-y-1">
+                        <label className="font-heading text-xs">Target Role</label>
+                        <Input
+                          value={targetRole}
+                          onChange={(e) => setTargetRole(e.target.value)}
+                          placeholder="e.g. Backend Engineer"
+                          maxLength={80}
+                          className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-heading text-xs">Skills</label>
+                        <Input
+                          value={skillsInput}
+                          onChange={(e) => setSkillsInput(e.target.value)}
+                          placeholder="react, python, aws..."
+                          className="border-2 border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                        />
+                        <p className="text-[10px] text-muted-foreground font-medium tracking-tight">Comma-separated. Up to 25. Used by recruiter search.</p>
+                      </div>
+                      <label className="flex items-center gap-3 cursor-pointer p-3 border-2 border-border bg-muted/50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mt-4">
+                        <input type="checkbox" checked={share} onChange={() => setShare(!share)} className="w-4 h-4 accent-primary rounded-none border-2 border-border" />
+                        <span className="text-sm font-bold tracking-tight uppercase">Share identity with recruiters</span>
+                      </label>
+                    </>
+                  )}
                   <Button onClick={saveProfile} className="w-full border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading tracking-wide mt-4">
                     Save Changes
                   </Button>
@@ -245,12 +312,36 @@ export default function ProfilePage() {
                     <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">GitHub</h4>
                     <p className="font-medium bg-muted p-2 border-2 border-border inline-block min-w-full text-sm truncate">{displayUser.publicProfile?.githubUrl || "—"}</p>
                   </div>
-                  <div>
-                    <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Visibility</h4>
-                    <Badge variant={displayUser.publicProfile?.shareIdentityWithRecruiters ? "default" : "secondary"} className="border-2 border-border rounded-none font-bold uppercase shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] text-[10px] px-2 py-0.5">
-                      {displayUser.publicProfile?.shareIdentityWithRecruiters ? "Shared with Recruiters" : "Anonymous"}
-                    </Badge>
-                  </div>
+                  {/* Same rationale as the edit form: candidate-only sections
+                      are hidden for recruiter accounts. */}
+                  {!isRecruiter && (
+                    <>
+                      <div>
+                        <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Target Role</h4>
+                        <p className="font-medium bg-muted p-2 border-2 border-border inline-block min-w-full text-sm truncate">{displayUser.publicProfile?.targetRole || "—"}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Skills</h4>
+                        {displayUser.publicProfile?.skills && displayUser.publicProfile.skills.length > 0 ? (
+                          <div className="flex flex-wrap gap-1.5">
+                            {displayUser.publicProfile.skills.map((s) => (
+                              <Badge key={s} variant="outline" className="border-2 border-border rounded-none font-bold uppercase shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] text-[10px] px-2 py-0.5">
+                                {s}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="font-medium bg-muted p-2 border-2 border-border inline-block min-w-full text-sm">—</p>
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Visibility</h4>
+                        <Badge variant={displayUser.publicProfile?.shareIdentityWithRecruiters ? "default" : "secondary"} className="border-2 border-border rounded-none font-bold uppercase shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] text-[10px] px-2 py-0.5">
+                          {displayUser.publicProfile?.shareIdentityWithRecruiters ? "Shared with Recruiters" : "Anonymous"}
+                        </Badge>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </CardContent>

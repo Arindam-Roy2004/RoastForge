@@ -15,6 +15,16 @@ const userSchema = new mongoose.Schema(
       linkedInUrl: { type: String, trim: true, default: "" },
       githubUrl: { type: String, trim: true, default: "" },
       shareIdentityWithRecruiters: { type: Boolean, default: false },
+      // Candidate-declared job role they are targeting (e.g. "Backend Engineer").
+      // Used for recruiter search; stored as-entered for display, matched case-insensitively.
+      targetRole: { type: String, trim: true, maxlength: 80, default: "" },
+      // Candidate-declared skills. Stored lowercased & deduped so $in queries are exact-cheap.
+      // Capped to keep payloads bounded and stop abuse.
+      skills: {
+        type: [{ type: String, trim: true, lowercase: true, maxlength: 40 }],
+        default: [],
+        validate: [(v: string[]) => !v || v.length <= 25, "Too many skills (max 25)"],
+      },
     },
     talentMetrics: {
       composite: { type: Number, default: 0 },
@@ -22,6 +32,10 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+// Indexes for recruiter candidate search. Sparse-friendly since most users start blank.
+userSchema.index({ "publicProfile.targetRole": 1 });
+userSchema.index({ "publicProfile.skills": 1 });
 
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;

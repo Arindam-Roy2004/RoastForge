@@ -2,15 +2,72 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export type ApiResult<T = unknown> = { success: boolean; message: string; data?: T };
 
+// Joins the API base URL with a path, tolerating missing/trailing slashes.
+function joinUrl(base: string, path: string): string {
+  const b = base.replace(/\/+$/, "");
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return `${b}${p}`;
+}
+
+// Safely parses a fetch response body. Returns a structured ApiResult even when
+// the backend returns HTML (proxy error page) or an empty body.
+async function parseApiResponse<T>(res: Response): Promise<ApiResult<T>> {
+  const contentType = res.headers.get("content-type") || "";
+  const rawText = await res.text();
+  if (contentType.includes("application/json") && rawText) {
+    try {
+      return JSON.parse(rawText) as ApiResult<T>;
+    } catch {
+      return { success: res.ok, message: `Invalid JSON from server (${res.status})` };
+    }
+  }
+  return { success: res.ok, message: rawText || res.statusText || `HTTP ${res.status}` };
+}
+
 // ─── Token helpers ───────────────────────────────────────────────────────────
 export const getToken = () => (typeof window !== "undefined" ? localStorage.getItem("token") : null);
-export const setToken = (t: string) => localStorage.setItem("token", t);
-export const clearToken = () => localStorage.removeItem("token");
+export const setToken = (t: string) => {
+  if (typeof window !== "undefined") localStorage.setItem("token", t);
+};
+export const clearToken = () => {
+  if (typeof window !== "undefined") localStorage.removeItem("token");
+};
+
+// Single-flight refresh: all 401 callers share one in-flight refresh promise.
+let refreshPromise: Promise<boolean> | null = null;
+function tryRefreshToken(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(joinUrl(API, "/api/auth/refresh"), {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!res.ok) return false;
+      const json = await parseApiResponse<{ accessToken?: string }>(res);
+      const token = json.data?.accessToken;
+      if (token) {
+        setToken(token);
+        return true;
+      }
+      return false;
+    } catch (err) {
+      if (process.env.NODE_ENV !== "production") console.warn("Token refresh failed", err);
+      return false;
+    } finally {
+      // Release the lock after a tick so concurrent callers share this result.
+      setTimeout(() => {
+        refreshPromise = null;
+      }, 0);
+    }
+  })();
+  return refreshPromise;
+}
 
 // ─── Core fetch wrapper ──────────────────────────────────────────────────────
 export async function apiFetch<T = unknown>(
   path: string,
-  options: RequestInit & { auth?: boolean } = {},
+  options: RequestInit & { auth?: boolean; _retry?: boolean } = {},
 ): Promise<ApiResult<T>> {
   const headers = new Headers(options.headers);
   if (!headers.has("Content-Type") && options.body && !(options.body instanceof FormData)) {
@@ -21,33 +78,20 @@ export async function apiFetch<T = unknown>(
     if (t) headers.set("Authorization", `Bearer ${t}`);
   }
 
-  const res = await fetch(`${API}${path}`, { ...options, headers, credentials: "include" });
-  const json = (await res.json()) as ApiResult<T>;
+  const res = await fetch(joinUrl(API, path), { ...options, headers, credentials: "include" });
+  const json = await parseApiResponse<T>(res);
 
   if (!res.ok) {
-    // Auto-refresh on 401
-    if (res.status === 401 && options.auth !== false) {
+    // Auto-refresh on 401 (single-flight, retry only once to prevent loops).
+    if (res.status === 401 && options.auth !== false && !options._retry) {
       const refreshed = await tryRefreshToken();
       if (refreshed) {
-        return apiFetch(path, options);
+        return apiFetch<T>(path, { ...options, _retry: true });
       }
     }
-    throw new Error(json.message || res.statusText);
+    throw new Error(json.message || res.statusText || `HTTP ${res.status}`);
   }
   return json;
-}
-
-async function tryRefreshToken(): Promise<boolean> {
-  try {
-    const res = await fetch(`${API}/api/auth/refresh`, { method: "POST", credentials: "include" });
-    if (!res.ok) return false;
-    const json = await res.json();
-    if (json.data?.accessToken) {
-      setToken(json.data.accessToken);
-      return true;
-    }
-  } catch {}
-  return false;
 }
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
@@ -65,6 +109,8 @@ export type RecruiterCandidateProfile = {
   anonymousUsername?: string;
   avatar: string;
   talentComposite: number;
+  targetRole?: string;
+  skills?: string[];
   identity: {
     displayName: string;
     linkedInUrl: string;
@@ -188,7 +234,10 @@ export const analysisApi = {
 // ─── Comments ────────────────────────────────────────────────────────────────
 export type Comment = {
   _id: string;
-  userId: { _id: string; name: string; avatar: string; anonymousUsername?: string };
+  // `null` when the author deleted themselves (or the comment) but replies from
+  // other users kept the node alive as a tombstone. The UI renders these as
+  // "[deleted]" with actions hidden.
+  userId: { _id: string; name: string; avatar: string; anonymousUsername?: string } | null;
   text: string;
   parentId: string | null;
   upvotesCount: number;
@@ -211,25 +260,26 @@ export const commentApi = {
 };
 
 // ─── Upload ──────────────────────────────────────────────────────────────────
+// Routed through apiFetch so uploads benefit from single-flight refresh + safe JSON parsing.
 export const uploadApi = {
   resume: async (file: File): Promise<{ fileUrl: string; fileType: "pdf" | "image" }> => {
     const fd = new FormData();
     fd.append("file", file);
-    const t = getToken();
-    const headers: HeadersInit = t ? { Authorization: `Bearer ${t}` } : {};
-    const res = await fetch(`${API}/api/upload/resume`, { method: "POST", headers, body: fd, credentials: "include" });
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.message || "Upload failed");
-    return json.data;
+    const res = await apiFetch<{ fileUrl: string; fileType: "pdf" | "image" }>("/api/upload/resume", {
+      method: "POST",
+      body: fd,
+    });
+    if (!res.data) throw new Error(res.message || "Upload failed");
+    return res.data;
   },
   avatar: async (file: File): Promise<string> => {
     const fd = new FormData();
     fd.append("avatar", file);
-    const t = getToken();
-    const headers: HeadersInit = t ? { Authorization: `Bearer ${t}` } : {};
-    const res = await fetch(`${API}/api/upload/avatar`, { method: "POST", headers, body: fd, credentials: "include" });
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.message || "Upload failed");
-    return json.data.avatarUrl;
+    const res = await apiFetch<{ avatarUrl: string }>("/api/upload/avatar", {
+      method: "POST",
+      body: fd,
+    });
+    if (!res.data?.avatarUrl) throw new Error(res.message || "Upload failed");
+    return res.data.avatarUrl;
   },
 };

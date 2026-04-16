@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useAuth } from "@/store/auth";
 import { Flame } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -60,11 +61,25 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/login" data-testid="link-login">
-                <Button variant="outline" size="sm" className="h-9 rounded-none border-[3px] border-border px-3.5 font-heading text-[11px] uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none">Login</Button>
+              <Link
+                href="/login"
+                data-testid="link-login"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "h-9 rounded-none border-[3px] border-border px-3.5 font-heading text-[11px] uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
+                )}
+              >
+                Login
               </Link>
-              <Link href="/register" data-testid="link-register">
-                <Button size="sm" className="h-9 rounded-none border-[3px] border-border px-3.5 font-heading text-[11px] uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none">Register</Button>
+              <Link
+                href="/register"
+                data-testid="link-register"
+                className={cn(
+                  buttonVariants({ size: "sm" }),
+                  "h-9 rounded-none border-[3px] border-border px-3.5 font-heading text-[11px] uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
+                )}
+              >
+                Register
               </Link>
             </>
           )}

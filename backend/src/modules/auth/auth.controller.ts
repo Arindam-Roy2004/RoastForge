@@ -27,8 +27,16 @@ export const login = async (req: Request, res: Response) => {
 
 export const refresh = async (req: Request, res: Response) => {
   const token = req.cookies?.refreshToken;
-  const { accessToken } = await authService.refresh(token);
-  ApiResponse.ok(res, "Token refreshed", { accessToken });
+  try {
+    const { accessToken, refreshToken: rotated } = await authService.refresh(token);
+    res.cookie("refreshToken", rotated, COOKIE_OPTS);
+    ApiResponse.ok(res, "Token refreshed", { accessToken });
+  } catch (err) {
+    // On any refresh failure (reuse, expiry, missing) we must clear the cookie so
+    // the browser doesn't keep replaying a dead/compromised token.
+    res.clearCookie("refreshToken", { path: "/", sameSite: COOKIE_OPTS.sameSite, secure: COOKIE_OPTS.secure });
+    throw err;
+  }
 };
 
 export const logout = async (req: Request, res: Response) => {

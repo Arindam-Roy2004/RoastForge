@@ -1,7 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { getToken } from "@/lib/api";
+import { uploadApi, resumeApi } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -12,7 +11,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+// Matches backend default UPLOAD_MAX_BYTES (10 * 1024 * 1024).
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const MAX_UPLOAD_MB = Math.floor(MAX_UPLOAD_BYTES / (1024 * 1024));
 
 export default function UploadPage() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export default function UploadPage() {
     const f = e.target.files?.[0];
     if (!f) return;
     if (f.type !== "application/pdf") { setError("Only PDF files are allowed."); return; }
-    if (f.size > 5 * 1024 * 1024) { setError("File too large. Maximum 5 MB."); return; }
+    if (f.size > MAX_UPLOAD_BYTES) { setError(`File too large. Maximum ${MAX_UPLOAD_MB} MB.`); return; }
     setFile(f);
     setError(null);
   }
@@ -45,26 +46,14 @@ export default function UploadPage() {
     setUploading(true);
     setError(null);
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const headers: HeadersInit = {};
-      const t = getToken();
-      if (t) headers.Authorization = `Bearer ${t}`;
-      const uploadRes = await fetch(`${API_BASE}/api/upload/resume`, { method: "POST", headers, body: fd });
-      const uploadJson = await uploadRes.json();
-      if (!uploadRes.ok) throw new Error(uploadJson.message || "Failed to upload file to cloud");
-
-      const { fileUrl, fileType } = uploadJson.data;
-
-      const createRes = await fetch(`${API_BASE}/api/resumes`, {
-        method: "POST",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ title: title.trim(), name: file.name, fileUrl, fileType })
+      const { fileUrl, fileType } = await uploadApi.resume(file);
+      const created = await resumeApi.create({
+        title: title.trim(),
+        name: file.name,
+        fileUrl,
+        fileType,
       });
-      const createJson = await createRes.json();
-      if (!createRes.ok) throw new Error(createJson.message || "Failed to save resume profile");
-
-      toast.success(createJson.message || "Resume uploaded & queued!");
+      toast.success(created.message || "Resume uploaded & queued!");
       router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
@@ -135,9 +124,17 @@ export default function UploadPage() {
                 </div>
                 <div className="text-center">
                   <p className="font-heading text-lg">Click to Upload</p>
-                  <p className="text-sm text-muted-foreground mt-1">PDF up to 5MB</p>
+                  <p className="text-sm text-muted-foreground mt-1">PDF up to {MAX_UPLOAD_MB}MB</p>
                 </div>
-                <input ref={ref} type="file" accept="application/pdf" className="hidden" onChange={handleFile} />
+                <input
+                  ref={ref}
+                  id="resume-file"
+                  type="file"
+                  accept="application/pdf"
+                  aria-label="Resume PDF file"
+                  className="hidden"
+                  onChange={handleFile}
+                />
                 <Button type="button" variant="outline" className="mt-2 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading" onClick={(e: React.MouseEvent) => { e.stopPropagation(); ref.current?.click(); }}>
                    Select File
                 </Button>

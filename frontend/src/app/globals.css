@@ -136,4 +136,18 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading tracking-wide;
   }
+
+  /* The Heming display font (loaded as `--font-heading`) ships with sparse kerning
+     tables — several uppercase pairs (notably D·A and A·S in "DASHBOARD") have
+     no pair data, which is why those letters drift apart once `uppercase` and
+     `tracking-wider` amplify the per-glyph sidebearings. Forcing kerning on and
+     asking the browser for legibility-optimised text-rendering makes it honor
+     whatever kerning data does exist (browsers default to `auto`, which often
+     disables kerning at small sizes). It's a global fix for every heading-font
+     usage, not just the navbar "Dashboard" link. */
+  .font-heading {
+    font-kerning: normal;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern" 1;
+  }
 }

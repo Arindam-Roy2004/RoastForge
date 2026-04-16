@@ -4,10 +4,15 @@ import type { Request, Response } from "express";
 
 const p = (v: string | string[]) => (Array.isArray(v) ? v[0] : v);
 
+const VALID_SORTS = new Set(["new", "hot", "top"]);
+
 export const listResumes = async (req: Request, res: Response) => {
-  const page = parseInt(String(req.query.page || "1"), 10);
-  const sort = (req.query.sort as "new" | "hot" | "top") || "new";
-  const search = req.query.search as string | undefined;
+  const rawPage = parseInt(String(req.query.page ?? "1"), 10);
+  const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
+  const sortParam = typeof req.query.sort === "string" ? req.query.sort : "new";
+  const sort = (VALID_SORTS.has(sortParam) ? sortParam : "new") as "new" | "hot" | "top";
+  const searchRaw = typeof req.query.search === "string" ? req.query.search : undefined;
+  const search = searchRaw ? searchRaw.slice(0, 200) : undefined;
   const viewerId = (req as any).user?.id;
   const data = await resumeService.listResumes({ page, sort, search, viewerId });
   ApiResponse.ok(res, "Resumes fetched", data);

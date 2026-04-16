@@ -1,7 +1,10 @@
 import Resume from "./resume.model.js";
 import Like from "./like.model.js";
+import Comment from "../comment/comment.model.js";
+import CommentVote from "../comment/comment-vote.model.js";
 import ApiError from "../../common/utils/api-error.js";
 import mongoose from "mongoose";
+import { safeRecalcTalentScore } from "../auth/talent-score.service.js";
 
 const PAGE_SIZE = 8;
 
@@ -67,17 +70,17 @@ export const listResumes = async (opts: {
 
   let query = Resume.find(filter).sort(sortObj).skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE);
   if (useTextScore) query = query.select({ score: { $meta: "textScore" } });
-  const resumes = await populateUser(query);
+  const resumes = (await populateUser(query)) as any[];
 
   // Attach liked status for authenticated viewer
   let likedIds: Set<string> = new Set();
   if (viewerId) {
-    const likes = await Like.find({ resumeId: { $in: resumes.map((r) => r._id) }, userId: viewerId }).select("resumeId");
+    const likes = await Like.find({ resumeId: { $in: resumes.map((r: any) => r._id) }, userId: viewerId }).select("resumeId");
     likedIds = new Set(likes.map((l) => l.resumeId.toString()));
   }
 
   return {
-    resumes: resumes.map((r) => ({
+    resumes: resumes.map((r: any) => ({
       ...stripPrivateRoastFields(r.toObject() as Record<string, unknown>),
       isLiked: likedIds.has(r._id.toString()),
     })),
@@ -132,20 +135,35 @@ export const updateResume = async (
 export const deleteResume = async (id: string, userId: string) => {
   const resume = await Resume.findOneAndDelete({ _id: id, userId });
   if (!resume) throw ApiError.notfound("Resume not found or not yours");
-  // Cleanup likes
+  // Cascade: likes, comments, and votes on those comments.
+  const commentIds = await Comment.find({ resumeId: id }).select("_id").lean();
+  const ids = commentIds.map((c) => c._id);
+  if (ids.length > 0) {
+    await CommentVote.deleteMany({ commentId: { $in: ids } });
+    await Comment.deleteMany({ _id: { $in: ids } });
+  }
   await Like.deleteMany({ resumeId: id });
+  // Removed resume changed the owner's max AI score / like totals — recompute.
+  safeRecalcTalentScore(userId);
   return resume;
 };
 
 export const toggleLike = async (resumeId: string, userId: string) => {
-  const existing = await Like.findOne({ resumeId, userId });
-  if (existing) {
-    await existing.deleteOne();
-    await Resume.findByIdAndUpdate(resumeId, { $inc: { likesCount: -1 } });
+  // Try to remove an existing like atomically; if one existed, we toggled off.
+  const removed = await Like.findOneAndDelete({ resumeId, userId });
+  if (removed) {
+    const resume = await Resume.findByIdAndUpdate(resumeId, { $inc: { likesCount: -1 } });
+    if (resume) safeRecalcTalentScore(resume.userId.toString());
     return { liked: false };
-  } else {
+  }
+  try {
     await Like.create({ resumeId, userId });
-    await Resume.findByIdAndUpdate(resumeId, { $inc: { likesCount: 1 } });
+    const resume = await Resume.findByIdAndUpdate(resumeId, { $inc: { likesCount: 1 } });
+    if (resume) safeRecalcTalentScore(resume.userId.toString());
     return { liked: true };
+  } catch (err: any) {
+    // Duplicate key means a concurrent request already liked — treat as idempotent success.
+    if (err?.code === 11000) return { liked: true };
+    throw err;
   }
 };

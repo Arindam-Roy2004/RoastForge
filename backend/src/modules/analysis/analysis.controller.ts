@@ -5,18 +5,65 @@ import { generateResumeRoast, normalizeRoastResult, type RoastResult } from "./a
 import redis from "../../common/config/redis.js";
 import ApiResponse from "../../common/utils/api-response.js";
 import ApiError from "../../common/utils/api-error.js";
+import { safeRecalcTalentScore } from "../auth/talent-score.service.js";
 
 /** How long roast results live in Redis (7 days in seconds) */
 const CACHE_TTL = 60 * 60 * 24 * 7;
+
+/** Cap fetched PDF byte size before parsing to avoid memory blow-ups. */
+const MAX_PDF_BYTES = 10 * 1024 * 1024;
+/** Cap extracted text fed to the model to keep prompt size bounded. */
+const MAX_RESUME_TEXT_CHARS = 32_000;
+/** SSRF guard: only fetch PDFs from Cloudinary's CDN. */
+const ALLOWED_PDF_HOSTS = new Set(["res.cloudinary.com"]);
+/** Hard cap on PDF download time. */
+const PDF_FETCH_TIMEOUT_MS = 15_000;
+
+function assertAllowedHost(rawUrl: string): URL {
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    throw ApiError.badRequest("Invalid file URL");
+  }
+  if (parsed.protocol !== "https:") {
+    throw ApiError.badRequest("Only HTTPS file URLs are allowed");
+  }
+  if (!ALLOWED_PDF_HOSTS.has(parsed.hostname)) {
+    throw ApiError.badRequest("File URL host is not allowed");
+  }
+  return parsed;
+}
 
 /**
  * Fetch the PDF from Cloudinary and extract text using pdf-parse.
  * pdf-parse is imported dynamically because it has side-effects on import.
  */
 async function extractTextFromPdf(url: string): Promise<string> {
-  const res = await fetch(url);
-  if (!res.ok) throw ApiError.badRequest("Failed to fetch PDF from storage");
-  const buffer = Buffer.from(await res.arrayBuffer());
+  assertAllowedHost(url);
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), PDF_FETCH_TIMEOUT_MS);
+  let pdfRes: globalThis.Response;
+  try {
+    pdfRes = await fetch(url, { signal: ctrl.signal });
+  } catch (err: any) {
+    if (err?.name === "AbortError") throw ApiError.badRequest("PDF fetch timed out");
+    throw ApiError.badRequest("Failed to fetch PDF from storage");
+  } finally {
+    clearTimeout(timer);
+  }
+  if (!pdfRes.ok) throw ApiError.badRequest("Failed to fetch PDF from storage");
+
+  const contentLength = Number(pdfRes.headers.get("content-length") || 0);
+  if (contentLength && contentLength > MAX_PDF_BYTES) {
+    throw ApiError.badRequest("PDF too large to analyze");
+  }
+
+  const ab = await pdfRes.arrayBuffer();
+  if (ab.byteLength > MAX_PDF_BYTES) {
+    throw ApiError.badRequest("PDF too large to analyze");
+  }
+  const buffer = Buffer.from(ab);
 
   // Import inner lib directly — pdf-parse's index.js tries to open a test PDF on import
   const mod = await import("pdf-parse/lib/pdf-parse.js");
@@ -42,10 +89,13 @@ export const analyzeResume = async (req: Request, res: Response, next: NextFunct
     }
 
     // 1. Extract text from the PDF
-    const resumeText = await extractTextFromPdf(resume.fileUrl);
-    if (!resumeText || resumeText.trim().length < 20) {
+    const rawText = await extractTextFromPdf(resume.fileUrl);
+    if (!rawText || rawText.trim().length < 20) {
       throw ApiError.badRequest("Could not extract enough text from this PDF to analyze.");
     }
+    const resumeText = rawText.length > MAX_RESUME_TEXT_CHARS
+      ? rawText.slice(0, MAX_RESUME_TEXT_CHARS)
+      : rawText;
 
     // 2. Generate content hash
     const contentHash = generateContentHash(resumeText);
@@ -68,6 +118,9 @@ export const analyzeResume = async (req: Request, res: Response, next: NextFunct
     resume.roastHash = contentHash;
     resume.aiRoast = roastResult;
     await resume.save();
+
+    // Fresh AI score → recompute owner's composite talent score (non-blocking).
+    safeRecalcTalentScore(resume.userId.toString());
 
     return ApiResponse.ok(res, "Roast generated", { cached: false, ...roastResult });
   } catch (error) {

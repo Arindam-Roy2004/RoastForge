@@ -10,7 +10,10 @@ export const upload = multer({
     if (allowed.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Only PDF and image files are allowed"));
+      const err = new Error("Only PDF and image files are allowed") as Error & { code?: string; statusCode?: number };
+      err.code = "INVALID_FILE_TYPE";
+      err.statusCode = 400;
+      cb(err);
     }
   },
 });

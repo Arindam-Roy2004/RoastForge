@@ -30,8 +30,10 @@ export const authenticate = async (req: any, res: any, next: any) => {
   }
 };
 
-// Optional auth — attaches user if token provided, but doesn't block
-export const optionalAuth = async (req: any, res: any, next: any) => {
+// Optional auth — attaches user if a valid token is provided. Bad / expired
+// tokens are silently ignored so anonymous browsing still works, but database
+// or unexpected errors must propagate.
+export const optionalAuth = async (req: any, _res: any, next: any) => {
   try {
     const header = req.headers.authorization;
     if (header?.startsWith("Bearer ")) {
@@ -40,6 +42,15 @@ export const optionalAuth = async (req: any, res: any, next: any) => {
       const user = await User.findById(decoded.id);
       if (user) req.user = { id: String(user._id), name: user.name, email: user.email, avatar: user.avatar, role: user.role };
     }
-  } catch {}
-  next();
+    next();
+  } catch (err) {
+    if (err instanceof jwt.JsonWebTokenError) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("optionalAuth: ignoring invalid token", err.message);
+      }
+      next();
+      return;
+    }
+    next(err);
+  }
 };

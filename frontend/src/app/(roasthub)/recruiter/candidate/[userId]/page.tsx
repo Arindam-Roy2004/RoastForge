@@ -102,7 +102,22 @@ export default function RecruiterCandidateProfilePage() {
   }
 
   if (!data) {
-    return null;
+    return (
+      <div className="container mx-auto px-4 py-16 max-w-lg text-center">
+        <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-8 bg-card">
+          <UserRound className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+          <h1 className="font-heading text-2xl mb-2">Profile not found</h1>
+          <p className="text-muted-foreground text-sm mb-6">This candidate profile is unavailable or no longer exists.</p>
+          <Button
+            variant="outline"
+            onClick={() => router.push("/recruiter")}
+            className="border-[3px] border-border rounded-none font-heading shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
+          >
+            Back to candidates
+          </Button>
+        </Card>
+      </div>
+    );
   }
 
   const alias = data.anonymousUsername || "Anonymous";
@@ -150,6 +165,14 @@ export default function RecruiterCandidateProfilePage() {
                   >
                     <Trophy className="w-3 h-3 mr-1" /> Talent {data.talentComposite ?? 0}
                   </Badge>
+                  {data.targetRole && (
+                    <Badge
+                      variant="secondary"
+                      className="border-2 border-border rounded-none text-[10px] font-bold uppercase shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                    >
+                      <Briefcase className="w-3 h-3 mr-1" /> {data.targetRole}
+                    </Badge>
+                  )}
                   {!data.identity && (
                     <Badge
                       variant="secondary"
@@ -159,6 +182,22 @@ export default function RecruiterCandidateProfilePage() {
                     </Badge>
                   )}
                 </div>
+                {data.skills && data.skills.length > 0 && (
+                  <div className="space-y-1.5 pt-2">
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Skills</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {data.skills.map((s) => (
+                        <Badge
+                          key={s}
+                          variant="outline"
+                          className="border-2 border-border rounded-none text-[10px] font-bold uppercase shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] px-2 py-0.5"
+                        >
+                          {s}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {data.identity && (data.identity.linkedInUrl || data.identity.githubUrl) && (
                   <div className="flex flex-wrap gap-2 pt-2">
                     {data.identity.linkedInUrl ? (
