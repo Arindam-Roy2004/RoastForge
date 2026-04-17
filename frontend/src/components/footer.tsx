@@ -14,15 +14,14 @@ export default function Footer() {
           <div className="shrink-0 space-y-2 lg:max-w-sm">
             <Link
               href="/"
-              className="group inline-flex w-fit items-center gap-2.5"
+              className="inline-flex w-fit items-center gap-2.5"
               data-testid="footer-brand"
             >
-              <div
-                className="flex size-9 shrink-0 items-center justify-center rounded-full border-[3px] border-border bg-primary shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:shadow-none"
+              <Flame
+                className="size-[1.125rem] shrink-0 text-primary sm:size-5"
+                strokeWidth={2.25}
                 aria-hidden
-              >
-                <Flame className="size-[1.125rem] text-primary-foreground" strokeWidth={2.25} />
-              </div>
+              />
               <span className="inline-flex h-9 items-center font-heading text-xl tracking-tighter text-foreground leading-none">
                 RoastForge
               </span>

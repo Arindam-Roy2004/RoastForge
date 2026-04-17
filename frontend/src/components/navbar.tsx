@@ -4,34 +4,56 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useAuth } from "@/store/auth";
-import { Flame } from "lucide-react";
+import { useTheme } from "@/store/theme";
+import { Flame, Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme, mounted } = useTheme();
   const router = useRouter();
   const isAuthenticated = !!user;
+  const isDark = mounted && theme === "dark";
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b-[3px] border-border bg-card">
       <div className="mx-auto flex min-h-16 w-full max-w-[1600px] items-center justify-between gap-4 px-4 py-2 sm:min-h-[4.25rem] sm:px-6 sm:py-2.5">
         <Link
           href="/"
-          className="inline-flex items-center gap-3 group shrink-0 py-1"
+          className="inline-flex items-center gap-3 shrink-0 py-1"
           data-testid="link-home"
         >
-          <div
-            className="flex size-10 shrink-0 items-center justify-center rounded-full border-[3px] border-border bg-primary shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:shadow-none sm:size-11"
+          <Flame
+            className="size-[1.125rem] shrink-0 text-primary sm:size-5"
+            strokeWidth={2.25}
             aria-hidden
-          >
-            <Flame className="size-[1.125rem] text-primary-foreground sm:size-5" strokeWidth={2.25} />
-          </div>
+          />
           <span className="inline-flex h-10 items-center font-heading text-xl leading-none tracking-tight text-foreground sm:text-[1.35rem]">
             RoastForge
           </span>
         </Link>
 
         <div className="flex min-h-10 items-center gap-1 overflow-x-auto sm:gap-2">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={mounted ? (isDark ? "Switch to light mode" : "Switch to dark mode") : "Toggle theme"}
+            aria-pressed={mounted ? isDark : undefined}
+            suppressHydrationWarning
+            data-testid="button-theme-toggle"
+            className="relative inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-none border-2 border-border bg-card text-foreground shadow-[var(--shadow-xs)] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:translate-x-[2px] active:translate-y-[2px] active:shadow-none focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            <Sun
+              className="absolute size-[18px] rotate-0 scale-100 opacity-100 transition-all dark:rotate-90 dark:scale-0 dark:opacity-0"
+              strokeWidth={2.25}
+              aria-hidden
+            />
+            <Moon
+              className="absolute size-[18px] -rotate-90 scale-0 opacity-0 transition-all dark:rotate-0 dark:scale-100 dark:opacity-100"
+              strokeWidth={2.25}
+              aria-hidden
+            />
+          </button>
           <Link href="/" className="rounded-none border-[3px] border-transparent px-3 py-2 text-xs font-heading uppercase tracking-wider text-muted-foreground transition-all hover:border-border hover:bg-muted hover:text-foreground sm:py-2.5" data-testid="link-browse">Browse</Link>
           
           {isAuthenticated ? (
@@ -49,7 +71,7 @@ export default function Navbar() {
               <Button 
                 variant="outline" 
                 size="sm"
-                className="ml-1 h-9 rounded-none border-[3px] border-border px-3.5 font-heading text-[11px] uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                className="ml-1 h-9 rounded-none border-[3px] border-border px-3.5 font-heading text-[11px] uppercase tracking-wider shadow-[var(--shadow-2xs)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
                 onClick={async () => {
                   try { await logout(); } catch {}
                   router.push("/login");
@@ -66,7 +88,7 @@ export default function Navbar() {
                 data-testid="link-login"
                 className={cn(
                   buttonVariants({ variant: "outline", size: "sm" }),
-                  "h-9 rounded-none border-[3px] border-border px-3.5 font-heading text-[11px] uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
+                  "h-9 rounded-none border-[3px] border-border px-3.5 font-heading text-[11px] uppercase tracking-wider shadow-[var(--shadow-2xs)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
                 )}
               >
                 Login
@@ -76,7 +98,7 @@ export default function Navbar() {
                 data-testid="link-register"
                 className={cn(
                   buttonVariants({ size: "sm" }),
-                  "h-9 rounded-none border-[3px] border-border px-3.5 font-heading text-[11px] uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
+                  "h-9 rounded-none border-[3px] border-border px-3.5 font-heading text-[11px] uppercase tracking-wider shadow-[var(--shadow-2xs)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
                 )}
               >
                 Register

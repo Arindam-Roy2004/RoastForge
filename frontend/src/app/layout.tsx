@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { body, display } from "@/lib/fonts";
 import { Providers } from "@/components/providers";
+import { themeInitScript } from "@/store/theme";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,7 +19,13 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${body.variable} ${display.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        {/* Runs before first paint to set the `dark` class from localStorage or
+            system preference. Prevents a flash of the wrong theme on load. */}
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="min-h-full font-sans bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
         <Providers>
           {children}

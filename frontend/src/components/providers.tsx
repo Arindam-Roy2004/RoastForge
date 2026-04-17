@@ -1,5 +1,6 @@
 "use client";
 import { AuthProvider } from "@/store/auth";
+import { ThemeProvider, useTheme } from "@/store/theme";
 import { Toaster } from "sonner";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
@@ -13,13 +14,20 @@ if (!GOOGLE_CLIENT_ID && typeof window !== "undefined" && process.env.NODE_ENV !
   console.warn("NEXT_PUBLIC_GOOGLE_CLIENT_ID is not set — Google sign-in will not work.");
 }
 
+function ThemedToaster() {
+  const { theme } = useTheme();
+  return <Toaster richColors theme={theme} position="top-center" closeButton />;
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <AuthProvider>
-        {children}
-        <Toaster richColors theme="dark" position="top-center" closeButton />
-      </AuthProvider>
-    </GoogleOAuthProvider>
+    <ThemeProvider>
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+        <AuthProvider>
+          {children}
+          <ThemedToaster />
+        </AuthProvider>
+      </GoogleOAuthProvider>
+    </ThemeProvider>
   );
 }

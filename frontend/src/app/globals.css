@@ -40,92 +40,112 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Neobrutalism type scale: 13 / 15 / 17 / 21 / 27 / 35
+     Exposed as optional tokens; base Tailwind sizes remain unchanged to keep
+     existing layouts stable. Use as text-[length:var(--text-nb-*)] when needed. */
+  --text-nb-xs: 0.8125rem;   /* 13px */
+  --text-nb-sm: 0.9375rem;   /* 15px */
+  --text-nb-base: 1.0625rem; /* 17px */
+  --text-nb-lg: 1.3125rem;   /* 21px */
+  --text-nb-xl: 1.6875rem;   /* 27px */
+  --text-nb-2xl: 2.1875rem;  /* 35px */
+
+  /* Neobrutalism border-width token. Default 2px per design system; larger
+     surfaces may override at the component level. */
+  --border-width-nb: 2px;
 }
 
 :root {
-  /* Warm cream background */
-  --background: 35 67% 96%;
-  --foreground: 0 0% 7%;
-  
-  --border: 0 0% 7%;
-  --input: 0 0% 7%;
-  --ring: 0 0% 7%;
+  /* Light: pairs with dark palette below — warm cream + slate ink + muted teal
+     (same hue family as Color Hunt “charcoal / slate / cyan-teal / mist” sets). */
+  --background: 38 42% 96%;
+  --foreground: 220 22% 14%;
+
+  --border: 220 16% 20%;
+  --input: 220 16% 20%;
+  --ring: 183 45% 38%;
 
   --card: 0 0% 100%;
-  --card-foreground: 0 0% 7%;
-  --card-border: 0 0% 7%;
+  --card-foreground: 220 22% 14%;
+  --card-border: 220 16% 20%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 7%;
-  --popover-border: 0 0% 7%;
+  --popover-foreground: 220 22% 14%;
+  --popover-border: 220 16% 20%;
 
-  /* Teal Accent */
-  --primary: 181 44% 71%;
-  --primary-foreground: 0 0% 7%;
+  /* Teal primary — aligned to #00ADB5 family; saturation lowered for long reading */
+  --primary: 183 40% 44%;
+  --primary-foreground: 220 28% 10%;
 
-  --secondary: 35 67% 90%;
-  --secondary-foreground: 0 0% 7%;
+  --secondary: 220 24% 92%;
+  --secondary-foreground: 220 22% 14%;
 
-  --muted: 35 20% 90%;
-  --muted-foreground: 0 0% 40%;
+  --muted: 38 28% 92%;
+  --muted-foreground: 220 12% 38%;
 
-  --accent: 181 44% 71%;
-  --accent-foreground: 0 0% 7%;
+  --accent: 183 36% 48%;
+  --accent-foreground: 220 28% 10%;
 
-  --destructive: 0 84% 60%;
+  --destructive: 0 72% 48%;
   --destructive-foreground: 0 0% 98%;
 
-  --radius: 0.5rem; 
-  
-  --shadow-2xs: 2px 2px 0px 0px hsl(0 0% 7%);
-  --shadow-xs: 3px 3px 0px 0px hsl(0 0% 7%);
-  --shadow-sm: 4px 4px 0px 0px hsl(0 0% 7%);
-  --shadow: 5px 5px 0px 0px hsl(0 0% 7%);
-  --shadow-md: 6px 6px 0px 0px hsl(0 0% 7%);
-  --shadow-lg: 8px 8px 0px 0px hsl(0 0% 7%);
-  --shadow-xl: 12px 12px 0px 0px hsl(0 0% 7%);
-  --shadow-2xl: 16px 16px 0px 0px hsl(0 0% 7%);
+  /* Neobrutalism: flat, stark corners */
+  --radius: 0rem;
+
+  --shadow-2xs: 2px 2px 0px 0px hsl(220 18% 12%);
+  --shadow-xs: 3px 3px 0px 0px hsl(220 18% 12%);
+  --shadow-sm: 4px 4px 0px 0px hsl(220 18% 12%);
+  --shadow: 5px 5px 0px 0px hsl(220 18% 12%);
+  --shadow-md: 6px 6px 0px 0px hsl(220 18% 12%);
+  --shadow-lg: 8px 8px 0px 0px hsl(220 18% 12%);
+  --shadow-xl: 12px 12px 0px 0px hsl(220 18% 12%);
+  --shadow-2xl: 16px 16px 0px 0px hsl(220 18% 12%);
 }
 
+/* Dark mode: Color Hunt–style “dark teal” quad (common set: #222831 #393E46 #00ADB5 #EEEEEE).
+   Cool charcoal + slate surfaces, cyan-teal accent, soft mist text — calm contrast,
+   matches light mode via shared hue (183° teal, 220° slate). Borders muted vs pure white. */
 .dark {
-  --background: 0 0% 7%;
-  --foreground: 35 67% 96%;
-  
-  --border: 35 67% 96%;
-  --input: 35 67% 96%;
-  --ring: 35 67% 96%;
+  --background: 219 18% 11%;
+  --foreground: 210 18% 94%;
 
-  --card: 0 0% 12%;
-  --card-foreground: 35 67% 96%;
-  --card-border: 35 67% 96%;
+  --border: 220 14% 34%;
+  --input: 220 14% 30%;
+  --ring: 183 50% 46%;
 
-  --popover: 0 0% 12%;
-  --popover-foreground: 35 67% 96%;
-  --popover-border: 35 67% 96%;
+  --card: 218 16% 15%;
+  --card-foreground: 210 18% 94%;
+  --card-border: 220 14% 38%;
 
-  --primary: 181 44% 71%;
-  --primary-foreground: 0 0% 7%;
+  --popover: 218 16% 16%;
+  --popover-foreground: 210 18% 94%;
+  --popover-border: 220 14% 38%;
 
-  --secondary: 0 0% 18%;
-  --secondary-foreground: 35 67% 96%;
+  --primary: 183 52% 44%;
+  --primary-foreground: 220 24% 8%;
 
-  --muted: 0 0% 20%;
-  --muted-foreground: 0 0% 60%;
+  --secondary: 218 14% 22%;
+  --secondary-foreground: 210 18% 94%;
 
-  --accent: 181 44% 71%;
-  --accent-foreground: 0 0% 7%;
+  --muted: 218 14% 18%;
+  --muted-foreground: 215 12% 68%;
 
-  --destructive: 0 62% 30%;
-  --destructive-foreground: 35 67% 96%;
-  
-  --shadow-2xs: 2px 2px 0px 0px hsl(35 67% 96%);
-  --shadow-xs: 3px 3px 0px 0px hsl(35 67% 96%);
-  --shadow-sm: 4px 4px 0px 0px hsl(35 67% 96%);
-  --shadow: 5px 5px 0px 0px hsl(35 67% 96%);
-  --shadow-md: 6px 6px 0px 0px hsl(35 67% 96%);
-  --shadow-lg: 8px 8px 0px 0px hsl(35 67% 96%);
-  --shadow-xl: 12px 12px 0px 0px hsl(35 67% 96%);
-  --shadow-2xl: 16px 16px 0px 0px hsl(35 67% 96%);
+  --accent: 183 42% 40%;
+  --accent-foreground: 210 18% 94%;
+
+  --destructive: 0 62% 52%;
+  --destructive-foreground: 210 20% 98%;
+
+  /* Hard shadows: soft cool highlight (not full #EEE — less glare) */
+  --shadow-2xs: 2px 2px 0px 0px hsl(210 16% 78%);
+  --shadow-xs: 3px 3px 0px 0px hsl(210 16% 78%);
+  --shadow-sm: 4px 4px 0px 0px hsl(210 16% 78%);
+  --shadow: 5px 5px 0px 0px hsl(210 16% 78%);
+  --shadow-md: 6px 6px 0px 0px hsl(210 16% 78%);
+  --shadow-lg: 8px 8px 0px 0px hsl(210 16% 78%);
+  --shadow-xl: 12px 12px 0px 0px hsl(210 16% 78%);
+  --shadow-2xl: 16px 16px 0px 0px hsl(210 16% 78%);
 }
 
 @layer base {
