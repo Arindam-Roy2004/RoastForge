@@ -180,7 +180,7 @@ export default function UploadPage() {
               disabled={uploading || !title.trim()} 
               className="w-full h-14 text-lg border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading tracking-wide bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              {uploading ? "Forging..." : "Upload & Roast! 🔥"}
+              {uploading ? "Forging..." : "Upload & Roast!"}
             </Button>
           </form>
         </CardContent>
