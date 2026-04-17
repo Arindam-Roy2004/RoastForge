@@ -4,7 +4,8 @@ import { uploadApi, resumeApi } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
-import { UploadCloud, FileText, X } from "lucide-react";
+import { FileText, X } from "lucide-react";
+import { CloudUploadIcon } from "@/components/icons/cloud-upload-icon";
 import Link from "next/link";
 import { useAuth } from "@/store/auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -103,7 +104,7 @@ export default function UploadPage() {
       <Card className="border-[3px] border-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card rounded-none overflow-hidden max-w-2xl mx-auto w-full">
         <CardHeader className="text-center bg-muted/50 border-b-[3px] border-border py-8 md:py-12 relative overflow-hidden">
           <div className="mx-auto bg-primary w-14 h-14 flex items-center justify-center rounded-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-3">
-            <UploadCloud className="w-7 h-7 text-primary-foreground" />
+            <CloudUploadIcon size={28} className="text-primary-foreground" />
           </div>
           <CardTitle className="text-4xl font-heading tracking-tight text-foreground">
             Enter the Forge

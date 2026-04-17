@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Flame, Search, ChevronLeft, ChevronRight, Clock, Trophy, X } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Clock, Trophy, X } from "lucide-react";
+import FlameIcon from "@/components/icons/flame-icon";
 import { motion } from "framer-motion";
 import { useAuth } from "@/store/auth";
 
@@ -161,7 +162,7 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           className="inline-flex items-center justify-center p-4 bg-primary text-primary-foreground rounded-full mb-4 border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
         >
-          <Flame className="w-12 h-12" />
+          <FlameIcon size={48} className="text-primary-foreground" strokeWidth={2} />
         </motion.div>
         <motion.h1 
           initial={{ opacity: 0, y: 20 }}
@@ -233,7 +234,7 @@ export default function HomePage() {
         <div className="flex items-center gap-2 mb-6 border-b-[3px] border-border pb-3 overflow-x-auto overflow-y-hidden">
           {[
             { id: "new", label: "Newest", icon: Clock },
-            { id: "hot", label: "Hot", icon: Flame },
+            { id: "hot", label: "Hot", icon: "flame" as const },
             { id: "top", label: "Top", icon: Trophy },
           ].map((tab) => (
             <button
@@ -249,7 +250,7 @@ export default function HomePage() {
                   : "bg-card hover:bg-muted hover:-translate-y-0.5"
               )}
             >
-              <tab.icon className="w-4 h-4" /> {tab.label}
+              {tab.icon === "flame" ? <FlameIcon size={16} strokeWidth={2} /> : <tab.icon className="w-4 h-4" />} {tab.label}
             </button>
           ))}
         </div>
@@ -341,7 +342,7 @@ export default function HomePage() {
                         </CardHeader>
                         <CardContent className="flex-1 min-h-0 px-5 pb-4 flex flex-col cursor-pointer">
                           <div className="mt-2 flex-1 min-h-0 flex flex-col items-center justify-center gap-3 py-5 px-3 bg-muted border-2 border-border border-dashed">
-                            <Flame className="w-10 h-10 text-destructive" />
+                            <FlameIcon size={40} className="text-destructive" strokeWidth={2} />
                             <div className="text-center space-y-1">
                               <p className="font-heading text-sm tracking-wide text-foreground leading-tight">
                                 Resume + roast thread

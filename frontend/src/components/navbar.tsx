@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useAuth } from "@/store/auth";
 import { useTheme } from "@/store/theme";
-import { Flame, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
+import FlameIcon from "@/components/icons/flame-icon";
 import { cn } from "@/lib/utils";
 
 export default function Navbar() {
@@ -23,8 +24,9 @@ export default function Navbar() {
           className="inline-flex items-center gap-3 shrink-0 py-1"
           data-testid="link-home"
         >
-          <Flame
-            className="size-[1.125rem] shrink-0 text-primary sm:size-5"
+          <FlameIcon
+            size={20}
+            className="shrink-0 text-primary"
             strokeWidth={2.25}
             aria-hidden
           />

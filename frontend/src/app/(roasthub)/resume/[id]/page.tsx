@@ -7,7 +7,8 @@ import { coalesceVerdictBars, isCompleteRoastPayload, verdictBarFillClass } from
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Flame, FileText, ArrowLeft, RefreshCw, Zap, MessageSquare, Trash2, Sparkles, AlertTriangle, Briefcase } from "lucide-react";
+import { FileText, ArrowLeft, RefreshCw, Zap, MessageSquare, Trash2, Sparkles, AlertTriangle, Briefcase } from "lucide-react";
+import FlameIcon from "@/components/icons/flame-icon";
 import { useAuth } from "@/store/auth";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -260,7 +261,7 @@ export default function ResumeDetail() {
                         onClick={fetchRoast}
                         className="w-full border-4 border-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading tracking-wide bg-background text-foreground hover:bg-muted/80 text-sm  py-7 min-h-[3.25rem]"
                       >
-                        <Flame className="w-5 h-5 mr-2 shrink-0" /> Run AI Analysis
+                        <FlameIcon size={20} className="mr-2 shrink-0" strokeWidth={2} /> Run AI Analysis
                       </Button>
                     )}
                   </motion.div>
@@ -280,7 +281,7 @@ export default function ResumeDetail() {
                         animate={{ rotate: 360 }}
                         transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
                       >
-                        <Flame className="w-12 h-12 text-destructive" />
+                        <FlameIcon size={48} className="text-destructive" strokeWidth={2} />
                       </motion.div>
                     </div>
                     <p className="text-sm font-bold uppercase text-destructive animate-pulse">Forging roast...</p>
@@ -416,7 +417,7 @@ export default function ResumeDetail() {
           <Card className="border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col overflow-hidden h-full bg-card">
             <CardHeader className={panelHeaderClass}>
                <div className="flex items-center gap-2.5 min-w-0">
-                 <Flame className="w-5 h-5 shrink-0 text-yellow-200" strokeWidth={2.5} aria-hidden />
+                 <FlameIcon size={20} className="shrink-0 text-yellow-200" strokeWidth={2.5} aria-hidden />
                  <CardTitle className="text-base  tracking-tight text-primary-foreground truncate">
                    Roast Thread
                  </CardTitle>

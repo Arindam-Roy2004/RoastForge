@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Briefcase, Search, Flame } from "lucide-react";
+import { Briefcase, Search } from "lucide-react";
+import FlameIcon from "@/components/icons/flame-icon";
 import { useAuth } from "@/store/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,7 +53,7 @@ export default function OnboardingRolePage() {
       <Card className="w-full max-w-2xl border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card overflow-hidden">
         <CardHeader className="text-center space-y-2 p-8 pb-4">
           <div className="mx-auto bg-primary w-12 h-12 flex items-center justify-center rounded-full border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mb-2">
-            <Flame className="w-6 h-6 text-primary-foreground" />
+            <FlameIcon size={24} className="text-primary-foreground" strokeWidth={2} />
           </div>
           <CardTitle className="text-3xl font-heading tracking-tighter">Pick Your Side</CardTitle>
           <CardDescription className="text-muted-foreground font-medium">

@@ -1,8 +1,9 @@
 "use client";
 
-import { Flame } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/store/auth";
+import FlameIcon from "@/components/icons/flame-icon";
+import BugIcon from "@/components/icons/bug-icon";
 
 export default function Footer() {
   const { user } = useAuth();
@@ -11,14 +12,15 @@ export default function Footer() {
     <footer className="mt-auto w-full border-t-[3px] border-border bg-card">
       <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
-          <div className="shrink-0 space-y-2 lg:max-w-sm">
+          <div className="shrink-0 space-y-3 lg:max-w-sm">
             <Link
               href="/"
               className="inline-flex w-fit items-center gap-2.5"
               data-testid="footer-brand"
             >
-              <Flame
-                className="size-[1.125rem] shrink-0 text-primary sm:size-5"
+              <FlameIcon
+                size={20}
+                className="shrink-0 text-primary"
                 strokeWidth={2.25}
                 aria-hidden
               />
@@ -29,6 +31,18 @@ export default function Footer() {
             <p className="text-sm leading-snug text-muted-foreground">
               Resume feedback without the sugar-coating.
             </p>
+            <div className="pt-1">
+              <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLSdIqU2QCmm7VMje1JWvpOm39tDHXv4QcwDvGzI9j1U54vcGYA/viewform?usp=publish-editor"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                data-testid="footer-link-report-bug"
+              >
+                <BugIcon size={16} strokeWidth={2.25} className="shrink-0" />
+                Report Bug
+              </a>
+            </div>
           </div>
 
           <nav
@@ -121,6 +135,7 @@ export default function Footer() {
                 </li>
               </ul>
             </div>
+
           </nav>
         </div>
       </div>

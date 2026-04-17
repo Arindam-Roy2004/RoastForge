@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Flame } from "lucide-react";
+import FlameIcon from "@/components/icons/flame-icon";
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { useAuth } from "@/store/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,7 +50,7 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card overflow-hidden">
         <CardHeader className="text-center space-y-3 p-8 pb-6">
           <div className="mx-auto bg-primary w-12 h-12 flex items-center justify-center rounded-full border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-            <Flame className="w-6 h-6 text-primary-foreground" />
+            <FlameIcon size={24} className="text-primary-foreground" strokeWidth={2} />
           </div>
           <CardTitle className="text-3xl font-heading tracking-tighter">Join the Forge</CardTitle>
           <CardDescription className="text-muted-foreground font-medium text-sm">

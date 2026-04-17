@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Briefcase, ExternalLink, FileText, Flame, Sparkles, Trophy, UserRound } from "lucide-react";
+import { ArrowLeft, Briefcase, ExternalLink, FileText, Sparkles, Trophy, UserRound } from "lucide-react";
+import FlameIcon from "@/components/icons/flame-icon";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { motion } from "framer-motion";
 
@@ -349,7 +350,7 @@ export default function RecruiterCandidateProfilePage() {
                       {project.aiEvaluation?.summary && (
                         <div className="border-[3px] border-border border-dashed bg-muted/40 p-4 space-y-1">
                           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1">
-                            <Flame className="w-3 h-3" /> AI note
+                            <FlameIcon size={12} strokeWidth={2} /> AI note
                           </p>
                           <p className="text-sm text-muted-foreground leading-relaxed">{project.aiEvaluation.summary}</p>
                         </div>
