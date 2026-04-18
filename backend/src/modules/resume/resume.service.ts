@@ -6,7 +6,7 @@ import ApiError from "../../common/utils/api-error.js";
 import mongoose from "mongoose";
 import { safeRecalcTalentScore } from "../auth/talent-score.service.js";
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 4;
 
 /** AI roast is private to the uploader — never expose in public list/API. */
 function stripPrivateRoastFields<T extends Record<string, unknown>>(doc: T): T {

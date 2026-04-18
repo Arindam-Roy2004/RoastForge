@@ -206,7 +206,7 @@ export type ResumeListResult = {
 };
 
 /** Must match `PAGE_SIZE` in backend `resume.service.ts`. */
-export const RESUME_GALLERY_PAGE_SIZE = 8;
+export const RESUME_GALLERY_PAGE_SIZE = 4;
 
 export const resumeApi = {
   list: (params: { page?: number; sort?: string; search?: string } = {}) => {
