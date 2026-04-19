@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import { AVATAR_STYLES } from "../../common/utils/avatar-styles.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -12,6 +13,13 @@ const userSchema = new mongoose.Schema(
     // Google auth (or never linked) don't all collide on `null`.
     googleId: { type: String, unique: true, sparse: true, select: false },
     avatar: { type: String, default: "" },
+    preferredAvatarStyle: { type: String, enum: AVATAR_STYLES, default: null },
+    /** DiceBear `backgroundColor` (6-char hex without #, or "transparent"). */
+    preferredAvatarBackgroundColor: { type: String, default: null, maxlength: 20 },
+    preferredAvatarFlip: { type: Boolean, default: false },
+    preferredAvatarRotate: { type: Number, default: 0, min: 0, max: 360 },
+    preferredAvatarRadius: { type: Number, default: 0, min: 0, max: 50 },
+    preferredAvatarScale: { type: Number, default: 100, min: 0, max: 200 },
     role: { type: String, enum: ["user", "recruiter"], default: "user" },
     anonymousUsername: { type: String, unique: true },
     refreshToken: { type: String, select: false },

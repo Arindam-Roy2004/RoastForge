@@ -220,7 +220,7 @@ export default function ProfilePage() {
   return (
     <div className="flex w-full min-w-0 flex-col gap-8 py-8">
       {/* User Header */}
-      <Card className="shrink-0 border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+      <Card className="shrink-0 border-[3px] border-border rounded-none overflow-hidden shadow-none hover:shadow-none hover:translate-x-0 hover:translate-y-0 transition-colors">
         <div className="bg-primary p-6 md:p-10 flex flex-col md:flex-row items-center gap-6">
           <div className="w-24 h-24 rounded-full border-[3px] border-border bg-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center text-4xl font-heading shrink-0">
             {displayUser.name.charAt(0).toUpperCase() || "?"}
@@ -412,7 +412,7 @@ export default function ProfilePage() {
                 <Skeleton className="h-48 w-full border-[3px] border-border rounded-none" />
               </div>
             ) : resumes.length === 0 ? (
-              <Card className="border-[3px] border-border border-dashed bg-muted/30 rounded-none text-center p-10 flex-1 flex flex-col items-center justify-center">
+              <Card className="border-[3px] border-border border-dashed bg-muted/30 rounded-none text-center p-10 flex-1 flex flex-col items-center justify-center shadow-none hover:shadow-none hover:translate-x-0 hover:translate-y-0 active:translate-x-0 active:translate-y-0 transition-colors">
                 <FileText className="w-8 h-8 text-muted-foreground mb-4 opacity-50" />
                 <CardDescription className="text-base font-medium text-foreground mb-1">
                   No resumes uploaded yet

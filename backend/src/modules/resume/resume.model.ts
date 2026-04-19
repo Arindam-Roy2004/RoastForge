@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { AVATAR_STYLES, type AvatarStyle } from "../../common/utils/avatar-styles.js";
 
 export interface IAiRoastBar {
   id: string;
@@ -19,6 +20,14 @@ export interface IResume extends Document {
   blurb: string;          // short description / "roast me because..."
   fileUrl: string;        // Cloudinary URL
   fileType: "pdf" | "image";
+  avatarStyle: AvatarStyle | null;
+  avatarSeed: string | null;
+  /** DiceBear `backgroundColor` (hex without #, or "transparent"); null = API default. */
+  avatarBackgroundColor: string | null;
+  avatarFlip: boolean;
+  avatarRotate: number;
+  avatarRadius: number;
+  avatarScale: number;
   likesCount: number;
   commentsCount: number;
   roastHash: string | null;
@@ -35,6 +44,13 @@ const resumeSchema = new Schema<IResume>(
     blurb: { type: String, default: "", trim: true, maxlength: 500 },
     fileUrl: { type: String, required: true },
     fileType: { type: String, enum: ["pdf", "image"], required: true },
+    avatarStyle: { type: String, enum: AVATAR_STYLES, default: null },
+    avatarSeed: { type: String, default: null, maxlength: 120 },
+    avatarBackgroundColor: { type: String, default: null, maxlength: 20 },
+    avatarFlip: { type: Boolean, default: false },
+    avatarRotate: { type: Number, default: 0, min: 0, max: 360 },
+    avatarRadius: { type: Number, default: 0, min: 0, max: 50 },
+    avatarScale: { type: Number, default: 100, min: 0, max: 200 },
     likesCount: { type: Number, default: 0 },
     commentsCount: { type: Number, default: 0 },
     roastHash: { type: String, default: null },

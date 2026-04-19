@@ -1,5 +1,13 @@
 import Joi from "joi";
 import { BaseDto } from "../../../common/dto/base.dto.js";
+import {
+    AVATAR_STYLES,
+    AVATAR_ROTATES,
+    AVATAR_RADIUS_MIN,
+    AVATAR_RADIUS_MAX,
+    AVATAR_SCALE_MIN,
+    AVATAR_SCALE_MAX,
+} from "../../../common/utils/avatar-styles.js";
 
 // Only allow URLs served by our configured Cloudinary account so users cannot
 // point the AI roast / PDF fetch at arbitrary hosts (SSRF mitigation).
@@ -14,5 +22,15 @@ export default class CreateResumeDto extends BaseDto {
         fileUrl: Joi.string().uri({ scheme: ["https"] }).pattern(cloudinaryUrl).required()
             .messages({ "string.pattern.base": "fileUrl must be a Cloudinary URL" }),
         fileType: Joi.string().valid("pdf", "image").required(),
+        avatarStyle: Joi.string().valid(...AVATAR_STYLES).optional(),
+        avatarSeed: Joi.string().trim().max(120).allow("").optional(),
+        avatarBackgroundColor: Joi.string()
+            .pattern(/^(transparent|[a-fA-F0-9]{6})$/)
+            .allow(null)
+            .optional(),
+        avatarFlip: Joi.boolean().optional(),
+        avatarRotate: Joi.number().integer().valid(...AVATAR_ROTATES).optional(),
+        avatarRadius: Joi.number().integer().min(AVATAR_RADIUS_MIN).max(AVATAR_RADIUS_MAX).optional(),
+        avatarScale: Joi.number().integer().min(AVATAR_SCALE_MIN).max(AVATAR_SCALE_MAX).optional(),
     });
 }

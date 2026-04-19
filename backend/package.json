@@ -8,7 +8,8 @@
     "dev": "nodemon --watch src --watch server.ts --ext ts --exec \"tsx\" server.ts",
     "build": "npx tsc && mkdir -p dist/modules/analysis && cp src/modules/analysis/roast-system-prompt.txt dist/modules/analysis/",
     "start": "node dist/server.js",
-    "backfill:talent": "tsx scripts/backfill-talent-scores.ts"
+    "backfill:talent": "tsx scripts/backfill-talent-scores.ts",
+    "backfill:avatars": "tsx scripts/backfill-resume-avatars.ts"
   },
   "keywords": [],
   "author": "",

@@ -2,11 +2,20 @@ import Resume from "./resume.model.js";
 import Like from "./like.model.js";
 import Comment from "../comment/comment.model.js";
 import CommentVote from "../comment/comment-vote.model.js";
+import User from "../auth/auth.model.js";
 import ApiError from "../../common/utils/api-error.js";
 import mongoose from "mongoose";
+import type { AvatarStyle } from "../../common/utils/avatar-styles.js";
+import {
+  AVATAR_ROTATES,
+  AVATAR_RADIUS_MAX,
+  AVATAR_RADIUS_MIN,
+  AVATAR_SCALE_MAX,
+  AVATAR_SCALE_MIN,
+} from "../../common/utils/avatar-styles.js";
 import { safeRecalcTalentScore } from "../auth/talent-score.service.js";
 
-const PAGE_SIZE = 4;
+const PAGE_SIZE = 3;
 
 /** AI roast is private to the uploader — never expose in public list/API. */
 function stripPrivateRoastFields<T extends Record<string, unknown>>(doc: T): T {
@@ -111,11 +120,120 @@ export const getMyResumes = async (userId: string) => {
   return populateUser(Resume.find({ userId }).sort({ createdAt: -1 }));
 };
 
+function normalizeAvatarBg(raw: string | null | undefined): string | null {
+  if (raw == null || raw === "") return null;
+  const t = raw.trim().toLowerCase();
+  if (t === "transparent") return "transparent";
+  if (/^[a-f0-9]{6}$/.test(t)) return t;
+  return null;
+}
+
+function normalizeRotate(raw: number | undefined, fallback: number): number {
+  if (raw == null) return fallback;
+  return (AVATAR_ROTATES as readonly number[]).includes(raw) ? raw : fallback;
+}
+
+function clampInt(raw: number | undefined, min: number, max: number, fallback: number): number {
+  if (raw == null || !Number.isFinite(raw)) return fallback;
+  return Math.min(max, Math.max(min, Math.round(raw)));
+}
+
+type AvatarInput = {
+  avatarStyle?: AvatarStyle;
+  avatarSeed?: string;
+  avatarBackgroundColor?: string | null;
+  avatarFlip?: boolean;
+  avatarRotate?: number;
+  avatarRadius?: number;
+  avatarScale?: number;
+};
+
+type ResolvedAvatar = {
+  avatarStyle: AvatarStyle | null;
+  avatarSeed: string | null;
+  avatarBackgroundColor: string | null;
+  avatarFlip: boolean;
+  avatarRotate: number;
+  avatarRadius: number;
+  avatarScale: number;
+};
+
+/**
+ * Resolves user-supplied avatar options against the user's stored preferences
+ * and updates the user doc when any preference changes. Centralised so
+ * createResume stays small and the defaulting rules live in one place.
+ */
+async function resolveAndPersistAvatar(
+  userId: string,
+  input: AvatarInput,
+): Promise<ResolvedAvatar> {
+  const user = await User.findById(userId).select(
+    "preferredAvatarStyle preferredAvatarBackgroundColor preferredAvatarFlip preferredAvatarRotate preferredAvatarRadius preferredAvatarScale",
+  );
+  if (!user) throw ApiError.notfound("User not found");
+
+  const style: AvatarStyle | null = input.avatarStyle ?? user.preferredAvatarStyle ?? null;
+
+  const seed =
+    style == null
+      ? null
+      : (() => {
+          const trimmed = input.avatarSeed?.trim();
+          return trimmed && trimmed.length > 0 ? trimmed.slice(0, 120) : userId;
+        })();
+
+  const bg =
+    input.avatarBackgroundColor !== undefined
+      ? normalizeAvatarBg(input.avatarBackgroundColor)
+      : normalizeAvatarBg(user.preferredAvatarBackgroundColor ?? undefined);
+
+  const flip = input.avatarFlip !== undefined ? input.avatarFlip : Boolean(user.preferredAvatarFlip);
+  const rotate = normalizeRotate(input.avatarRotate, Number(user.preferredAvatarRotate ?? 0));
+  const radius = clampInt(input.avatarRadius, AVATAR_RADIUS_MIN, AVATAR_RADIUS_MAX, Number(user.preferredAvatarRadius ?? 0));
+  const scale = clampInt(input.avatarScale, AVATAR_SCALE_MIN, AVATAR_SCALE_MAX, Number(user.preferredAvatarScale ?? 100));
+
+  // Persist as the new defaults so future uploads start from here.
+  let dirty = false;
+  if (style !== user.preferredAvatarStyle) { user.preferredAvatarStyle = style; dirty = true; }
+  if (bg !== normalizeAvatarBg(user.preferredAvatarBackgroundColor ?? undefined)) { user.preferredAvatarBackgroundColor = bg; dirty = true; }
+  if (flip !== Boolean(user.preferredAvatarFlip)) { user.preferredAvatarFlip = flip; dirty = true; }
+  if (rotate !== Number(user.preferredAvatarRotate ?? 0)) { user.preferredAvatarRotate = rotate; dirty = true; }
+  if (radius !== Number(user.preferredAvatarRadius ?? 0)) { user.preferredAvatarRadius = radius; dirty = true; }
+  if (scale !== Number(user.preferredAvatarScale ?? 100)) { user.preferredAvatarScale = scale; dirty = true; }
+  if (dirty) await user.save();
+
+  return {
+    avatarStyle: style,
+    avatarSeed: seed,
+    avatarBackgroundColor: bg,
+    avatarFlip: flip,
+    avatarRotate: rotate,
+    avatarRadius: radius,
+    avatarScale: scale,
+  };
+}
+
 export const createResume = async (
   userId: string,
-  data: { title: string; name: string; blurb?: string; fileUrl: string; fileType: "pdf" | "image" },
+  data: {
+    title: string;
+    name: string;
+    blurb?: string;
+    fileUrl: string;
+    fileType: "pdf" | "image";
+  } & AvatarInput,
 ) => {
-  return Resume.create({ userId, ...data });
+  const avatar = await resolveAndPersistAvatar(userId, data);
+
+  return Resume.create({
+    userId,
+    title: data.title,
+    name: data.name,
+    blurb: data.blurb,
+    fileUrl: data.fileUrl,
+    fileType: data.fileType,
+    ...avatar,
+  });
 };
 
 export const updateResume = async (

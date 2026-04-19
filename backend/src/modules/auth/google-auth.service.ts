@@ -2,7 +2,7 @@ import { OAuth2Client, type TokenPayload } from "google-auth-library";
 import User from "./auth.model.js";
 import ApiError from "../../common/utils/api-error.js";
 import { generateAnonymousUsername } from "../../common/utils/anonymous-username.util.js";
-import { issueTokensFor } from "./auth.service.js";
+import { issueTokensFor, pickAvatarPrefs } from "./auth.service.js";
 
 // Lazy singleton: env is asserted at boot, but lazy-init keeps test seams clean
 // and avoids reading process.env at module import time (Vercel cold-start friendly).
@@ -102,6 +102,7 @@ export const loginWithGoogle = async (idToken: string) => {
       avatar: user.avatar,
       anonymousUsername: user.anonymousUsername,
       role: user.role,
+      ...pickAvatarPrefs(user),
       onboardingCompleted: user.onboardingCompleted,
     },
     accessToken,

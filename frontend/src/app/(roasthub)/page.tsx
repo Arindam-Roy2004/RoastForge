@@ -2,14 +2,15 @@
 
 import { useState, useEffect, useCallback, type Dispatch, type SetStateAction } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { getCardBg, getDiceBearUrl } from "@/lib/avatar";
 import { resumeApi, type Resume, type ResumeListResult, RESUME_GALLERY_PAGE_SIZE } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, ChevronLeft, ChevronRight, Clock, Trophy, X } from "lucide-react";
-import FlameIcon from "@/components/icons/flame-icon";
+import { Search, ChevronLeft, ChevronRight, Clock, Trophy, X, SlidersHorizontal, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/store/auth";
 
@@ -154,50 +155,83 @@ export default function HomePage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1600px] px-4 py-8">
-      {/* Hero Section */}
-      <section className="py-20 text-center space-y-6">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center justify-center p-4 bg-primary text-primary-foreground rounded-full mb-4 border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-        >
-          <FlameIcon size={48} className="text-primary-foreground" strokeWidth={2} />
-        </motion.div>
-        <motion.h1 
+    <div className="w-full py-4">
+      {/* Hero Section — Tokenizer style */}
+      <section className="py-16 md:py-24 text-center space-y-8 bg-accent/30 border-[3px] border-border px-6 mb-16 md:mb-20">
+        <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-5xl md:text-8xl font-heading font-bold text-foreground tracking-tighter leading-[0.9]"
+          className="text-4xl md:text-7xl font-heading font-bold text-foreground tracking-tighter leading-[0.95]"
         >
-          Brutal Honesty.
-          <br /> Better Resumes.
+          Find your resume&apos;s
+          <br /> brutal truth
         </motion.h1>
-        <motion.p 
+
+        {/* Search bar — wide, Tokenizer-style */}
+        <motion.form
+          onSubmit={handleSearch}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-xl md:text-2xl max-w-3xl mx-auto text-muted-foreground font-medium"
+          className="max-w-2xl mx-auto flex items-stretch gap-0 border-[3px] border-border bg-background"
         >
-          {user?.role === "recruiter"
-            ? "Browse the Hall of Shame below or open your dashboard to filter and discover candidates."
-            : "Upload your resume. Get it completely torn apart by AI and brutally honest peers. Fix it before recruiters toss it in the bin."}
-        </motion.p>
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+          <div className="flex items-center pl-4 pr-2 text-muted-foreground shrink-0">
+            <Search className="w-5 h-5" />
+          </div>
+          <Input
+            placeholder="Search by name or use filters"
+            className="flex-1 min-w-0 border-0 shadow-none rounded-none h-12 text-base focus-visible:ring-0 focus-visible:shadow-none bg-transparent"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            data-testid="input-search"
+          />
+          <button type="button" className="shrink-0 px-3 py-2 text-muted-foreground hover:text-foreground transition-colors border-l-[3px] border-border">
+            <SlidersHorizontal className="w-5 h-5" />
+          </button>
+          <Button
+            type="submit"
+            className="h-12 px-6 shrink-0 rounded-none border-0 border-l-[3px] border-border font-heading text-sm tracking-wide bg-primary text-primary-foreground hover:bg-primary/90 hover:translate-x-0 hover:translate-y-0 !shadow-none"
+            data-testid="button-search"
+          >
+            Find Resumes
+          </Button>
+        </motion.form>
+
+        {/* Trending tags */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.35 }}
+          className="flex items-center justify-center gap-3 text-sm flex-wrap"
+        >
+          <span className="text-muted-foreground font-medium">Trending:</span>
+          {["software-eng", "product", "design"].map((tag) => (
+            <button
+              key={tag}
+              onClick={() => { setSearchInput(tag); setSearch(tag); setPage(1); }}
+              className="font-heading text-foreground hover:text-primary transition-colors underline underline-offset-4 decoration-border hover:decoration-primary"
+            >
+              {tag}
+            </button>
+          ))}
+        </motion.div>
+
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="pt-4"
+          transition={{ delay: 0.4 }}
         >
           {user?.role === "recruiter" ? (
             <Link href="/recruiter" data-testid="link-hero-recruiter">
-              <Button size="lg" className="text-lg px-8 border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading tracking-wide h-14">
-                Recruiter dashboard
+              <Button size="lg" className="text-base px-8 border-[3px] border-border !shadow-none hover:translate-x-0 hover:translate-y-0 transition-colors rounded-none font-heading tracking-wide h-12">
+                Recruiter Dashboard
               </Button>
             </Link>
           ) : (
             <Link href="/upload" data-testid="link-hero-upload">
-              <Button size="lg" className="text-lg px-8 border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading tracking-wide h-14">
+              <Button size="lg" className="text-base px-8 border-[3px] border-border !shadow-none hover:translate-x-0 hover:translate-y-0 transition-colors rounded-none font-heading tracking-wide h-12">
                 Roast My Resume
               </Button>
             </Link>
@@ -206,60 +240,52 @@ export default function HomePage() {
       </section>
 
       {/* Gallery Section */}
-      <section className="py-12">
-        {/* Header: title + sort + search */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-heading tracking-tighter mb-2 text-foreground">
-              Hall of Shame
-            </h1>
-            <p className="text-muted-foreground text-lg tracking-tight">The most roasted resumes on the internet. Proceed with caution.</p>
-          </div>
-          <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto">
-            <div className="relative w-full md:w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search by title or description..." 
-                className="pl-9 border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-none h-10"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                data-testid="input-search"
-              />
-            </div>
-            <Button type="submit" variant="secondary" className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs h-10" data-testid="button-search">Search</Button>
-          </form>
-        </div>
-
-        {/* Sort tabs + active search indicator */}
-        <div className="flex items-center gap-2 mb-6 border-b-[3px] border-border pb-3 overflow-x-auto overflow-y-hidden">
-          {[
-            { id: "new", label: "Newest", icon: Clock },
-            { id: "hot", label: "Hot", icon: "flame" as const },
-            { id: "top", label: "Top", icon: Trophy },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-              setSort(tab.id as SortTab);
-                setPage(1);
-              }}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 font-heading text-sm border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all whitespace-nowrap active:scale-95",
-                sort === tab.id 
-                  ? "bg-primary text-primary-foreground translate-x-0.5 translate-y-0.5 shadow-none" 
-                  : "bg-card hover:bg-muted hover:-translate-y-0.5"
+      <section>
+        {/* Header row: title + sort + pagination */}
+        <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-3">
+              <h2 className="text-3xl md:text-4xl font-heading font-bold tracking-tighter text-foreground">
+                Hall of Shame
+              </h2>
+              {!loading && total > 0 && (
+                <span className="text-xs text-muted-foreground font-bold tabular-nums border-2 border-border/50 px-2 py-0.5">
+                  {total}
+                </span>
               )}
-            >
-              {tab.icon === "flame" ? <FlameIcon size={16} strokeWidth={2} /> : <tab.icon className="w-4 h-4" />} {tab.label}
-            </button>
-          ))}
+            </div>
+            <p className="text-sm text-muted-foreground font-medium">
+              The most roasted resumes on the internet. Proceed with caution.
+            </p>
+          </div>
+          <div className="flex items-center gap-1 text-sm">
+            <span className="text-muted-foreground font-medium mr-2 hidden sm:inline">Sort by:</span>
+            {(
+              [
+                { id: "new", label: "newest" },
+                { id: "hot", label: "hottest" },
+                { id: "top", label: "top" },
+              ] as const
+            ).map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => changeSort(tab.id)}
+                className={cn(
+                  "px-3 py-1.5 font-heading text-sm transition-all",
+                  sort === tab.id
+                    ? "text-foreground underline underline-offset-4 decoration-2 decoration-primary font-bold"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
+        {/* Active search badge */}
         {search && (
-          <div className="flex items-center flex-wrap gap-2 mb-6">
-            <span className="text-xs font-heading uppercase tracking-wide text-muted-foreground">
-              Results for
-            </span>
+          <div className="flex items-center gap-2 mb-6">
             <span className="inline-flex items-center gap-2 bg-card border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] px-3 py-1.5 font-heading text-xs">
               <Search className="w-3.5 h-3.5 text-muted-foreground" />
               <span className="text-foreground">{search}</span>
@@ -275,122 +301,119 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Total + pagination (above grid so page controls stay visible) */}
-        {!loading && total > 0 && (
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <p className="text-xs text-muted-foreground font-bold tabular-nums">
-              {total} {total === 1 ? "resume" : "resumes"}
-              {pages > 1 ? (
-                <span className="text-muted-foreground/80 font-medium">
-                  {" "}
-                  · Page {page} of {pages}
-                </span>
-              ) : null}
-            </p>
-            {pages > 1 ? (
-              <HallPagination page={page} pages={pages} pageRange={pageRange} setPage={setPage} className="sm:justify-end" />
-            ) : null}
-          </div>
-        )}
-
-        {/* Cards grid */}
+        {/* Cards grid — NFT style */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="h-80 border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                <CardHeader className="space-y-2">
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-1/3" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-24 w-full" />
-                </CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i} className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+                <Skeleton className="aspect-[4/3] w-full" />
+                <div className="p-3 space-y-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3.5 w-1/2" />
+                </div>
               </Card>
             ))}
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
               {resumes.map((resume: Resume) => {
-                const ownerId =
-                  resume.userId && typeof resume.userId === "object" && "_id" in resume.userId
-                    ? String((resume.userId as { _id: string })._id)
-                    : "";
+                const ownerId = resume.userId?._id;
+                const username = resume.userId?.anonymousUsername || resume.userId?.name || "Anonymous";
+                // Legacy fallback intentionally keys on the (immutable) resume id only
+                // so the avatar stays visually stable even when the owner rerolls their
+                // anonymous username. New resumes store avatarSeed explicitly.
+                const avatarSeed = resume.avatarSeed || resume._id;
+                const cardBg = getCardBg(avatarSeed);
+
                 return (
                   <motion.div
                     key={resume._id}
-                    whileHover={{ y: -5, x: -5, boxShadow: "8px 8px 0px 0px rgba(0,0,0,1)" }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    whileHover={{ y: -3 }}
                     className="h-full"
                   >
-                    <Card className="h-80 flex flex-col border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all bg-card overflow-hidden">
-                      <Link
-                        href={`/resume/${resume._id}`}
-                        data-testid={`link-resume-${resume._id}`}
-                        className="flex flex-1 flex-col min-h-0 text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        <CardHeader className="pb-0 p-5 shrink-0 border-b-[3px] border-border">
-                          <div className="flex justify-between items-start gap-3">
-                            <div className="min-w-0 flex-1">
-                              <h3 className="font-heading text-base line-clamp-2 leading-tight pr-1">
-                                {resume.title || resume.userId?.anonymousUsername || "Untitled"}
-                              </h3>
-                              <p className="text-xs text-muted-foreground truncate mt-1 font-mono tracking-tight">
-                                u/{resume.userId?.anonymousUsername || resume.userId?.name || "Anonymous"}
-                              </p>
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="flex-1 min-h-0 px-5 pb-4 flex flex-col cursor-pointer">
-                          <div className="mt-2 flex-1 min-h-0 flex flex-col items-center justify-center gap-3 py-5 px-3 bg-muted border-2 border-border border-dashed">
-                            <FlameIcon size={40} className="text-destructive" strokeWidth={2} />
-                            <div className="text-center space-y-1">
-                              <p className="font-heading text-sm tracking-wide text-foreground leading-tight">
-                                Resume + roast thread
-                              </p>
-                              <p className="text-[11px] text-muted-foreground font-medium tabular-nums">
-                                {resume.commentsCount ?? 0}{" "}
-                                {(resume.commentsCount ?? 0) === 1 ? "comment" : "comments"}
-                                <span className="mx-1.5 text-border">&middot;</span>
-                                {resume.likesCount ?? 0}{" "}
-                                {(resume.likesCount ?? 0) === 1 ? "like" : "likes"}
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Link>
-                      <CardFooter className="text-xs text-muted-foreground border-t-[3px] border-border p-3 bg-muted rounded-none shrink-0 mt-auto flex flex-wrap items-center justify-between gap-2">
-                        <span>{new Date(resume.createdAt).toLocaleDateString()}</span>
-                        <div className="flex items-center gap-2">
-                          {user?.role === "recruiter" && ownerId ? (
-                            <Link
-                              href={`/recruiter/candidate/${ownerId}`}
-                              onClick={(e) => e.stopPropagation()}
-                              data-testid={`link-candidate-${ownerId}`}
-                              className="font-heading text-[10px] tracking-wider px-2 py-1 border-[3px] border-border bg-card text-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
-                            >
-                              Portfolio
-                            </Link>
-                          ) : null}
-                          <span className="font-heading text-[10px] tracking-wider">Open resume →</span>
+                    <Link
+                      href={`/resume/${resume._id}`}
+                      data-testid={`link-resume-${resume._id}`}
+                      className="block h-full text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <Card className="h-full flex flex-col border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all bg-card overflow-hidden group">
+                        {/* Avatar — landscape frame: shorter card, wider tiles (3-up on lg) */}
+                        <div className={cn("relative aspect-[4/3] overflow-hidden border-b-[3px] border-border", cardBg)}>
+                          <Image
+                            src={getDiceBearUrl(avatarSeed, resume.avatarStyle ?? undefined, 176, {
+                              backgroundColor: resume.avatarBackgroundColor ?? null,
+                              flip: Boolean(resume.avatarFlip),
+                              rotate: resume.avatarRotate ?? 0,
+                              radius: resume.avatarRadius ?? 0,
+                              scale: resume.avatarScale ?? 100,
+                            })}
+                            alt={`Avatar for ${username}`}
+                            width={176}
+                            height={176}
+                            unoptimized
+                            className="w-full h-full object-contain p-4 group-hover:scale-[1.06] transition-transform duration-300"
+                          />
                         </div>
-                      </CardFooter>
-                    </Card>
+
+                        {/* Card info */}
+                        <div className="p-3 flex-1 flex flex-col gap-1.5">
+                          <h3 className="font-heading text-[13px] leading-snug line-clamp-2">
+                            {resume.title || "Untitled Resume"}
+                          </h3>
+
+                          <p className="text-[11px] text-muted-foreground font-mono truncate">
+                            u/{username}
+                          </p>
+
+                          {/* Stats row */}
+                          <div className="mt-auto pt-1.5 flex items-center justify-between text-[11px] text-muted-foreground border-t border-border/50">
+                            <span className="flex items-center gap-1">
+                              <MessageSquare className="w-3 h-3" />
+                              {resume.commentsCount ?? 0} {(resume.commentsCount ?? 0) === 1 ? "comment" : "comments"}
+                            </span>
+                            <span className="text-[10px] tabular-nums">
+                              {new Date(resume.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="border-t-[3px] border-border px-3 py-2 bg-muted/40 flex items-center justify-end gap-2">
+                          {user?.role === "recruiter" && ownerId ? (
+                            <span
+                              onClick={(e) => e.stopPropagation()}
+                              className="font-heading text-[10px] tracking-wider px-2 py-0.5 border-2 border-border bg-card shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all cursor-pointer mr-auto"
+                            >
+                              <Link href={`/recruiter/candidate/${ownerId}`} data-testid={`link-candidate-${ownerId}`}>
+                                Portfolio
+                              </Link>
+                            </span>
+                          ) : null}
+                          <span className="font-heading text-[10px] tracking-wider border-2 border-border px-2.5 py-0.5 bg-background hover:bg-primary hover:text-primary-foreground transition-colors">
+                            View Roast
+                          </span>
+                        </div>
+                      </Card>
+                    </Link>
                   </motion.div>
                 );
               })}
 
               {resumes.length === 0 && (
-                <div className="col-span-full py-12 text-center">
-                  <p className="text-lg text-muted-foreground">
+                <div className="col-span-full py-16 text-center">
+                  <p className="text-lg text-muted-foreground font-medium">
                     {search ? "No resumes match your search." : "No resumes found. Be the first to get roasted."}
                   </p>
                 </div>
               )}
             </div>
 
-            {pages > 1 ? (
+            {pages > 1 && (
               <HallPagination page={page} pages={pages} pageRange={pageRange} setPage={setPage} className="mt-10" />
-            ) : null}
+            )}
           </>
         )}
       </section>

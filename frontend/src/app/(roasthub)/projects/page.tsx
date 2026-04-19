@@ -201,7 +201,7 @@ export default function ProjectsPage() {
           </div>
         ) : list.length === 0 ? (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="border-[3px] border-border border-dashed bg-muted/30 rounded-none text-center p-12 flex flex-col items-center justify-center">
+            <Card className="border-[3px] border-border border-dashed bg-muted/30 rounded-none text-center p-12 flex flex-col items-center justify-center shadow-none hover:shadow-none hover:translate-x-0 hover:translate-y-0 transition-colors">
               <Code className="w-12 h-12 text-muted-foreground mb-4 opacity-50" />
               <h3 className="font-heading text-xl tracking-wide mb-1">No projects yet</h3>
               <p className="text-muted-foreground text-sm mb-6">Add your projects to strengthen your profile.</p>

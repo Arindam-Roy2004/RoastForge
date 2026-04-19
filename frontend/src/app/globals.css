@@ -137,18 +137,34 @@
   --destructive: 0 62% 52%;
   --destructive-foreground: 210 20% 98%;
 
-  /* Hard shadows: soft cool highlight (not full #EEE — less glare) */
-  --shadow-2xs: 2px 2px 0px 0px hsl(210 16% 78%);
-  --shadow-xs: 3px 3px 0px 0px hsl(210 16% 78%);
-  --shadow-sm: 4px 4px 0px 0px hsl(210 16% 78%);
-  --shadow: 5px 5px 0px 0px hsl(210 16% 78%);
-  --shadow-md: 6px 6px 0px 0px hsl(210 16% 78%);
-  --shadow-lg: 8px 8px 0px 0px hsl(210 16% 78%);
-  --shadow-xl: 12px 12px 0px 0px hsl(210 16% 78%);
-  --shadow-2xl: 16px 16px 0px 0px hsl(210 16% 78%);
+  /*
+   * Neobrutalist offset shadows on dark surfaces: use near-black ink, not a
+   * light gray slab. Light-colored --shadow-* values read as a “white box”
+   * behind transparent inputs (hero search) and on hover/focus where shadows
+   * stack — same idea as :root using dark ink on cream, but inverted for dark UI.
+   */
+  --shadow-2xs: 2px 2px 0px 0px hsl(220 22% 5%);
+  --shadow-xs: 3px 3px 0px 0px hsl(220 22% 5%);
+  --shadow-sm: 4px 4px 0px 0px hsl(220 22% 5%);
+  --shadow: 5px 5px 0px 0px hsl(220 22% 5%);
+  --shadow-md: 6px 6px 0px 0px hsl(220 22% 5%);
+  --shadow-lg: 8px 8px 0px 0px hsl(220 22% 5%);
+  --shadow-xl: 12px 12px 0px 0px hsl(220 22% 5%);
+  --shadow-2xl: 16px 16px 0px 0px hsl(220 22% 5%);
 }
 
 @layer base {
+  /* Kill Chrome’s bright autofill background on dark (reads as a white slab). */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: hsl(var(--foreground));
+    caret-color: hsl(var(--foreground));
+    box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    transition: background-color 99999s ease-out;
+  }
+
   * {
     @apply border-border;
   }

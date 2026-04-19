@@ -11,6 +11,27 @@ import {
 const hashToken = (token: string) => crypto.createHash("sha256").update(token).digest("hex");
 
 /**
+ * Serialises the persisted avatar preferences onto the client-facing user
+ * payload. Kept in one place so response shapes stay consistent across
+ * getMe, updateAvatar, completeOnboarding, and Google login.
+ */
+export const pickAvatarPrefs = (user: {
+  preferredAvatarStyle?: unknown;
+  preferredAvatarBackgroundColor?: unknown;
+  preferredAvatarFlip?: unknown;
+  preferredAvatarRotate?: unknown;
+  preferredAvatarRadius?: unknown;
+  preferredAvatarScale?: unknown;
+}) => ({
+  preferredAvatarStyle: (user.preferredAvatarStyle as string | null) ?? null,
+  preferredAvatarBackgroundColor: (user.preferredAvatarBackgroundColor as string | null) ?? null,
+  preferredAvatarFlip: Boolean(user.preferredAvatarFlip),
+  preferredAvatarRotate: Number(user.preferredAvatarRotate ?? 0),
+  preferredAvatarRadius: Number(user.preferredAvatarRadius ?? 0),
+  preferredAvatarScale: Number(user.preferredAvatarScale ?? 100),
+});
+
+/**
  * Issues a fresh access + refresh token pair for a user document, persisting the
  * SHA-256 hash of the refresh token so we can detect reuse on the next refresh.
  * Shared between Google login and refresh-token rotation.
@@ -65,6 +86,7 @@ export const getMe = async (userId: string) => {
   return {
     id: user._id, name: user.name, email: user.email, avatar: user.avatar,
     anonymousUsername: user.anonymousUsername, role: user.role,
+    ...pickAvatarPrefs(user),
     publicProfile: user.publicProfile,
     // Onboarding flag drives the post-Google role-picker redirect on the client.
     onboardingCompleted: user.onboardingCompleted,
@@ -75,7 +97,14 @@ export const getMe = async (userId: string) => {
 export const updateAvatar = async (userId: string, avatar: string) => {
   const user = await User.findByIdAndUpdate(userId, { avatar }, { returnDocument: "after" });
   if (!user) throw ApiError.notfound("User not found");
-  return { id: user._id, name: user.name, email: user.email, avatar: user.avatar, anonymousUsername: user.anonymousUsername };
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    avatar: user.avatar,
+    anonymousUsername: user.anonymousUsername,
+    ...pickAvatarPrefs(user),
+  };
 };
 
 /** Normalize user-entered skills to a deduped, lowercased, trimmed list. */
@@ -177,6 +206,7 @@ export const completeOnboarding = async (userId: string, role: "user" | "recruit
   return {
     id: user._id, name: user.name, email: user.email, avatar: user.avatar,
     anonymousUsername: user.anonymousUsername, role: user.role,
+    ...pickAvatarPrefs(user),
     onboardingCompleted: user.onboardingCompleted,
   };
 };

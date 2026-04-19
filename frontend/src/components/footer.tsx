@@ -7,136 +7,85 @@ import BugIcon from "@/components/icons/bug-icon";
 
 export default function Footer() {
   const { user } = useAuth();
-  const hideCandidateLinks = user?.role === "recruiter";
+  const isRecruiter = user?.role === "recruiter";
+
   return (
     <footer className="mt-auto w-full border-t-[3px] border-border bg-card">
-      <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
-          <div className="shrink-0 space-y-3 lg:max-w-sm">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Main footer row */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 py-6">
+          {/* Left: Brand + tagline */}
+          <div className="flex flex-col items-center sm:items-start gap-1">
             <Link
               href="/"
-              className="inline-flex w-fit items-center gap-2.5"
+              className="inline-flex items-center gap-2 shrink-0"
               data-testid="footer-brand"
             >
-              <FlameIcon
-                size={20}
-                className="shrink-0 text-primary"
-                strokeWidth={2.25}
-                aria-hidden
-              />
-              <span className="inline-flex h-9 items-center font-heading text-xl tracking-tighter text-foreground leading-none">
+              <FlameIcon size={18} className="shrink-0 text-primary" strokeWidth={2.25} aria-hidden />
+              <span className="font-heading text-lg tracking-tighter text-foreground leading-none">
                 RoastForge
               </span>
             </Link>
-            <p className="text-sm leading-snug text-muted-foreground">
-              Resume feedback without the sugar-coating.
+            <p className="text-xs text-muted-foreground">
+              Get your resume brutally roasted.
             </p>
-            <div className="pt-1">
-              <a
-                href="https://docs.google.com/forms/d/e/1FAIpQLSdIqU2QCmm7VMje1JWvpOm39tDHXv4QcwDvGzI9j1U54vcGYA/viewform?usp=publish-editor"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                data-testid="footer-link-report-bug"
-              >
-                <BugIcon size={16} strokeWidth={2.25} className="shrink-0" />
-                Report Bug
-              </a>
-            </div>
           </div>
 
-          <nav
-            className="flex flex-col gap-8 sm:flex-row sm:gap-0 lg:ml-auto"
-            aria-label="Footer navigation"
-          >
-            <div className="sm:min-w-44 sm:border-r-2 sm:border-border sm:pr-8 md:pr-10">
-              <h3 className="mb-1 font-heading text-xs uppercase tracking-[0.18em] text-foreground">
-                Explore
-              </h3>
-              <div className="mb-3 h-0.5 w-12 rounded-full bg-primary/80" aria-hidden />
-              <ul className="flex flex-col gap-0.5 text-sm font-medium">
-                <li>
-                  <Link
-                    href="/"
-                    className="block w-full py-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-sm -mx-1 px-1 hover:bg-muted/60"
-                    data-testid="footer-link-home"
-                  >
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/"
-                    className="block w-full py-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-sm -mx-1 px-1 hover:bg-muted/60"
-                    data-testid="footer-link-browse"
-                  >
-                    Browse Roasts
-                  </Link>
-                </li>
-                {hideCandidateLinks && (
-                  <li>
-                    <Link
-                      href="/recruiter"
-                      className="block w-full py-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-sm -mx-1 px-1 hover:bg-muted/60"
-                      data-testid="footer-link-recruiter"
-                    >
-                      Recruiter dashboard
-                    </Link>
-                  </li>
-                )}
-                {!hideCandidateLinks && (
-                  <li>
-                    <Link
-                      href="/upload"
-                      className="block w-full py-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-sm -mx-1 px-1 hover:bg-muted/60"
-                      data-testid="footer-link-upload"
-                    >
-                      Upload Resume
-                    </Link>
-                  </li>
-                )}
-              </ul>
-            </div>
-
-            <div className="sm:min-w-44 sm:pl-8 md:pl-10">
-              <h3 className="mb-1 font-heading text-xs uppercase tracking-[0.18em] text-foreground">
-                Account
-              </h3>
-              <div className="mb-3 h-0.5 w-12 rounded-full bg-primary/80" aria-hidden />
-              <ul className="flex flex-col gap-0.5 text-sm font-medium">
-                <li>
-                  <Link
-                    href="/profile"
-                    className="block w-full py-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-sm -mx-1 px-1 hover:bg-muted/60"
-                    data-testid="footer-link-profile"
-                  >
-                    My Profile
-                  </Link>
-                </li>
-                {!hideCandidateLinks && (
-                  <li>
-                    <Link
-                      href="/projects"
-                      className="block w-full py-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-sm -mx-1 px-1 hover:bg-muted/60"
-                      data-testid="footer-link-projects"
-                    >
-                      My Projects
-                    </Link>
-                  </li>
-                )}
-                <li>
-                  <Link
-                    href="/login"
-                    className="block w-full py-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-sm -mx-1 px-1 hover:bg-muted/60"
-                    data-testid="footer-link-login"
-                  >
-                    Login
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
+          {/* Center: Nav links */}
+          <nav className="flex items-center gap-1 flex-wrap justify-center" aria-label="Footer navigation">
+            <Link
+              href="/"
+              className="px-3 py-1.5 text-xs font-heading uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+              data-testid="footer-link-home"
+            >
+              Browse
+            </Link>
+            {isRecruiter ? (
+              <Link
+                href="/recruiter"
+                className="px-3 py-1.5 text-xs font-heading uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                data-testid="footer-link-recruiter"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/upload"
+                className="px-3 py-1.5 text-xs font-heading uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                data-testid="footer-link-upload"
+              >
+                Upload
+              </Link>
+            )}
+            <Link
+              href="/profile"
+              className="px-3 py-1.5 text-xs font-heading uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+              data-testid="footer-link-profile"
+            >
+              Profile
+            </Link>
           </nav>
+
+          {/* Right: Report bug */}
+          <div className="flex items-center">
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLSdIqU2QCmm7VMje1JWvpOm39tDHXv4QcwDvGzI9j1U54vcGYA/viewform?usp=publish-editor"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-heading uppercase tracking-wider text-muted-foreground border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all bg-background"
+              data-testid="footer-link-report-bug"
+            >
+              <BugIcon size={13} strokeWidth={2.25} className="shrink-0" />
+              Report Bug
+            </a>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div className="border-t border-border/50 py-3 text-center">
+          <p className="text-[10px] text-muted-foreground/70 tracking-wide">
+            &copy; {new Date().getFullYear()} RoastForge. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

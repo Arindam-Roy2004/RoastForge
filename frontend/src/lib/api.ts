@@ -1,3 +1,5 @@
+import type { AvatarStyle } from "@/lib/avatar";
+
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
 export type ApiResult<T = unknown> = { success: boolean; message: string; data?: T };
@@ -102,6 +104,12 @@ export type User = {
   avatar: string;
   anonymousUsername?: string;
   role?: string;
+  preferredAvatarStyle?: AvatarStyle | null;
+  preferredAvatarBackgroundColor?: string | null;
+  preferredAvatarFlip?: boolean;
+  preferredAvatarRotate?: number;
+  preferredAvatarRadius?: number;
+  preferredAvatarScale?: number;
   // False for fresh Google sign-ups until they pick Candidate/Recruiter on
   // /onboarding/role. The auth store reads this to gate that redirect.
   onboardingCompleted?: boolean;
@@ -180,6 +188,13 @@ export type AiRoast = {
 export type Resume = {
   _id: string;
   userId: { _id: string; name: string; avatar: string; anonymousUsername?: string };
+  avatarStyle?: AvatarStyle | null;
+  avatarSeed?: string | null;
+  avatarBackgroundColor?: string | null;
+  avatarFlip?: boolean;
+  avatarRotate?: number;
+  avatarRadius?: number;
+  avatarScale?: number;
   title?: string;
   name?: string;
   blurb?: string;
@@ -206,7 +221,7 @@ export type ResumeListResult = {
 };
 
 /** Must match `PAGE_SIZE` in backend `resume.service.ts`. */
-export const RESUME_GALLERY_PAGE_SIZE = 4;
+export const RESUME_GALLERY_PAGE_SIZE = 3;
 
 export const resumeApi = {
   list: (params: { page?: number; sort?: string; search?: string } = {}) => {
@@ -219,8 +234,20 @@ export const resumeApi = {
   },
   get: (id: string) => apiFetch<Resume>(`/api/resumes/${id}`),
   my: () => apiFetch<Resume[]>("/api/resumes/my"),
-  create: (body: { title: string; name: string; blurb?: string; fileUrl: string; fileType: "pdf" | "image" }) =>
-    apiFetch<Resume>("/api/resumes", { method: "POST", body: JSON.stringify(body) }),
+  create: (body: {
+    title: string;
+    name: string;
+    blurb?: string;
+    fileUrl: string;
+    fileType: "pdf" | "image";
+    avatarStyle?: AvatarStyle;
+    avatarSeed?: string;
+    avatarBackgroundColor?: string | null;
+    avatarFlip?: boolean;
+    avatarRotate?: number;
+    avatarRadius?: number;
+    avatarScale?: number;
+  }) => apiFetch<Resume>("/api/resumes", { method: "POST", body: JSON.stringify(body) }),
   update: (id: string, body: { title?: string; name?: string; blurb?: string }) =>
     apiFetch<Resume>(`/api/resumes/${id}`, { method: "PUT", body: JSON.stringify(body) }),
   delete: (id: string) => apiFetch(`/api/resumes/${id}`, { method: "DELETE" }),

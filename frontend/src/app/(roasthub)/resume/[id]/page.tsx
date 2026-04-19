@@ -152,7 +152,7 @@ export default function ResumeDetail() {
 
   if (loading) {
     return (
-      <div className="mx-auto w-full max-w-[1600px] space-y-4 p-4 py-8">
+      <div className="mx-auto w-full max-w-7xl space-y-4 p-4 py-8">
         <Skeleton className="h-16 w-3/4 border-[3px] border-border rounded-none" />
         <Skeleton className="h-125 w-full border-[3px] border-border rounded-none" />
       </div>
@@ -161,7 +161,7 @@ export default function ResumeDetail() {
 
   if (!resume) {
     return (
-      <div className="mx-auto w-full max-w-[1600px] p-4 py-16 text-center">
+      <div className="mx-auto w-full max-w-7xl p-4 py-16 text-center">
         <h1 className="text-4xl font-heading mb-6">Resume not found</h1>
         <Button onClick={() => router.push("/")} className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-heading text-lg tracking-wide">
           Back Home
@@ -176,7 +176,7 @@ export default function ResumeDetail() {
     "min-h-14 shrink-0 px-4 flex items-center justify-between gap-3 border-b-4 border-border bg-primary text-primary-foreground font-heading tracking-wide";
 
   return (
-    <div className="mx-auto w-full max-w-[1600px] space-y-8 px-4 py-8">
+    <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-8">
       {/* Header */}
       <div className="space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
