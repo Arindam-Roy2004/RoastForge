@@ -227,7 +227,7 @@ export default function ResumeDetail() {
         )}
       >
         {/* Center: PDF Viewer */}
-        <div className="order-1 border-4 border-border shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-muted overflow-hidden flex flex-col h-[540px] lg:h-[var(--panel-h)]">
+        <div className="order-1 border-4 border-border bg-muted overflow-hidden flex flex-col h-[540px] lg:h-[var(--panel-h)]">
           <div className={cn(panelHeaderClass, "text-sm ")}>
              <div className="flex items-center gap-2.5 min-w-0">
                <FileText className="w-5 h-5 shrink-0" strokeWidth={2.5} /> <span className="truncate">Resume PDF</span>

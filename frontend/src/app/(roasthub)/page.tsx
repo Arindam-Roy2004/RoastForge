@@ -8,9 +8,9 @@ import { getCardBg, getDiceBearUrl } from "@/lib/avatar";
 import { resumeApi, type Resume, type ResumeListResult, RESUME_GALLERY_PAGE_SIZE } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, ChevronLeft, ChevronRight, Clock, Trophy, X, SlidersHorizontal, MessageSquare } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, X, SlidersHorizontal, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/store/auth";
 
@@ -155,14 +155,14 @@ export default function HomePage() {
   }
 
   return (
-    <div className="w-full py-4">
+    <div className="mx-auto w-full max-w-[1180px] px-4 py-4 sm:px-5 lg:px-6">
       {/* Hero Section — Tokenizer style */}
-      <section className="py-16 md:py-24 text-center space-y-8 bg-accent/30 border-[3px] border-border px-6 mb-16 md:mb-20">
+      <section className="mx-auto mb-14 max-w-[1080px] space-y-7 border-[3px] border-border bg-accent/30 px-5 py-14 text-center sm:px-7 md:mb-18 md:space-y-8 md:px-10 md:py-20">
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-4xl md:text-7xl font-heading font-bold text-foreground tracking-tighter leading-[0.95]"
+          className="mx-auto max-w-3xl text-4xl font-heading font-bold leading-[0.95] tracking-tighter text-foreground md:text-6xl"
         >
           Find your resume&apos;s
           <br /> brutal truth
@@ -174,7 +174,7 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="max-w-2xl mx-auto flex items-stretch gap-0 border-[3px] border-border bg-background"
+          className="mx-auto flex max-w-xl items-stretch gap-0 border-[3px] border-border bg-background"
         >
           <div className="flex items-center pl-4 pr-2 text-muted-foreground shrink-0">
             <Search className="w-5 h-5" />
@@ -240,7 +240,7 @@ export default function HomePage() {
       </section>
 
       {/* Gallery Section */}
-      <section>
+      <section className="mx-auto w-full max-w-[1120px]">
         {/* Header row: title + sort + pagination */}
         <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
           <div className="flex flex-col gap-1">
@@ -303,10 +303,10 @@ export default function HomePage() {
 
         {/* Cards grid — NFT style */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
             {[...Array(3)].map((_, i) => (
               <Card key={i} className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-                <Skeleton className="aspect-[4/3] w-full" />
+                <Skeleton className="aspect-[5/4] w-full" />
                 <div className="p-3 space-y-2">
                   <Skeleton className="h-4 w-3/4" />
                   <Skeleton className="h-3.5 w-1/2" />
@@ -316,7 +316,7 @@ export default function HomePage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
               {resumes.map((resume: Resume) => {
                 const ownerId = resume.userId?._id;
                 const username = resume.userId?.anonymousUsername || resume.userId?.name || "Anonymous";
@@ -341,7 +341,7 @@ export default function HomePage() {
                     >
                       <Card className="h-full flex flex-col border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all bg-card overflow-hidden group">
                         {/* Avatar — landscape frame: shorter card, wider tiles (3-up on lg) */}
-                        <div className={cn("relative aspect-[4/3] overflow-hidden border-b-[3px] border-border", cardBg)}>
+                        <div className={cn("relative aspect-[5/4] overflow-hidden border-b-[3px] border-border", cardBg)}>
                           <Image
                             src={getDiceBearUrl(avatarSeed, resume.avatarStyle ?? undefined, 176, {
                               backgroundColor: resume.avatarBackgroundColor ?? null,
@@ -354,12 +354,12 @@ export default function HomePage() {
                             width={176}
                             height={176}
                             unoptimized
-                            className="w-full h-full object-contain p-4 group-hover:scale-[1.06] transition-transform duration-300"
+                            className="h-full w-full object-contain p-5 transition-transform duration-300 group-hover:scale-[1.03]"
                           />
                         </div>
 
                         {/* Card info */}
-                        <div className="p-3 flex-1 flex flex-col gap-1.5">
+                        <div className="flex flex-1 flex-col gap-1.5 p-3.5">
                           <h3 className="font-heading text-[13px] leading-snug line-clamp-2">
                             {resume.title || "Untitled Resume"}
                           </h3>
