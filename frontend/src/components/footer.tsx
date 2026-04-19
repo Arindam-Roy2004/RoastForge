@@ -11,7 +11,7 @@ export default function Footer() {
 
   return (
     <footer className="mt-auto w-full border-t-[3px] border-border bg-card">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[1760px] px-4 sm:px-6 lg:px-8">
         {/* Main footer row */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6 py-6">
           {/* Left: Brand + tagline */}
