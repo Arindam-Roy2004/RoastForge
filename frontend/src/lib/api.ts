@@ -204,8 +204,11 @@ export type Resume = {
   candidateAlias?: string;
   aiScore?: { [key: string]: number };
   likesCount: number;
+  dislikesCount?: number;
   commentsCount: number;
   isLiked?: boolean;
+  isDisliked?: boolean;
+  viewerReaction?: "like" | "dislike" | null;
   /** Present only for the resume owner (API strips for others). */
   isOwner?: boolean;
   aiRoast?: AiRoast;
@@ -251,7 +254,16 @@ export const resumeApi = {
   update: (id: string, body: { title?: string; name?: string; blurb?: string }) =>
     apiFetch<Resume>(`/api/resumes/${id}`, { method: "PUT", body: JSON.stringify(body) }),
   delete: (id: string) => apiFetch(`/api/resumes/${id}`, { method: "DELETE" }),
-  like: (id: string) => apiFetch<{ liked: boolean }>(`/api/resumes/${id}/like`, { method: "POST" }),
+  like: (id: string) =>
+    apiFetch<{ isLiked: boolean; isDisliked: boolean; viewerReaction: "like" | "dislike" | null; likesCount: number; dislikesCount: number }>(
+      `/api/resumes/${id}/like`,
+      { method: "POST" },
+    ),
+  react: (id: string, reaction: "like" | "dislike") =>
+    apiFetch<{ isLiked: boolean; isDisliked: boolean; viewerReaction: "like" | "dislike" | null; likesCount: number; dislikesCount: number }>(
+      `/api/resumes/${id}/reaction`,
+      { method: "POST", body: JSON.stringify({ reaction }) },
+    ),
 };
 
 // ─── AI Analysis ─────────────────────────────────────────────────────────────

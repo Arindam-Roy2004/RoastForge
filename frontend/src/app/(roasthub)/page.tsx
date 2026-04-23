@@ -3,9 +3,12 @@
 import { useState, useEffect, useCallback, type Dispatch, type SetStateAction } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { getCardBg, getDiceBearUrl } from "@/lib/avatar";
 import { resumeApi, type Resume, type ResumeListResult, RESUME_GALLERY_PAGE_SIZE } from "@/lib/api";
+import { enqueueResumeReaction, flushQueuedResumeReactions } from "@/lib/resume-reaction-sync";
+import { ResumeReactionControls } from "@/components/resume-reaction-controls";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Search, ChevronLeft, ChevronRight, X, SlidersHorizontal, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/store/auth";
+import { toast } from "sonner";
 
 type SortTab = "new" | "hot" | "top";
 
@@ -74,14 +78,47 @@ function HallPagination({
 
 export default function HomePage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reactionPending, setReactionPending] = useState<Record<string, boolean>>({});
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [sort, setSort] = useState<SortTab>("new");
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
+
+  const inferReaction = useCallback((resume: Resume): "like" | "dislike" | null => {
+    if (resume.viewerReaction === "like" || resume.viewerReaction === "dislike") return resume.viewerReaction;
+    if (resume.isLiked) return "like";
+    if (resume.isDisliked) return "dislike";
+    return null;
+  }, []);
+
+  const applyReaction = useCallback(
+    (resume: Resume, reaction: "like" | "dislike") => {
+      const prev = inferReaction(resume);
+      const next = prev === reaction ? null : reaction;
+      const likesCount = Math.max(
+        0,
+        (resume.likesCount ?? 0) + (next === "like" ? 1 : 0) - (prev === "like" ? 1 : 0),
+      );
+      const dislikesCount = Math.max(
+        0,
+        (resume.dislikesCount ?? 0) + (next === "dislike" ? 1 : 0) - (prev === "dislike" ? 1 : 0),
+      );
+      return {
+        ...resume,
+        viewerReaction: next,
+        isLiked: next === "like",
+        isDisliked: next === "dislike",
+        likesCount,
+        dislikesCount,
+      };
+    },
+    [inferReaction],
+  );
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -132,6 +169,78 @@ export default function HomePage() {
     setSearch("");
     setPage(1);
   };
+
+  const reactOnCard = useCallback(
+    async (resumeId: string, reaction: "like" | "dislike") => {
+      if (!user) {
+        toast.error("Please log in to react.");
+        router.push("/login");
+        return;
+      }
+      const current = resumes.find((r) => r._id === resumeId);
+      if (!current) return;
+      const ownerId = current.userId?._id;
+      if (ownerId && ownerId === user.id) {
+        toast.error("You cannot react to your own resume.");
+        return;
+      }
+
+      const optimistic = applyReaction(current, reaction);
+      const optimisticReaction = optimistic.viewerReaction;
+      setReactionPending((prev) => ({ ...prev, [resumeId]: true }));
+      setResumes((prev) => prev.map((r) => (r._id === resumeId ? optimistic : r)));
+
+      try {
+        const res = await resumeApi.react(resumeId, reaction);
+        const data = res.data;
+        if (data) {
+          setResumes((prev) =>
+            prev.map((r) =>
+              r._id === resumeId
+                ? {
+                    ...r,
+                    viewerReaction: data.viewerReaction,
+                    isLiked: data.isLiked,
+                    isDisliked: data.isDisliked,
+                    likesCount: data.likesCount,
+                    dislikesCount: data.dislikesCount,
+                  }
+                : r,
+            ),
+          );
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Could not save reaction.";
+        const networkish =
+          typeof navigator !== "undefined"
+          && (!navigator.onLine || /network|failed to fetch|load failed/i.test(message));
+        if (networkish && optimisticReaction) {
+          enqueueResumeReaction(resumeId, optimisticReaction);
+          toast.error("Offline detected. Reaction queued and will sync when you're online.");
+        } else {
+          setResumes((prev) => prev.map((r) => (r._id === resumeId ? current : r)));
+          toast.error(message);
+        }
+      } finally {
+        setReactionPending((prev) => ({ ...prev, [resumeId]: false }));
+      }
+    },
+    [applyReaction, resumes, router, user],
+  );
+
+  useEffect(() => {
+    const flush = async () => {
+      const synced = await flushQueuedResumeReactions();
+      if (synced > 0) {
+        await load();
+        toast.success(`Synced ${synced} queued reaction${synced > 1 ? "s" : ""}.`);
+      }
+    };
+    void flush();
+    const onOnline = () => { void flush(); };
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+  }, [load]);
 
   const changeSort = (s: SortTab) => {
     if (s === sort) return;
@@ -210,7 +319,7 @@ export default function HomePage() {
             <button
               key={tag}
               onClick={() => { setSearchInput(tag); setSearch(tag); setPage(1); }}
-              className="font-heading text-foreground hover:text-primary transition-colors underline underline-offset-4 decoration-border hover:decoration-primary"
+              className="font-heading text-muted-foreground hover:text-primary transition-colors underline underline-offset-4 decoration-2 decoration-border hover:decoration-primary"
             >
               {tag}
             </button>
@@ -274,7 +383,7 @@ export default function HomePage() {
                   "px-3 py-1.5 font-heading text-sm transition-all",
                   sort === tab.id
                     ? "text-foreground underline underline-offset-4 decoration-2 decoration-primary font-bold"
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:underline hover:decoration-2 hover:decoration-border hover:underline-offset-4"
                 )}
               >
                 {tab.label}
@@ -385,13 +494,23 @@ export default function HomePage() {
                           {user?.role === "recruiter" && ownerId ? (
                             <span
                               onClick={(e) => e.stopPropagation()}
-                              className="font-heading text-[10px] tracking-wider px-2 py-0.5 border-2 border-border bg-card shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all cursor-pointer mr-auto"
+                              className="font-heading text-[10px] tracking-wider px-2 py-0.5 border-2 border-border bg-card shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all cursor-pointer"
                             >
                               <Link href={`/recruiter/candidate/${ownerId}`} data-testid={`link-candidate-${ownerId}`}>
                                 Portfolio
                               </Link>
                             </span>
                           ) : null}
+                          <ResumeReactionControls
+                            className="mr-auto"
+                            likesCount={resume.likesCount ?? 0}
+                            dislikesCount={resume.dislikesCount ?? 0}
+                            viewerReaction={inferReaction(resume)}
+                            pending={Boolean(reactionPending[resume._id])}
+                            disabled={!user || (ownerId != null && ownerId === user.id)}
+                            stopNavigation
+                            onReact={(reaction) => void reactOnCard(resume._id, reaction)}
+                          />
                           <span className="font-heading text-[10px] tracking-wider border-2 border-border px-2.5 py-0.5 bg-background hover:bg-primary hover:text-primary-foreground transition-colors">
                             View Roast
                           </span>

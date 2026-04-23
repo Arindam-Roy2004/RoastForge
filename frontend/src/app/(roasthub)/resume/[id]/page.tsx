@@ -1,8 +1,10 @@
 "use client";
 
 import { EnhancedComment } from "@/components/enhanced-comment";
+import { ResumeReactionControls } from "@/components/resume-reaction-controls";
 import { cn } from "@/lib/utils";
 import { resumeApi, commentApi, analysisApi, type Resume, type Comment, type RoastData } from "@/lib/api";
+import { enqueueResumeReaction, flushQueuedResumeReactions } from "@/lib/resume-reaction-sync";
 import { coalesceVerdictBars, isCompleteRoastPayload, verdictBarFillClass } from "@/lib/verdict-dimensions";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -28,6 +30,7 @@ export default function ResumeDetail() {
   const [commentText, setCommentText] = useState("");
   const [commentType, setCommentType] = useState<string>("comment");
   const [posting, setPosting] = useState(false);
+  const [reactionPending, setReactionPending] = useState(false);
 
   // AI Roast state
   const [roastData, setRoastData] = useState<RoastData | null>(null);
@@ -36,6 +39,30 @@ export default function ResumeDetail() {
 
   const isOwner = Boolean(
     resume && (resume.isOwner === true || (user && user.id === resume.userId?._id)),
+  );
+
+  const inferReaction = useCallback((r: Resume | null): "like" | "dislike" | null => {
+    if (!r) return null;
+    if (r.viewerReaction === "like" || r.viewerReaction === "dislike") return r.viewerReaction;
+    if (r.isLiked) return "like";
+    if (r.isDisliked) return "dislike";
+    return null;
+  }, []);
+
+  const applyReaction = useCallback(
+    (r: Resume, reaction: "like" | "dislike"): Resume => {
+      const prev = inferReaction(r);
+      const next = prev === reaction ? null : reaction;
+      return {
+        ...r,
+        viewerReaction: next,
+        isLiked: next === "like",
+        isDisliked: next === "dislike",
+        likesCount: Math.max(0, (r.likesCount ?? 0) + (next === "like" ? 1 : 0) - (prev === "like" ? 1 : 0)),
+        dislikesCount: Math.max(0, (r.dislikesCount ?? 0) + (next === "dislike" ? 1 : 0) - (prev === "dislike" ? 1 : 0)),
+      };
+    },
+    [inferReaction],
   );
 
   const loadResume = useCallback(async () => {
@@ -113,6 +140,71 @@ export default function ResumeDetail() {
       setRoasting(false);
     }
   }
+
+  async function reactOnResume(reaction: "like" | "dislike") {
+    if (!resume) return;
+    if (!user) {
+      toast.error("Please log in to react.");
+      router.push("/login");
+      return;
+    }
+    if (resume.userId?._id === user.id) {
+      toast.error("You cannot react to your own resume.");
+      return;
+    }
+
+    const prev = resume;
+    const optimistic = applyReaction(prev, reaction);
+    const optimisticReaction = optimistic.viewerReaction;
+    setReactionPending(true);
+    setResume(optimistic);
+
+    try {
+      const res = await resumeApi.react(id, reaction);
+      if (res.data) {
+        setResume((curr) =>
+          curr
+            ? {
+                ...curr,
+                viewerReaction: res.data!.viewerReaction,
+                isLiked: res.data!.isLiked,
+                isDisliked: res.data!.isDisliked,
+                likesCount: res.data!.likesCount,
+                dislikesCount: res.data!.dislikesCount,
+              }
+            : curr,
+        );
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Could not save reaction.";
+      const networkish =
+        typeof navigator !== "undefined"
+        && (!navigator.onLine || /network|failed to fetch|load failed/i.test(message));
+      if (networkish && optimisticReaction) {
+        enqueueResumeReaction(id, optimisticReaction);
+        toast.error("Offline detected. Reaction queued and will sync when you're online.");
+      } else {
+        setResume(prev);
+        toast.error(message);
+      }
+    } finally {
+      setReactionPending(false);
+    }
+  }
+
+  useEffect(() => {
+    const flush = async () => {
+      const synced = await flushQueuedResumeReactions();
+      if (synced > 0) {
+        await loadResume();
+        toast.success(`Synced ${synced} queued reaction${synced > 1 ? "s" : ""}.`);
+      }
+    };
+    void flush();
+    const onOnline = () => { void flush(); };
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+  }, [loadResume]);
 
   async function postComment(e: React.FormEvent) {
     e.preventDefault();
@@ -198,6 +290,14 @@ export default function ResumeDetail() {
           </div>
 
           <div className="flex flex-wrap gap-2 items-center">
+            <ResumeReactionControls
+              likesCount={resume.likesCount ?? 0}
+              dislikesCount={resume.dislikesCount ?? 0}
+              viewerReaction={inferReaction(resume)}
+              pending={reactionPending}
+              disabled={!user || isOwner}
+              onReact={(reaction) => { void reactOnResume(reaction); }}
+            />
             {user?.role === "recruiter" && resume.userId?._id && (
               <Link href={`/recruiter/candidate/${resume.userId._id}`}>
                 <Button
