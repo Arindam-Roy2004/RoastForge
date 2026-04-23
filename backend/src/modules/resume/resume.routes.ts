@@ -19,5 +19,6 @@ router.post("/", authenticate, requireCandidate, validate(CreateResumeDto), asyn
 router.put("/:id", validateObjectIdParam("id"), authenticate, requireCandidate, validate(UpdateResumeDto), asyncHandler(controller.updateResume));
 router.delete("/:id", validateObjectIdParam("id"), authenticate, requireCandidate, asyncHandler(controller.deleteResume));
 router.post("/:id/like", validateObjectIdParam("id"), authenticate, asyncHandler(controller.toggleLike));
+router.post("/:id/reaction", validateObjectIdParam("id"), authenticate, asyncHandler(controller.reactToResume));
 
 export default router;

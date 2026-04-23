@@ -1,5 +1,5 @@
 import Resume from "./resume.model.js";
-import Like from "./like.model.js";
+import Like, { type ResumeReactionType } from "./like.model.js";
 import Comment from "../comment/comment.model.js";
 import CommentVote from "../comment/comment-vote.model.js";
 import User from "../auth/auth.model.js";
@@ -16,6 +16,7 @@ import {
 import { safeRecalcTalentScore } from "../auth/talent-score.service.js";
 
 const PAGE_SIZE = 3;
+const REACTION_VALUES: readonly ResumeReactionType[] = ["like", "dislike"] as const;
 
 /** AI roast is private to the uploader — never expose in public list/API. */
 function stripPrivateRoastFields<T extends Record<string, unknown>>(doc: T): T {
@@ -35,6 +36,24 @@ function resumeOwnerId(resume: { userId: unknown }): string {
 // Populate user info for public display
 const populateUser = (q: any) =>
   q.populate("userId", "name avatar anonymousUsername");
+
+/**
+ * Normalise a Like document's `reaction` field for API responses.
+ * Legacy docs (pre-reaction-feature) have no `reaction` field — those are
+ * treated as likes so existing UI badges don't silently disappear.
+ */
+function toViewerReaction(v: unknown): ResumeReactionType {
+  if (v === "dislike") return "dislike";
+  return "like";
+}
+
+function isTransactionUnavailable(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err ?? "");
+  return (
+    msg.includes("Transaction numbers are only allowed on a replica set member or mongos")
+    || msg.includes("Transaction support is not enabled")
+  );
+}
 
 export const listResumes = async (opts: {
   page: number;
@@ -81,17 +100,27 @@ export const listResumes = async (opts: {
   if (useTextScore) query = query.select({ score: { $meta: "textScore" } });
   const resumes = (await populateUser(query)) as any[];
 
-  // Attach liked status for authenticated viewer
-  let likedIds: Set<string> = new Set();
+  // Attach viewer reaction for authenticated viewer. Compound unique index on
+  // (resumeId, userId) means this is at most one row per resume.
+  let reactionByResume = new Map<string, ResumeReactionType>();
   if (viewerId) {
-    const likes = await Like.find({ resumeId: { $in: resumes.map((r: any) => r._id) }, userId: viewerId }).select("resumeId");
-    likedIds = new Set(likes.map((l) => l.resumeId.toString()));
+    const reactions = await Like.find({
+      resumeId: { $in: resumes.map((r: any) => r._id) },
+      userId: viewerId,
+    }).select("resumeId reaction");
+    reactionByResume = new Map(
+      reactions.map((r) => [r.resumeId.toString(), toViewerReaction((r as any).reaction)]),
+    );
   }
 
   return {
     resumes: resumes.map((r: any) => ({
       ...stripPrivateRoastFields(r.toObject() as Record<string, unknown>),
-      isLiked: likedIds.has(r._id.toString()),
+      viewerReaction: reactionByResume.get(r._id.toString()) ?? null,
+      isLiked: reactionByResume.get(r._id.toString()) === "like",
+      isDisliked: reactionByResume.get(r._id.toString()) === "dislike",
+      likesCount: Math.max(0, Number(r.likesCount) || 0),
+      dislikesCount: Math.max(0, Number((r as any).dislikesCount) || 0),
     })),
     total,
     page,
@@ -103,9 +132,10 @@ export const getResumeById = async (id: string, viewerId?: string) => {
   const resume = await populateUser(Resume.findById(id));
   if (!resume) throw ApiError.notfound("Resume not found");
 
-  let isLiked = false;
+  let viewerReaction: ResumeReactionType | null = null;
   if (viewerId) {
-    isLiked = !!(await Like.findOne({ resumeId: id, userId: viewerId }));
+    const reaction = await Like.findOne({ resumeId: id, userId: viewerId }).select("reaction");
+    viewerReaction = reaction ? toViewerReaction((reaction as any)?.reaction) : null;
   }
 
   const obj = resume.toObject() as Record<string, unknown>;
@@ -113,7 +143,15 @@ export const getResumeById = async (id: string, viewerId?: string) => {
   const isOwner = Boolean(viewerId && viewerId === ownerId);
   const safe = isOwner ? obj : stripPrivateRoastFields(obj);
 
-  return { ...safe, isLiked, isOwner };
+  return {
+    ...safe,
+    viewerReaction,
+    isLiked: viewerReaction === "like",
+    isDisliked: viewerReaction === "dislike",
+    likesCount: Math.max(0, Number((safe as any).likesCount) || 0),
+    dislikesCount: Math.max(0, Number((safe as any).dislikesCount) || 0),
+    isOwner,
+  };
 };
 
 export const getMyResumes = async (userId: string) => {
@@ -261,27 +299,121 @@ export const deleteResume = async (id: string, userId: string) => {
     await Comment.deleteMany({ _id: { $in: ids } });
   }
   await Like.deleteMany({ resumeId: id });
-  // Removed resume changed the owner's max AI score / like totals — recompute.
+  // Removed resume changed the owner's AI average / reaction totals — recompute.
   safeRecalcTalentScore(userId);
   return resume;
 };
 
-export const toggleLike = async (resumeId: string, userId: string) => {
-  // Try to remove an existing like atomically; if one existed, we toggled off.
-  const removed = await Like.findOneAndDelete({ resumeId, userId });
-  if (removed) {
-    const resume = await Resume.findByIdAndUpdate(resumeId, { $inc: { likesCount: -1 } });
-    if (resume) safeRecalcTalentScore(resume.userId.toString());
-    return { liked: false };
-  }
-  try {
-    await Like.create({ resumeId, userId });
-    const resume = await Resume.findByIdAndUpdate(resumeId, { $inc: { likesCount: 1 } });
-    if (resume) safeRecalcTalentScore(resume.userId.toString());
-    return { liked: true };
-  } catch (err: any) {
-    // Duplicate key means a concurrent request already liked — treat as idempotent success.
-    if (err?.code === 11000) return { liked: true };
-    throw err;
-  }
+type ReactionMutationResult = {
+  ownerId: string;
+  viewerReaction: ResumeReactionType | null;
+  likesCount: number;
+  dislikesCount: number;
 };
+
+function isDuplicateKeyError(err: unknown): boolean {
+  return typeof err === "object" && err !== null && (err as { code?: number }).code === 11000;
+}
+
+async function applyReactionMutation(
+  resumeId: string,
+  userId: string,
+  targetReaction: ResumeReactionType,
+  session?: mongoose.ClientSession,
+  retry = true,
+): Promise<ReactionMutationResult> {
+  const resumeQuery = Resume.findById(resumeId).select("userId likesCount dislikesCount");
+  if (session) resumeQuery.session(session);
+  const resume = await resumeQuery;
+  if (!resume) throw ApiError.notfound("Resume not found");
+  if (resume.userId.toString() === userId) throw ApiError.badRequest("You cannot react to your own resume.");
+
+  const existingQuery = Like.findOne({ resumeId, userId }).select("reaction");
+  if (session) existingQuery.session(session);
+  const existing = await existingQuery;
+  const prev = existing ? toViewerReaction((existing as any)?.reaction) : null;
+  const next: ResumeReactionType | null = prev === targetReaction ? null : targetReaction;
+
+  if (existing && !next) {
+    const delQuery = Like.deleteOne({ _id: existing._id });
+    if (session) delQuery.session(session);
+    await delQuery;
+  } else if (existing && next) {
+    const upQuery = Like.updateOne({ _id: existing._id }, { $set: { reaction: next } });
+    if (session) upQuery.session(session);
+    await upQuery;
+  } else if (!existing && next) {
+    try {
+      await Like.create([{ resumeId, userId, reaction: next }], { session });
+    } catch (err) {
+      // A concurrent request from the same user inserted the Like row between
+      // our read and our create. Retry the whole mutation once so we recompute
+      // `prev`/`next` and the counter deltas against the now-existing row.
+      if (!isDuplicateKeyError(err) || !retry) throw err;
+      return applyReactionMutation(resumeId, userId, targetReaction, session, false);
+    }
+  }
+
+  const prevLike = prev === "like" ? 1 : 0;
+  const prevDislike = prev === "dislike" ? 1 : 0;
+  const nextLike = next === "like" ? 1 : 0;
+  const nextDislike = next === "dislike" ? 1 : 0;
+  const likesDelta = nextLike - prevLike;
+  const dislikesDelta = nextDislike - prevDislike;
+
+  // Mongoose 9+ requires an explicit opt-in for aggregation-pipeline updates.
+  const updated = await Resume.findByIdAndUpdate(
+    resumeId,
+    [
+      {
+        $set: {
+          likesCount: { $max: [0, { $add: [{ $ifNull: ["$likesCount", 0] }, likesDelta] }] },
+          dislikesCount: { $max: [0, { $add: [{ $ifNull: ["$dislikesCount", 0] }, dislikesDelta] }] },
+        },
+      },
+    ],
+    { new: true, session, updatePipeline: true } as mongoose.QueryOptions,
+  ).select("userId likesCount dislikesCount");
+
+  if (!updated) throw ApiError.notfound("Resume not found");
+  return {
+    ownerId: updated.userId.toString(),
+    viewerReaction: next,
+    likesCount: Math.max(0, Number(updated.likesCount) || 0),
+    dislikesCount: Math.max(0, Number((updated as any).dislikesCount) || 0),
+  };
+}
+
+export const reactToResume = async (resumeId: string, userId: string, reaction: ResumeReactionType) => {
+  if (!REACTION_VALUES.includes(reaction)) throw ApiError.badRequest("Invalid reaction");
+
+  let result: ReactionMutationResult | null = null;
+  const session = await mongoose.startSession();
+  try {
+    try {
+      await session.withTransaction(async () => {
+        result = await applyReactionMutation(resumeId, userId, reaction, session);
+      });
+    } catch (err) {
+      if (!isTransactionUnavailable(err)) throw err;
+      // Local/dev Mongo instances may not support transactions. Fall back to a
+      // single-writer mutation path while keeping the same business semantics.
+      result = await applyReactionMutation(resumeId, userId, reaction);
+    }
+  } finally {
+    await session.endSession();
+  }
+
+  if (!result) throw ApiError.conflict("Could not persist reaction");
+  safeRecalcTalentScore(result.ownerId);
+  return {
+    viewerReaction: result.viewerReaction,
+    isLiked: result.viewerReaction === "like",
+    isDisliked: result.viewerReaction === "dislike",
+    likesCount: result.likesCount,
+    dislikesCount: result.dislikesCount,
+  };
+};
+
+// Backward-compat route behavior: /like still toggles like on/off.
+export const toggleLike = async (resumeId: string, userId: string) => reactToResume(resumeId, userId, "like");

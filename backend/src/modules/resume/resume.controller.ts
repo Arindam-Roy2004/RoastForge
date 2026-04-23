@@ -1,5 +1,6 @@
 import * as resumeService from "./resume.service.js";
 import ApiResponse from "../../common/utils/api-response.js";
+import ApiError from "../../common/utils/api-error.js";
 import type { Request, Response } from "express";
 
 const p = (v: string | string[]) => (Array.isArray(v) ? v[0] : v);
@@ -55,5 +56,14 @@ export const deleteResume = async (req: Request, res: Response) => {
 
 export const toggleLike = async (req: Request, res: Response) => {
   const result = await resumeService.toggleLike(p(req.params.id), (req as any).user.id);
-  ApiResponse.ok(res, result.liked ? "Liked" : "Unliked", result);
+  ApiResponse.ok(res, result.isLiked ? "Liked" : "Unliked", result);
+};
+
+export const reactToResume = async (req: Request, res: Response) => {
+  const reaction = String(req.body?.reaction || "").toLowerCase();
+  if (reaction !== "like" && reaction !== "dislike") {
+    throw ApiError.badRequest("reaction must be either 'like' or 'dislike'");
+  }
+  const result = await resumeService.reactToResume(p(req.params.id), (req as any).user.id, reaction);
+  ApiResponse.ok(res, "Reaction updated", result);
 };

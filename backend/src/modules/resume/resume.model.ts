@@ -29,6 +29,7 @@ export interface IResume extends Document {
   avatarRadius: number;
   avatarScale: number;
   likesCount: number;
+  dislikesCount: number;
   commentsCount: number;
   roastHash: string | null;
   aiRoast: IAiRoast | null;
@@ -52,6 +53,7 @@ const resumeSchema = new Schema<IResume>(
     avatarRadius: { type: Number, default: 0, min: 0, max: 50 },
     avatarScale: { type: Number, default: 100, min: 0, max: 200 },
     likesCount: { type: Number, default: 0 },
+    dislikesCount: { type: Number, default: 0 },
     commentsCount: { type: Number, default: 0 },
     roastHash: { type: String, default: null },
     aiRoast: {
@@ -70,7 +72,7 @@ const resumeSchema = new Schema<IResume>(
 );
 
 resumeSchema.index({ createdAt: -1 });
-resumeSchema.index({ likesCount: -1, commentsCount: -1 });
+resumeSchema.index({ likesCount: -1, dislikesCount: 1, commentsCount: -1 });
 resumeSchema.index({ title: "text", blurb: "text" }, { weights: { title: 10, blurb: 3 } });
 
 export default mongoose.model<IResume>("Resume", resumeSchema);
