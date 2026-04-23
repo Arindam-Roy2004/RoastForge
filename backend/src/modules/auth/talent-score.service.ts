@@ -7,9 +7,10 @@ import User from "./auth.model.js";
  * `User.talentMetrics.composite`. The formula is intentionally simple so it is
  * easy to reason about and audit:
  *
- *   base      = max(aiRoast.score) across the user's resumes, or 0 if none
+ *   base      = avg(aiRoast.score) across the user's resumes, or 0 if none
  *   likeBonus = min(10, floor(totalLikes / 5))   // every 5 likes → +1, capped at +10
- *   composite = min(100, base + likeBonus)
+ *   dislikePenalty = min(5, floor(totalDislikes / 8))  // every 8 dislikes → -1, capped at -5
+ *   composite = clamp(0..100, base + likeBonus - dislikePenalty)
  *
  * Recruiters never have a talent score — they don't upload resumes or projects,
  * so the score is meaningless for them and showing "0" looks like a broken UI.
@@ -26,21 +27,25 @@ export const recalcTalentScore = async (userId: string): Promise<number> => {
   const user = await User.findById(userId).select("role").lean();
   if (!user || user.role === "recruiter") return 0;
 
-  const [stats] = await Resume.aggregate<{ maxScore: number | null; totalLikes: number }>([
+  const [stats] = await Resume.aggregate<{ avgScore: number | null; totalLikes: number; totalDislikes: number }>([
     { $match: { userId: new mongoose.Types.ObjectId(userId) } },
     {
       $group: {
         _id: null,
-        maxScore: { $max: "$aiRoast.score" },
-        totalLikes: { $sum: "$likesCount" },
+        avgScore: { $avg: "$aiRoast.score" },
+        // $ifNull: legacy resumes may omit these counters until first reaction / backfill.
+        totalLikes: { $sum: { $ifNull: ["$likesCount", 0] } },
+        totalDislikes: { $sum: { $ifNull: ["$dislikesCount", 0] } },
       },
     },
   ]);
 
-  const base = Math.max(0, Math.min(100, Number(stats?.maxScore) || 0));
+  const base = Math.max(0, Math.min(100, Number(stats?.avgScore) || 0));
   const totalLikes = Math.max(0, Number(stats?.totalLikes) || 0);
+  const totalDislikes = Math.max(0, Number(stats?.totalDislikes) || 0);
   const likeBonus = Math.min(10, Math.floor(totalLikes / 5));
-  const composite = Math.min(100, base + likeBonus);
+  const dislikePenalty = Math.min(5, Math.floor(totalDislikes / 8));
+  const composite = Math.max(0, Math.min(100, base + likeBonus - dislikePenalty));
 
   await User.findByIdAndUpdate(userId, {
     $set: { "talentMetrics.composite": composite },
