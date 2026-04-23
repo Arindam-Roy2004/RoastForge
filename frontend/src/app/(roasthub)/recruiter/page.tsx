@@ -252,8 +252,8 @@ export default function RecruiterPage() {
                       <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Contact Info</p>
                       <div className="flex flex-wrap gap-4 text-sm font-medium">
                         {r.identity.displayName && <span className="flex items-center gap-2"><span className="underline decoration-2 decoration-primary underline-offset-4">{r.identity.displayName}</span></span>}
-                        {r.identity.linkedInUrl && <a href={r.identity.linkedInUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-800 underline decoration-2 underline-offset-4">LinkedIn Profile</a>}
-                        {r.identity.githubUrl && <a href={r.identity.githubUrl} target="_blank" rel="noreferrer" className="text-primary hover:opacity-80 underline decoration-2 underline-offset-4">GitHub Profile</a>}
+                        {r.identity.linkedInUrl && <a href={r.identity.linkedInUrl} target="_blank" rel="noreferrer" className="text-foreground underline decoration-2 decoration-primary underline-offset-4 transition-colors hover:text-primary">LinkedIn Profile</a>}
+                        {r.identity.githubUrl && <a href={r.identity.githubUrl} target="_blank" rel="noreferrer" className="text-foreground underline decoration-2 decoration-primary underline-offset-4 transition-colors hover:text-primary">GitHub Profile</a>}
                       </div>
                     </div>
                   )}

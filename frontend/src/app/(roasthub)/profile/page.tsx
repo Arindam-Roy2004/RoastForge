@@ -222,15 +222,17 @@ export default function ProfilePage() {
       {/* User Header */}
       <Card className="shrink-0 border-[3px] border-border rounded-none overflow-hidden shadow-none hover:shadow-none hover:translate-x-0 hover:translate-y-0 transition-colors">
         <div className="bg-primary p-6 md:p-10 flex flex-col md:flex-row items-center gap-6">
-          <div className="w-24 h-24 rounded-full border-[3px] border-border bg-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center text-4xl font-heading shrink-0">
+          <div className="w-24 h-24 rounded-full border-[3px] border-border bg-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center text-4xl font-mono font-semibold shrink-0">
             {displayUser.name.charAt(0).toUpperCase() || "?"}
           </div>
-          <div className="flex-1 text-center md:text-left text-primary-foreground space-y-2">
-            <h1 className="text-3xl md:text-4xl font-heading tracking-tighter text-foreground">{displayUser.name}</h1>
-            <p className="font-medium opacity-90">{displayUser.email}</p>
+          <div className="flex-1 text-center md:text-left text-primary-foreground space-y-2 min-w-0">
+            <h1 className="text-3xl md:text-4xl font-mono font-semibold tracking-normal text-balance break-words leading-snug text-foreground">
+              {displayUser.name}
+            </h1>
+            <p className="font-sans font-medium opacity-90 break-all">{displayUser.email}</p>
             <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start mt-1">
               {displayUser.anonymousPublicId && (
-                <span className="font-mono text-xs tracking-tight text-primary-foreground/70">u/{displayUser.anonymousPublicId}</span>
+                <span className="font-mono text-xs tracking-normal text-primary-foreground/70">u/{displayUser.anonymousPublicId}</span>
               )}
               {/* Talent score is candidate-only; recruiters never receive talentMetrics from the API. */}
               {!isRecruiter && displayUser.talentMetrics && (
@@ -332,7 +334,9 @@ export default function ProfilePage() {
                 <div className="space-y-4">
                   <div>
                     <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Display Name</h4>
-                    <p className="font-medium bg-muted p-2 border-2 border-border inline-block min-w-full text-sm">{displayUser.publicProfile?.displayName || "—"}</p>
+                    <p className="font-mono font-medium bg-muted p-2 border-2 border-border inline-block min-w-full text-sm tracking-normal text-balance break-words">
+                      {displayUser.publicProfile?.displayName || "—"}
+                    </p>
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">LinkedIn</h4>

@@ -121,7 +121,7 @@ export default function RegisterPage() {
         <div className="flex justify-center border-t-[3px] border-border bg-muted/50 px-6 py-4 md:hidden">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="font-heading text-primary hover:underline tracking-wider" data-testid="link-go-login">
+            <Link href="/login" className="font-heading text-muted-foreground tracking-wider underline underline-offset-4 decoration-2 decoration-border transition-colors hover:text-primary hover:decoration-primary" data-testid="link-go-login">
               Sign in
             </Link>
           </p>

@@ -35,6 +35,7 @@
 
   --font-sans: var(--font-geist), sans-serif;
   --font-heading: var(--font-heming), sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -57,35 +58,34 @@
 }
 
 :root {
-  /* Light: pairs with dark palette below — warm cream + slate ink + muted teal
-     (same hue family as Color Hunt “charcoal / slate / cyan-teal / mist” sets). */
-  --background: 38 42% 96%;
-  --foreground: 220 22% 14%;
+  /* RoastForge light: off-white #F9F6F1, charcoal #2B303B, brand teal #43999D,
+     hero wash #C8E5E8, deep navy copy on hero #1C212C. */
+  --background: 40 33% 96%;
+  --foreground: 222 16% 20%;
 
-  --border: 220 16% 20%;
-  --input: 220 16% 20%;
-  --ring: 183 45% 38%;
+  --border: 222 16% 20%;
+  --input: 222 16% 20%;
+  --ring: 182 40% 44%;
 
   --card: 0 0% 100%;
-  --card-foreground: 220 22% 14%;
-  --card-border: 220 16% 20%;
+  --card-foreground: 222 16% 20%;
+  --card-border: 222 16% 20%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 220 22% 14%;
-  --popover-border: 220 16% 20%;
+  --popover-foreground: 222 16% 20%;
+  --popover-border: 222 16% 20%;
 
-  /* Teal primary — aligned to #00ADB5 family; saturation lowered for long reading */
-  --primary: 183 40% 44%;
-  --primary-foreground: 220 28% 10%;
+  --primary: 182 40% 44%;
+  --primary-foreground: 216 30% 10%;
 
-  --secondary: 220 24% 92%;
-  --secondary-foreground: 220 22% 14%;
+  --secondary: 40 24% 92%;
+  --secondary-foreground: 222 16% 20%;
 
-  --muted: 38 28% 92%;
-  --muted-foreground: 220 12% 38%;
+  --muted: 40 30% 94%;
+  --muted-foreground: 218 12% 38%;
 
-  --accent: 183 36% 48%;
-  --accent-foreground: 220 28% 10%;
+  --accent: 186 38% 82%;
+  --accent-foreground: 222 22% 14%;
 
   --destructive: 0 72% 48%;
   --destructive-foreground: 0 0% 98%;
@@ -93,6 +93,7 @@
   /* Neobrutalism: flat, stark corners */
   --radius: 0rem;
 
+  /* Hard offset “ink” = rgb(25, 29, 36) / #191D24 */
   --shadow-2xs: 2px 2px 0px 0px hsl(220 18% 12%);
   --shadow-xs: 3px 3px 0px 0px hsl(220 18% 12%);
   --shadow-sm: 4px 4px 0px 0px hsl(220 18% 12%);
@@ -103,57 +104,59 @@
   --shadow-2xl: 16px 16px 0px 0px hsl(220 18% 12%);
 }
 
-/* Dark mode: Color Hunt–style “dark teal” quad (common set: #222831 #393E46 #00ADB5 #EEEEEE).
-   Cool charcoal + slate surfaces, cyan-teal accent, soft mist text — calm contrast,
-   matches light mode via shared hue (183° teal, 220° slate). Borders muted vs pure white. */
+/* Dark: almost-black #191D24 base, lifted cards, warm mist text, same brand teal;
+   muted teal hero wash; borders stay charcoal-tinted, not neon. */
 .dark {
-  --background: 219 18% 11%;
-  --foreground: 210 18% 94%;
+  --background: 220 18% 12%;
+  --foreground: 40 28% 95%;
 
-  --border: 220 14% 34%;
-  --input: 220 14% 30%;
-  --ring: 183 50% 46%;
+  --border: 222 14% 34%;
+  --input: 222 14% 30%;
+  --ring: 182 45% 52%;
 
-  --card: 218 16% 15%;
-  --card-foreground: 210 18% 94%;
-  --card-border: 220 14% 38%;
+  --card: 220 16% 16%;
+  --card-foreground: 40 28% 95%;
+  --card-border: 222 14% 38%;
 
-  --popover: 218 16% 16%;
-  --popover-foreground: 210 18% 94%;
-  --popover-border: 220 14% 38%;
+  --popover: 220 15% 17%;
+  --popover-foreground: 40 28% 95%;
+  --popover-border: 222 14% 38%;
 
-  --primary: 183 52% 44%;
-  --primary-foreground: 220 24% 8%;
+  --primary: 182 40% 44%;
+  --primary-foreground: 216 30% 10%;
 
-  --secondary: 218 14% 22%;
-  --secondary-foreground: 210 18% 94%;
+  --secondary: 220 14% 22%;
+  --secondary-foreground: 40 26% 95%;
 
-  --muted: 218 14% 18%;
-  --muted-foreground: 215 12% 68%;
+  --muted: 220 14% 19%;
+  --muted-foreground: 218 11% 62%;
 
-  --accent: 183 42% 40%;
-  --accent-foreground: 210 18% 94%;
+  --accent: 182 22% 27%;
+  --accent-foreground: 40 28% 95%;
 
   --destructive: 0 62% 52%;
-  --destructive-foreground: 210 20% 98%;
+  --destructive-foreground: 40 20% 98%;
 
   /*
-   * Neobrutalist offset shadows on dark surfaces: use near-black ink, not a
-   * light gray slab. Light-colored --shadow-* values read as a “white box”
-   * behind transparent inputs (hero search) and on hover/focus where shadows
-   * stack — same idea as :root using dark ink on cream, but inverted for dark UI.
+   * Offset shadows on dark UI: same #191D24 ink as light mode so elevation
+   * matches the design system; reads as a clean stamp (not a gray halo).
    */
-  --shadow-2xs: 2px 2px 0px 0px hsl(220 22% 5%);
-  --shadow-xs: 3px 3px 0px 0px hsl(220 22% 5%);
-  --shadow-sm: 4px 4px 0px 0px hsl(220 22% 5%);
-  --shadow: 5px 5px 0px 0px hsl(220 22% 5%);
-  --shadow-md: 6px 6px 0px 0px hsl(220 22% 5%);
-  --shadow-lg: 8px 8px 0px 0px hsl(220 22% 5%);
-  --shadow-xl: 12px 12px 0px 0px hsl(220 22% 5%);
-  --shadow-2xl: 16px 16px 0px 0px hsl(220 22% 5%);
+  --shadow-2xs: 2px 2px 0px 0px hsl(220 18% 12%);
+  --shadow-xs: 3px 3px 0px 0px hsl(220 18% 12%);
+  --shadow-sm: 4px 4px 0px 0px hsl(220 18% 12%);
+  --shadow: 5px 5px 0px 0px hsl(220 18% 12%);
+  --shadow-md: 6px 6px 0px 0px hsl(220 18% 12%);
+  --shadow-lg: 8px 8px 0px 0px hsl(220 18% 12%);
+  --shadow-xl: 12px 12px 0px 0px hsl(220 18% 12%);
+  --shadow-2xl: 16px 16px 0px 0px hsl(220 18% 12%);
 }
 
 @layer base {
+  ::selection {
+    background: hsl(var(--primary) / 0.28);
+    color: hsl(var(--foreground));
+  }
+
   /* Kill Chrome’s bright autofill background on dark (reads as a white slab). */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,

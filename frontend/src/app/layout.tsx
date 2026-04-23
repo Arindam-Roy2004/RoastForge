@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { body, display } from "@/lib/fonts";
+import { body, display, mono } from "@/lib/fonts";
 import { Providers } from "@/components/providers";
 import { themeInitScript } from "@/store/theme";
 import "./globals.css";
@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${body.variable} ${display.variable} h-full antialiased`}
+      className={`${body.variable} ${display.variable} ${mono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

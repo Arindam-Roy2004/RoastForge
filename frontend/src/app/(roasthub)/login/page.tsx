@@ -112,7 +112,7 @@ export default function LoginPage() {
         <div className="flex justify-center border-t-[3px] border-border bg-muted/50 px-6 py-4 md:hidden">
           <p className="text-sm text-muted-foreground">
             New to RoastForge?{" "}
-            <Link href="/register" className="font-heading text-primary hover:underline tracking-wider" data-testid="link-go-register">
+            <Link href="/register" className="font-heading text-muted-foreground tracking-wider underline underline-offset-4 decoration-2 decoration-border transition-colors hover:text-primary hover:decoration-primary" data-testid="link-go-register">
               Create an account
             </Link>
           </p>

@@ -223,7 +223,7 @@ export default function ProjectsPage() {
                           <span className={cn("rounded-none border-2 border-border px-2 py-0.5 text-[10px] font-bold uppercase shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]", project.aiStatus === "READY" ? "bg-green-300" : project.aiStatus === "FAILED" ? "bg-red-300" : "bg-primary text-primary-foreground")}>
                             {project.aiStatus || "—"}
                           </span>
-                          <Button variant="ghost" size="icon" className="w-7 h-7 border-2 border-border rounded-none hover:bg-destructive hover:text-destructive-foreground shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-none p-0" onClick={() => handleDelete(project._id)}>
+                          <Button variant="ghost" size="icon" className="w-7 h-7 border-2 border-border rounded-none text-foreground hover:text-destructive-foreground hover:bg-destructive hover:no-underline shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-none p-0" onClick={() => handleDelete(project._id)}>
                             <Trash2 className="w-3.5 h-3.5" />
                           </Button>
                         </div>
