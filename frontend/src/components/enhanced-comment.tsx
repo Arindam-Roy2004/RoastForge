@@ -32,10 +32,10 @@ export function EnhancedComment({
   const cleanText = roastMatch ? roastMatch[2].trim() : comment.text;
 
   const typeStyles: Record<string, string> = {
-    strength: "bg-green-400 text-black",
-    weakness: "bg-red-400 text-black",
-    suggestion: "bg-blue-400 text-black",
-    comment: "bg-muted text-foreground",
+    strength: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25",
+    weakness: "bg-orange-400/20 text-orange-600 dark:text-orange-300 dark:bg-orange-400/15 border border-orange-400/30",
+    suggestion: "bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/25",
+    comment: "bg-muted text-foreground border border-border/20",
   };
 
   async function vote(value: 1 | -1) {
@@ -74,7 +74,7 @@ export function EnhancedComment({
 
   return (
     <div className={cn(
-      "border-[3px] border-border rounded-none bg-card p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
+      "border-[3px] border-border rounded-none bg-card p-3 shadow-[var(--shadow-2xs)]",
       isTombstoned && "opacity-60",
     )}>
       <div className="flex items-start gap-3">
@@ -104,7 +104,7 @@ export function EnhancedComment({
           {/* Actions — hidden for tombstones (nothing to vote on / no owner to delete). */}
           {!isTombstoned && (
           <div className="flex items-center gap-2 mt-2 flex-wrap">
-            <div className="flex items-center border-[3px] border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] bg-muted shrink-0">
+            <div className="flex items-center border-[3px] border-border shadow-[1px_1px_0px_0px_hsl(var(--border))] bg-muted shrink-0">
               <button
                 type="button"
                 onClick={() => vote(1)}
@@ -128,7 +128,7 @@ export function EnhancedComment({
             </div>
             
             {user?.id === comment.userId?._id && (
-              <Button variant="destructive" size="sm" onClick={deleteComment} disabled={deleting} className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all rounded-none font-heading uppercase text-[10px] h-7 px-2 ml-auto">
+              <Button variant="destructive" size="sm" onClick={deleteComment} disabled={deleting} className="border-2 border-border shadow-[1px_1px_0px_0px_hsl(var(--border))] hover:shadow-none transition-all rounded-none font-heading uppercase text-[10px] h-7 px-2 ml-auto">
                 <Trash2 className="w-3 h-3 mr-1" /> {deleting ? "…" : "Delete"}
               </Button>
             )}
@@ -139,3 +139,4 @@ export function EnhancedComment({
     </div>
   );
 }
+

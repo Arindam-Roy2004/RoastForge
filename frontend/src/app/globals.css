@@ -104,51 +104,52 @@
   --shadow-2xl: 16px 16px 0px 0px hsl(220 18% 12%);
 }
 
-/* Dark: almost-black #191D24 base, lifted cards, warm mist text, same brand teal;
-   muted teal hero wash; borders stay charcoal-tinted, not neon. */
+/* Dark: premium deep midnight-slate #0e1117 base, lifted cards, warm mist text,
+   glowing brand teal; borders stay clean and sharp. */
 .dark {
-  --background: 220 18% 12%;
+  --background: 222 24% 8%;
   --foreground: 40 28% 95%;
 
-  --border: 222 14% 34%;
-  --input: 222 14% 30%;
-  --ring: 182 45% 52%;
+  --border: 222 20% 20%;
+  --input: 222 20% 18%;
+  --ring: 182 60% 48%;
 
-  --card: 220 16% 16%;
+  --card: 222 20% 12%;
   --card-foreground: 40 28% 95%;
-  --card-border: 222 14% 38%;
+  --card-border: 222 20% 22%;
 
-  --popover: 220 15% 17%;
+  --popover: 222 20% 11%;
   --popover-foreground: 40 28% 95%;
-  --popover-border: 222 14% 38%;
+  --popover-border: 222 20% 20%;
 
-  --primary: 182 40% 44%;
-  --primary-foreground: 216 30% 10%;
+  --primary: 182 60% 46%;
+  --primary-foreground: 222 24% 8%;
 
-  --secondary: 220 14% 22%;
+  --secondary: 222 18% 15%;
   --secondary-foreground: 40 26% 95%;
 
-  --muted: 220 14% 19%;
-  --muted-foreground: 218 11% 62%;
+  --muted: 222 18% 14%;
+  --muted-foreground: 218 16% 65%;
 
-  --accent: 182 22% 27%;
+  --accent: 182 45% 16%;
   --accent-foreground: 40 28% 95%;
 
-  --destructive: 0 62% 52%;
+  --destructive: 0 75% 55%;
   --destructive-foreground: 40 20% 98%;
 
   /*
-   * Offset shadows on dark UI: same #191D24 ink as light mode so elevation
-   * matches the design system; reads as a clean stamp (not a gray halo).
+   * Offset shadows on dark UI: Pure black with a subtle blue tint (#050608)
+   * for a crisp, razor-sharp, high-contrast neobrutalist stamp effect that
+   * looks premium, flat, and intentional.
    */
-  --shadow-2xs: 2px 2px 0px 0px hsl(220 18% 12%);
-  --shadow-xs: 3px 3px 0px 0px hsl(220 18% 12%);
-  --shadow-sm: 4px 4px 0px 0px hsl(220 18% 12%);
-  --shadow: 5px 5px 0px 0px hsl(220 18% 12%);
-  --shadow-md: 6px 6px 0px 0px hsl(220 18% 12%);
-  --shadow-lg: 8px 8px 0px 0px hsl(220 18% 12%);
-  --shadow-xl: 12px 12px 0px 0px hsl(220 18% 12%);
-  --shadow-2xl: 16px 16px 0px 0px hsl(220 18% 12%);
+  --shadow-2xs: 2px 2px 0px 0px hsl(222 24% 4%);
+  --shadow-xs: 3px 3px 0px 0px hsl(222 24% 4%);
+  --shadow-sm: 4px 4px 0px 0px hsl(222 24% 4%);
+  --shadow: 5px 5px 0px 0px hsl(222 24% 4%);
+  --shadow-md: 6px 6px 0px 0px hsl(222 24% 4%);
+  --shadow-lg: 8px 8px 0px 0px hsl(222 24% 4%);
+  --shadow-xl: 12px 12px 0px 0px hsl(222 24% 4%);
+  --shadow-2xl: 16px 16px 0px 0px hsl(222 24% 4%);
 }
 
 @layer base {

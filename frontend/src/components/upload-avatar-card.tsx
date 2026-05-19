@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ChevronDown, Shuffle } from "lucide-react";
+import { motion } from "framer-motion";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -64,7 +65,7 @@ function SectionShell({
   bodyClassName?: string;
 }) {
   return (
-    <Card className="border-[3px] border-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card rounded-none flex flex-col h-full overflow-hidden">
+    <Card className="border-[3px] border-border shadow-[var(--shadow-md)] bg-card rounded-none flex flex-col h-full overflow-hidden transition-shadow duration-200">
       <CardHeader className="border-b-[3px] border-border bg-muted/40 py-3 space-y-0.5 shrink-0">
         <CardTitle className="font-heading text-sm tracking-wide">{title}</CardTitle>
         {description ? (
@@ -201,14 +202,16 @@ function Swatch({
   const bgStyle = !isTransparent && !isDefault ? { backgroundColor: `#${color}` } : undefined;
 
   return (
-    <button
+    <motion.button
+      whileHover={{ scale: 1.1, zIndex: 10 }}
+      whileTap={{ scale: 0.92 }}
       type="button"
       onClick={onSelect}
       title={label}
       aria-label={label}
       aria-pressed={selected}
       className={cn(
-        "relative h-8 w-8 shrink-0 border-[3px] border-border transition-colors rounded-none",
+        "relative h-8 w-8 shrink-0 border-[3px] border-border transition-colors rounded-none cursor-pointer",
         selected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
         isDefault && "bg-gradient-to-br from-muted to-background",
       )}
@@ -225,7 +228,7 @@ function Swatch({
           AUTO
         </span>
       )}
-    </button>
+    </motion.button>
   );
 }
 
@@ -334,13 +337,13 @@ export function AvatarControlsCard({ value, onChange }: CardProps) {
             value={value.seed}
             onChange={(e) => patch({ seed: e.target.value.slice(0, 120) })}
             placeholder="e.g. your name"
-            className="border-[3px] border-border rounded-none shadow-none focus-visible:ring-0 font-mono text-[11px] h-10 flex-1 min-w-0"
+            className="border-[3px] border-border rounded-none bg-background shadow-none focus-visible:ring-2 focus-visible:ring-ring/40 font-mono text-[11px] h-10 flex-1 min-w-0 transition-all focus:shadow-[var(--shadow-2xs)]"
           />
           <Button
             type="button"
             variant="outline"
             size="icon"
-            className="h-10 w-10 shrink-0 !shadow-none hover:translate-x-0 hover:translate-y-0 active:translate-x-0 active:translate-y-0"
+            className="h-10 w-10 shrink-0 border-[3px] border-border shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none"
             onClick={() => patch({ seed: randomAvatarSeed() })}
             title="Random seed"
             aria-label="Random seed"
@@ -376,25 +379,27 @@ function GalleryTile({
   onSelect: () => void;
 }) {
   return (
-    <button
+    <motion.button
+      whileHover={{ y: -3, scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
       aria-label={`Use ${name}`}
       className={cn(
-        "group flex flex-col items-stretch gap-1 border-[3px] border-border bg-background p-1.5 text-left transition-colors",
+        "group flex flex-col items-stretch gap-1 border-[3px] border-border bg-background p-1.5 text-left transition-all cursor-pointer shadow-none hover:shadow-[var(--shadow-xs)] rounded-none",
         "hover:bg-muted/40",
-        selected && "bg-primary/10 ring-2 ring-primary ring-offset-2 ring-offset-background",
+        selected && "bg-primary/10 ring-2 ring-primary ring-offset-2 ring-offset-background shadow-[var(--shadow-xs)]",
       )}
     >
-      <div className="aspect-square border-2 border-border bg-muted/40 flex items-center justify-center overflow-hidden">
-        <Image src={url} alt={name} width={140} height={140} unoptimized className="h-full w-full object-contain" />
+      <div className="aspect-square border-2 border-border bg-muted/40 flex items-center justify-center overflow-hidden transition-transform duration-300 rounded-none">
+        <Image src={url} alt={name} width={140} height={140} unoptimized className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105" />
       </div>
       <div className="flex items-center justify-between gap-1 px-0.5 pb-0.5">
         <span className="text-[10px] font-heading truncate uppercase tracking-wide">{name}</span>
         {selected ? <span className="text-[10px] font-bold text-primary shrink-0">✓</span> : null}
       </div>
-    </button>
+    </motion.button>
   );
 }
 
@@ -427,7 +432,7 @@ export function AvatarGalleryCard({ value, onChange }: CardProps) {
           variant="outline"
           size="default"
           onClick={() => setNames(pickRandomNames(SEED_NAME_POOL, 30))}
-          className="shrink-0 !shadow-none hover:translate-x-0 hover:translate-y-0 active:translate-x-0 active:translate-y-0"
+          className="shrink-0 border-[3px] border-border shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs tracking-wider"
         >
           <Shuffle className="w-4 h-4 mr-1.5" />
           Shuffle

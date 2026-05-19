@@ -19,10 +19,10 @@ type ResumeCardProps = {
 export function ResumeCard({ id, title, version, status, overall, createdAt, candidateAlias }: ResumeCardProps) {
   return (
     <Link href={`/resume/${id}`} className="block h-full">
-      <Card className="h-full min-h-[13rem] cursor-pointer border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all bg-card flex flex-col">
+      <Card className="h-full min-h-[13rem] cursor-pointer border-[3px] border-border rounded-none shadow-[var(--shadow-sm)] bg-card flex flex-col hover:bg-muted/30 transition-colors duration-200">
         <div className="p-4 flex-1">
           <div className="flex items-start gap-3 mb-3">
-            <div className="w-11 h-11 rounded-full border-[3px] border-border bg-primary/20 flex items-center justify-center text-lg font-heading uppercase shrink-0 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            <div className="w-11 h-11 rounded-full border-[3px] border-border bg-primary/20 flex items-center justify-center text-lg font-heading uppercase shrink-0 shadow-[var(--shadow-2xs)]">
               {candidateAlias?.charAt(0)?.toUpperCase() || "?"}
             </div>
             <div className="min-w-0 flex-1">
@@ -30,7 +30,7 @@ export function ResumeCard({ id, title, version, status, overall, createdAt, can
                 {title || candidateAlias || `Resume v${version}`}
               </h3>
               <div className="flex flex-wrap gap-2 items-center">
-                <Badge variant="secondary" className="border-2 border-border rounded-none font-bold uppercase py-0 px-2 text-[10px] shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                <Badge variant="secondary" className="border-2 border-border rounded-none font-bold uppercase py-0 px-2 text-[10px] shadow-[var(--shadow-2xs)] bg-card">
                   v{version}
                 </Badge>
                 <span className="text-[11px] font-bold tracking-widest uppercase text-muted-foreground">
@@ -50,11 +50,11 @@ export function ResumeCard({ id, title, version, status, overall, createdAt, can
           ) : <span />}
           <div className="flex items-center gap-3">
             {overall != null ? (
-              <Badge className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] font-heading text-xs rounded-none">
+              <Badge className="border-2 border-border shadow-[var(--shadow-2xs)] font-heading text-xs rounded-none bg-primary text-primary-foreground">
                 AI Score: {overall}
               </Badge>
             ) : (
-              <Badge variant="outline" className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] font-heading text-[10px] rounded-none text-muted-foreground uppercase">
+              <Badge variant="outline" className="border-2 border-border shadow-[var(--shadow-2xs)] font-heading text-[10px] rounded-none text-muted-foreground uppercase">
                 Unscored
               </Badge>
             )}

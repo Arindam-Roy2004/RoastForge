@@ -258,7 +258,7 @@ export default function RecruiterCandidateProfilePage() {
               {data.resumes.map((r) => (
                 <motion.li key={r._id} variants={itemVariants}>
                   <Link href={`/resume/${r._id}`} className="block h-full group">
-                    <Card className="h-full border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group-hover:shadow-none group-hover:translate-x-1 group-hover:translate-y-1 transition-all bg-card">
+                    <Card className="h-full border-[3px] border-border rounded-none shadow-[var(--shadow-sm)] bg-card group-hover:bg-muted/30 transition-colors duration-200">
                       <CardHeader className="pb-2 border-b-[3px] border-border bg-muted/40">
                         <CardTitle className="font-heading text-base leading-tight line-clamp-2">
                           {r.title || "Untitled"}
@@ -312,7 +312,7 @@ export default function RecruiterCandidateProfilePage() {
             >
               {data.projects.map((project) => (
                 <motion.div key={project._id} variants={itemVariants}>
-                  <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card overflow-hidden">
+                  <Card className="border-[3px] border-border rounded-none shadow-[var(--shadow-md)] bg-card overflow-hidden">
                     <CardHeader className="border-b-[3px] border-border flex flex-row flex-wrap items-start justify-between gap-3 bg-muted/30 p-5">
                       <div className="min-w-0">
                         <CardTitle className="font-heading text-lg tracking-wide leading-tight">

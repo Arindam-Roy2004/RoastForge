@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import FlameIcon from "@/components/icons/flame-icon";
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { useAuth } from "@/store/auth";
+import { useTheme } from "@/store/theme";
+import { motion } from "framer-motion";
 
 /**
  * Sign-in page. Google is the only auth method — first-time Google users are
@@ -16,7 +18,10 @@ import { useAuth } from "@/store/auth";
 export default function LoginPage() {
   const router = useRouter();
   const { signInWithGoogle } = useAuth();
+  const { theme, mounted } = useTheme();
   const [busy, setBusy] = useState(false);
+
+  const isDark = mounted && theme === "dark";
 
   async function onGoogleSuccess(res: CredentialResponse) {
     if (!res.credential) {
@@ -36,16 +41,23 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center px-4 py-12">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="min-h-[calc(100vh-5rem)] flex items-center justify-center px-4 py-12"
+    >
       {/* Outer wrapper — no hover translate on page-level cards */}
-      <div className="w-full max-w-4xl border-[3px] border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-card">
+      <div className="w-full max-w-4xl border-[3px] border-border rounded-none shadow-[var(--shadow-lg)] bg-card overflow-hidden">
         <div className="grid md:grid-cols-[1fr_1.2fr] min-h-[480px]">
           {/* Left — illustration panel */}
           <div className="hidden md:flex flex-col items-center justify-center bg-accent/30 border-r-[3px] border-border px-10 py-14 gap-8">
-            <img
+            <motion.img
               src="https://api.dicebear.com/9.x/fun-emoji/svg?seed=roastforge-login&size=200"
               alt=""
               className="w-36 h-36"
+              animate={{ y: [0, -8, 0] }}
+              transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
             />
             <div className="text-center space-y-2">
               <h2 className="text-2xl font-heading font-bold tracking-tighter text-foreground">
@@ -56,7 +68,7 @@ export default function LoginPage() {
               </p>
             </div>
             {/* Tab switcher */}
-            <div className="flex items-center border-[3px] border-border bg-background">
+            <div className="flex items-center border-[3px] border-border bg-background shadow-[var(--shadow-2xs)]">
               <Link
                 href="/register"
                 className="px-5 py-2 text-xs font-heading uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
@@ -64,7 +76,7 @@ export default function LoginPage() {
               >
                 Sign up
               </Link>
-              <span className="px-5 py-2 text-xs font-heading uppercase tracking-wider bg-primary text-primary-foreground border-l-[3px] border-border">
+              <span className="px-5 py-2 text-xs font-heading uppercase tracking-wider bg-primary text-primary-foreground border-l-[3px] border-border font-bold">
                 Sign in
               </span>
             </div>
@@ -73,33 +85,40 @@ export default function LoginPage() {
           {/* Right — form panel */}
           <div className="flex flex-col items-center justify-center px-8 py-14 sm:px-12">
             {/* Icon */}
-            <div className="bg-primary w-14 h-14 flex items-center justify-center rounded-full border-[3px] border-border shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+            <motion.div 
+              whileHover={{ scale: 1.08, rotate: 5 }}
+              className="bg-primary w-14 h-14 flex items-center justify-center rounded-full border-[3px] border-border shadow-[var(--shadow-xs)] cursor-pointer"
+            >
               <FlameIcon size={28} className="text-primary-foreground" strokeWidth={2} />
-            </div>
+            </motion.div>
 
             {/* Heading */}
             <h1 className="mt-5 text-3xl font-heading font-bold uppercase tracking-tight text-foreground">
               Sign In
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground font-medium">
+            <p className="mt-2 text-sm text-muted-foreground font-medium text-center">
               One tap with Google to continue.
             </p>
 
-            {/* Google button */}
-            <div
-              className={`mt-8 transition-opacity ${busy ? "opacity-50 pointer-events-none" : ""}`}
+            {/* Google button with smooth hover scale */}
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className={`mt-8 transition-all duration-200 ${busy ? "opacity-50 pointer-events-none" : ""}`}
               data-testid="google-login-slot"
             >
-              <GoogleLogin
-                onSuccess={onGoogleSuccess}
-                onError={() => toast.error("Google sign-in was cancelled or failed")}
-                theme="outline"
-                shape="rectangular"
-                size="large"
-                text="continue_with"
-                useOneTap={false}
-              />
-            </div>
+              {mounted && (
+                <GoogleLogin
+                  onSuccess={onGoogleSuccess}
+                  onError={() => toast.error("Google sign-in was cancelled or failed")}
+                  theme={isDark ? "filled_black" : "outline"}
+                  shape="rectangular"
+                  size="large"
+                  text="continue_with"
+                  useOneTap={false}
+                />
+              )}
+            </motion.div>
 
             {/* Disclaimer */}
             <p className="mt-6 text-[10px] text-center text-muted-foreground/70 font-medium tracking-wide max-w-[280px]">
@@ -118,6 +137,6 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

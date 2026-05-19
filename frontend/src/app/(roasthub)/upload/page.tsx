@@ -15,6 +15,7 @@ import { useAuth } from "@/store/auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { motion } from "framer-motion";
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 const MAX_UPLOAD_MB = Math.floor(MAX_UPLOAD_BYTES / (1024 * 1024));
@@ -66,12 +67,14 @@ function FileSlot({
 }) {
   if (!file) {
     return (
-      <button
+      <motion.button
+        whileHover={{ scale: 1.01, borderColor: "var(--color-primary)" }}
+        whileTap={{ scale: 0.99 }}
         type="button"
         onClick={onClick}
         className={cn(
           "flex-1 min-h-[150px] w-full border-[3px] border-dashed border-border bg-muted/30 flex flex-col items-center justify-center gap-3",
-          "cursor-pointer hover:bg-muted/50 transition-colors rounded-none px-5 py-6",
+          "cursor-pointer hover:bg-muted/50 transition-all rounded-none px-5 py-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
         )}
       >
         <div className="w-14 h-14 rounded-full bg-background border-2 border-border flex items-center justify-center">
@@ -81,14 +84,19 @@ function FileSlot({
           <p className="font-heading text-sm">Click to upload</p>
           <p className="text-xs text-muted-foreground mt-1">PDF up to {MAX_UPLOAD_MB}MB</p>
         </div>
-      </button>
+      </motion.button>
     );
   }
 
   return (
-    <div className="flex-1 min-h-[150px] border-[3px] border-border bg-background flex flex-col overflow-hidden">
+    <motion.div
+      initial={{ scale: 0.97, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="flex-1 min-h-[150px] border-[3px] border-border bg-background flex flex-col overflow-hidden"
+    >
       <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-2 p-4 bg-muted/20">
-        <div className="w-14 h-14 rounded-full bg-primary/15 border-2 border-border flex items-center justify-center">
+        <div className="w-14 h-14 rounded-full bg-primary/15 border-2 border-border flex items-center justify-center animate-bounce">
           <CheckCircle2 className="w-7 h-7 text-primary" />
         </div>
         <p className="font-heading text-xs uppercase tracking-[0.14em] text-muted-foreground">Ready to forge</p>
@@ -112,7 +120,7 @@ function FileSlot({
           <X className="w-4 h-4" />
         </Button>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -134,7 +142,7 @@ function ResumeCard({
   fileInputRef: React.RefObject<HTMLInputElement | null>;
 }) {
   return (
-    <Card className="border-[3px] border-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card rounded-none flex flex-col h-full overflow-hidden">
+    <Card className="border-[3px] border-border shadow-[var(--shadow-md)] bg-card rounded-none flex flex-col h-full overflow-hidden">
       <CardHeader className="border-b-[3px] border-border bg-muted/40 py-3 space-y-0.5 shrink-0">
         <CardTitle className="font-heading text-sm tracking-wide">Resume & title</CardTitle>
         <CardDescription className="text-xs text-muted-foreground">
@@ -157,7 +165,7 @@ function ResumeCard({
         {error && (
           <div className="bg-destructive/10 border-[3px] border-destructive p-3">
             <p className="text-[10px] font-bold text-destructive uppercase tracking-widest mb-1">Error</p>
-            <p className="text-sm font-medium">{error}</p>
+            <p className="text-sm font-medium text-destructive">{error}</p>
           </div>
         )}
 
@@ -167,7 +175,7 @@ function ResumeCard({
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
             placeholder="e.g. New grad SWE trying to break into FAANG"
-            className="border-[3px] border-border rounded-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 font-medium h-10 text-sm"
+            className="border-[3px] border-border rounded-none bg-background shadow-none focus-visible:ring-2 focus-visible:ring-ring/40 font-medium h-10 text-sm transition-all focus:shadow-[var(--shadow-2xs)]"
             required
           />
           <span className="text-[11px] text-muted-foreground">Shown on your Hall of Shame card.</span>
@@ -255,7 +263,7 @@ export default function UploadPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16 p-4">
-        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center p-8 animate-pulse">
+        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[var(--shadow-md)] text-center p-8 animate-pulse bg-card">
           <CardTitle className="font-heading text-xl tracking-wide">Loading...</CardTitle>
         </Card>
       </div>
@@ -265,7 +273,7 @@ export default function UploadPage() {
   if (user?.role === "recruiter") {
     return (
       <div className="flex items-center justify-center py-16 p-4">
-        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center p-8 bg-card">
+        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[var(--shadow-md)] text-center p-8 bg-card">
           <CardTitle className="font-heading text-xl tracking-wide">Redirecting…</CardTitle>
         </Card>
       </div>
@@ -275,13 +283,13 @@ export default function UploadPage() {
   if (!user) {
     return (
       <div className="flex items-center justify-center p-4 py-16">
-        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center p-8 bg-card">
-          <h1 className="font-heading text-3xl mb-4 tracking-tighter">Sign In Required</h1>
+        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[var(--shadow-md)] text-center p-8 bg-card">
+          <h1 className="font-heading text-3xl mb-4 tracking-tighter text-foreground">Sign In Required</h1>
           <p className="text-sm text-muted-foreground mb-6 font-medium">
             You need to sign in to upload your resume for roasting!
           </p>
           <Link href="/login">
-            <Button size="lg" className="font-heading tracking-wide">
+            <Button size="lg" className="font-heading tracking-wide border-[3px] border-border shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none">
               Sign In to Upload
             </Button>
           </Link>
@@ -291,10 +299,15 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] w-full px-3 sm:px-5 lg:px-6 xl:px-8 py-6 lg:py-8">
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="min-h-[calc(100vh-4rem)] w-full px-3 sm:px-5 lg:px-6 xl:px-8 py-6 lg:py-8"
+    >
       <div className="w-full max-w-[1760px] mx-auto space-y-6">
         <header className="text-center space-y-1.5">
-          <div className="mx-auto bg-primary w-12 h-12 flex items-center justify-center rounded-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="mx-auto bg-primary w-12 h-12 flex items-center justify-center rounded-full border-[3px] border-border shadow-[var(--shadow-xs)]">
             <CloudUploadIcon size={24} className="text-primary-foreground" />
           </div>
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-heading tracking-tight">Enter the Forge</h1>
@@ -329,14 +342,16 @@ export default function UploadPage() {
           </div>
 
           <div className="w-full max-w-md mx-auto flex flex-col items-center gap-2">
-            <Button
-              type="submit"
-              disabled={uploading || !title.trim() || !file}
-              size="lg"
-              className="w-full h-12 text-sm font-heading tracking-wide"
-            >
-              {uploading ? "Forging..." : "Upload & Roast!"}
-            </Button>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full">
+              <Button
+                type="submit"
+                disabled={uploading || !title.trim() || !file}
+                size="lg"
+                className="w-full h-12 text-sm font-heading tracking-wide border-[3px] border-border shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none"
+              >
+                {uploading ? "Forging..." : "Upload & Roast!"}
+              </Button>
+            </motion.div>
             {(!file || !title.trim()) && (
               <p className="text-[11px] text-muted-foreground">
                 Upload a PDF and give it a title to enable submission.
@@ -345,6 +360,6 @@ export default function UploadPage() {
           </div>
         </form>
       </div>
-    </div>
+    </motion.div>
   );
 }

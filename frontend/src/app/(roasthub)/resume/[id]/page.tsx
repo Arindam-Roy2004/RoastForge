@@ -255,7 +255,7 @@ export default function ResumeDetail() {
     return (
       <div className="mx-auto w-full max-w-7xl p-4 py-16 text-center">
         <h1 className="text-4xl font-heading mb-6">Resume not found</h1>
-        <Button onClick={() => router.push("/")} className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-heading text-lg tracking-wide">
+        <Button onClick={() => router.push("/")} className="border-[3px] border-border rounded-none shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-heading text-lg tracking-wide">
           Back Home
         </Button>
       </div>
@@ -273,12 +273,12 @@ export default function ResumeDetail() {
       <div className="space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="space-y-4">
-            <Button variant="outline" onClick={() => router.back()} className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs h-8 px-3">
+            <Button variant="outline" onClick={() => router.back()} className="border-[3px] border-border shadow-[var(--shadow-2xs)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs h-8 px-3">
               <ArrowLeft className="w-3 h-3 mr-1.5" /> Back
             </Button>
 
             <div>
-              <h1 className="text-3xl md:text-5xl font-heading tracking-tighter  mb-1">
+              <h1 className="text-3xl md:text-5xl font-heading tracking-tighter mb-1">
                 {resume.title || resume.candidateAlias || resume.userId?.anonymousUsername || "Untitled Resume"}
               </h1>
               <p className="text-muted-foreground text-sm flex items-center gap-1.5">
@@ -302,7 +302,7 @@ export default function ResumeDetail() {
               <Link href={`/recruiter/candidate/${resume.userId._id}`}>
                 <Button
                   variant="secondary"
-                  className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs h-9"
+                  className="border-[3px] border-border shadow-[var(--shadow-2xs)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs h-9"
                   data-testid="link-recruiter-portfolio"
                 >
                   <Briefcase className="w-3 h-3 mr-1.5" /> Candidate portfolio
@@ -310,7 +310,7 @@ export default function ResumeDetail() {
               </Link>
             )}
             {isOwner && (
-              <Button variant="destructive" onClick={deleteThisResume} className="border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs h-9">
+              <Button variant="destructive" onClick={deleteThisResume} className="border-[3px] border-border shadow-[var(--shadow-2xs)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs h-9">
                 <Trash2 className="w-3 h-3 mr-1.5" /> Delete
               </Button>
             )}
@@ -322,8 +322,8 @@ export default function ResumeDetail() {
   
       <div
         className={cn(
-          "grid grid-cols-1 items-start gap-6 lg:[--panel-h:clamp(600px,calc(100vh-12.5rem),920px)]",
-          isOwner ? "lg:grid-cols-[minmax(0,1.72fr)_minmax(320px,0.92fr)]" : "lg:grid-cols-[minmax(0,1.82fr)_minmax(300px,0.88fr)]",
+          "grid grid-cols-1 items-start gap-6 lg:[--panel-h:clamp(740px,calc(100vh-12.5rem),960px)]",
+          isOwner ? "lg:grid-cols-[minmax(0,1.65fr)_minmax(360px,0.95fr)]" : "lg:grid-cols-[minmax(0,1.55fr)_minmax(380px,1.05fr)]",
         )}
       >
         {/* Center: PDF Viewer */}
@@ -338,7 +338,7 @@ export default function ResumeDetail() {
                rel="noreferrer" 
                className={cn(
                  buttonVariants({ variant: "secondary", size: "sm" }),
-                 "border-2 border-border bg-background text-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-[10px] h-9 px-3.5 font-bold shrink-0"
+                 "border-2 border-border bg-background text-foreground shadow-[var(--shadow-xs)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-[10px] h-9 px-3.5 font-bold shrink-0"
                )}
              >
                Open external
@@ -354,12 +354,12 @@ export default function ResumeDetail() {
         </div>
 
         {isOwner ? (
-          <div className="order-2 grid gap-6 lg:h-[var(--panel-h)] lg:grid-rows-[minmax(21rem,1.08fr)_minmax(18rem,0.92fr)]">
+          <div className="order-2 grid gap-6 lg:h-[var(--panel-h)] lg:grid-rows-[minmax(0,1.12fr)_minmax(0,0.88fr)]">
             {/* Left: AI Roast & Details — owner only */}
             <div className="flex min-h-[20rem] flex-col lg:min-h-0">
-              <Card className="border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col h-full bg-card">
+              <Card className="border-4 border-border rounded-none shadow-[var(--shadow-lg)] flex flex-col h-full bg-card">
                 <CardHeader className={cn(panelHeaderClass, "justify-start")}>
-                  <CardTitle className="text-base flex items-center gap-2.5  tracking-tight text-primary-foreground">
+                  <CardTitle className="text-base flex items-center gap-2.5 tracking-tight text-primary-foreground">
                     <Sparkles className="w-5 h-5 shrink-0" strokeWidth={2.5} /> AI Analysis
                   </CardTitle>
                 </CardHeader>
@@ -387,7 +387,7 @@ export default function ResumeDetail() {
                         {isPdf && isOwner && user && (
                           <Button
                             onClick={fetchRoast}
-                            className="w-full border-4 border-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading tracking-wide bg-background text-foreground hover:bg-muted/80 text-sm py-6 min-h-[3.25rem]"
+                            className="w-full border-4 border-border shadow-[var(--shadow-md)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading tracking-wide bg-background text-foreground hover:bg-muted/80 text-sm py-6 min-h-[3.25rem]"
                           >
                             <FlameIcon size={20} className="mr-2 shrink-0" strokeWidth={2} /> Run AI Analysis
                           </Button>
@@ -435,7 +435,7 @@ export default function ResumeDetail() {
                         <Button
                           onClick={fetchRoast}
                           variant="outline"
-                          className="border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-heading text-xs"
+                          className="border-4 border-border rounded-none shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-heading text-xs"
                         >
                           Try Again
                         </Button>
@@ -450,16 +450,16 @@ export default function ResumeDetail() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
                         transition={{ type: "spring", stiffness: 200 }}
-                        className="space-y-2.5 p-4 flex-1 min-h-0 overflow-y-auto"
+                        className="space-y-3.5 p-4 flex-1 min-h-0 overflow-y-auto scrollbar-thin"
                       >
-                        <div className="flex flex-col items-center gap-1 pb-1 border-b-4 border-border">
+                        <div className="flex flex-col items-center gap-1 pb-2 border-b-4 border-border">
                           <motion.div
                             initial={{ scale: 0.5 }}
                             animate={{ scale: 1 }}
                             transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-                            className="w-24 h-24 rounded-full border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center bg-background gap-0"
+                            className="w-20 h-20 rounded-full border-4 border-border shadow-[var(--shadow-sm)] flex flex-col items-center justify-center bg-background gap-0"
                           >
-                            <span className={cn("text-4xl font-heading leading-none", scoreColor(roastData!.score))}>
+                            <span className={cn("text-3xl font-heading leading-none", scoreColor(roastData!.score))}>
                               {roastData!.score}
                             </span>
                           </motion.div>
@@ -468,13 +468,14 @@ export default function ResumeDetail() {
                           </p>
                         </div>
 
-                        <div className="border-4 border-border bg-muted/30 p-2.5 overscroll-contain">
-                          <h4 className="font-heading text-xs mb-2 tracking-wide flex items-center gap-2">
+                        {/* Verdict Bars Grid */}
+                        <div className="border-4 border-border bg-muted/30 p-3 overscroll-contain">
+                          <h4 className="font-heading text-xs mb-2.5 tracking-wide flex items-center gap-2">
                             Verdict <span className="text-[10px] font-sans font-normal text-muted-foreground normal-case">(1–5 each)</span>
                           </h4>
-                          <div className="space-y-2">
+                          <div className="space-y-2.5">
                             {coalesceVerdictBars(roastData!.verdictBars).map((bar) => (
-                              <div key={bar.id} className="space-y-0.5">
+                              <div key={bar.id} className="space-y-1">
                                 <div className="flex justify-between items-baseline gap-2 text-[11px] font-bold uppercase tracking-tight">
                                   <span className="text-foreground leading-tight min-w-0">{bar.label}</span>
                                   <span className="shrink-0 tabular-nums text-muted-foreground">{bar.score}/5</span>
@@ -484,7 +485,7 @@ export default function ResumeDetail() {
                                     <div
                                       key={step}
                                       className={cn(
-                                        "flex-1 h-2.5 min-w-0 border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]",
+                                        "flex-1 h-2.5 min-w-0 border-2 border-border shadow-[1px_1px_0px_0px_hsl(var(--border))]",
                                         step <= bar.score ? verdictBarFillClass(bar.score) : "bg-background",
                                       )}
                                     />
@@ -499,7 +500,7 @@ export default function ResumeDetail() {
                           type="button"
                           variant="outline"
                           onClick={fetchRoast}
-                          className="w-full border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-heading text-xs h-10 gap-2 mt-1"
+                          className="w-full border-4 border-border rounded-none shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-heading text-xs h-10 gap-2 mt-1"
                         >
                           <RefreshCw className="w-3.5 h-3.5" />
                           Re-roast
@@ -514,34 +515,72 @@ export default function ResumeDetail() {
 
             {/* Right: Discussion */}
             <div className="flex h-[400px] min-h-0 flex-col lg:h-auto lg:min-h-0">
-              <Card className="border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col overflow-hidden h-full bg-card">
+              <Card className="border-4 border-border rounded-none shadow-[var(--shadow-lg)] flex flex-col overflow-hidden h-full bg-card">
                 <CardHeader className={panelHeaderClass}>
                    <div className="flex items-center gap-2.5 min-w-0">
                      <FlameIcon size={20} className="shrink-0 text-yellow-200" strokeWidth={2.5} aria-hidden />
-                     <CardTitle className="text-base  tracking-tight text-primary-foreground truncate">
+                     <CardTitle className="text-base tracking-tight text-primary-foreground truncate">
                        Roast Thread
                      </CardTitle>
                    </div>
                    <Badge
                      variant="secondary"
-                     className="border-2 border-border rounded-none shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] font-heading font-bold text-[10px] uppercase bg-background text-foreground px-2.5 py-1 shrink-0"
+                     className="border-2 border-border rounded-none shadow-[var(--shadow-xs)] font-heading font-bold text-[10px] uppercase bg-background text-foreground px-2.5 py-1 shrink-0"
                    >
                      {comments.length} {comments.length === 1 ? "comment" : "comments"}
                    </Badge>
                 </CardHeader>
 
                 {/* Scrollable comments area */}
-                <div className="bg-background flex-1 overflow-y-auto p-4 min-h-0 flex flex-col">
+                <div className="bg-muted/30 flex-1 overflow-y-auto p-4 min-h-0 flex flex-col scrollbar-thin">
                   {comments.length === 0 ? (
-                    <div className="flex flex-1 min-h-[10rem] flex-col items-center justify-center">
-                      <div className="w-full max-w-xs border-[5px] border-dashed border-border bg-muted/25 px-5 py-8 text-center shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]">
-                        <MessageSquare className="w-10 h-10 mx-auto mb-4 text-muted-foreground/80" strokeWidth={1.75} />
-                        <p className="font-heading text-sm  tracking-tight text-foreground">No feedback yet.</p>
-                        <p className="text-sm mt-2 text-muted-foreground leading-relaxed">Be the first to roast!</p>
+                    <div className="flex flex-col items-center justify-center p-6 text-center my-auto space-y-6">
+                      {/* Visual Preview Container */}
+                      <div className="w-full max-w-sm relative space-y-4 px-2 select-none pointer-events-none opacity-85">
+                        {/* Mock Card 1 */}
+                        <div className="border-[3px] border-border bg-card p-3.5 shadow-[var(--shadow-2xs)] text-left transform -rotate-1 scale-95 translate-y-2 opacity-75 dark:opacity-90">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <div className="w-5 h-5 rounded-full border-2 border-border bg-emerald-500/20 dark:bg-emerald-500/30 flex items-center justify-center text-[9px] font-mono font-bold">
+                              S
+                            </div>
+                            <span className="font-mono text-[10px] font-bold text-foreground">u/SeniorDesigner</span>
+                            <span className="border border-emerald-500/25 rounded-none font-bold uppercase py-0 px-1 text-[8px] bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
+                              strength
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                            Outstanding visual hierarchy. The neobrutalist styling gives this application a distinct, premium identity.
+                          </p>
+                        </div>
+
+                        {/* Mock Card 2 */}
+                        <div className="border-[3px] border-border bg-card p-3.5 shadow-[var(--shadow-xs)] text-left transform rotate-1 relative z-10">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <div className="w-5 h-5 rounded-full border-2 border-border bg-orange-400/20 dark:bg-orange-400/30 flex items-center justify-center text-[9px] font-mono font-bold">
+                              R
+                            </div>
+                            <span className="font-mono text-[10px] font-bold text-foreground">u/RecruiterPro</span>
+                            <span className="border border-orange-400/30 rounded-none font-bold uppercase py-0 px-1 text-[8px] bg-orange-400/20 text-orange-600 dark:bg-orange-400/15 dark:text-orange-300">
+                              weakness
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                            Quantifiable achievements are missing in the early internships. Add clear metrics to stand out.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 max-w-xs">
+                        <h3 className="font-heading text-lg tracking-tight text-foreground">No feedback yet</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {isOwner 
+                            ? "Your resume is ready for review! Share the link with friends, colleagues, or reviewers to start the thread." 
+                            : "Be the first to roast! Highlight strengths, pinpoint weaknesses, or offer suggestions below."}
+                        </p>
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-3 w-full">
+                    <div className="space-y-3.5 w-full">
                       {comments.map((c) => (
                         <EnhancedComment key={c._id} comment={c} onRefresh={loadComments} />
                       ))}
@@ -555,23 +594,36 @@ export default function ResumeDetail() {
                     <form onSubmit={postComment} className="p-3 space-y-2 flex flex-col bg-muted/30">
                       {!isOwner && (
                         <div className="flex gap-1.5 flex-wrap">
-                          {(["strength", "weakness", "suggestion", "comment"] as const).map((t) => (
-                            <button
-                              key={t}
-                              type="button"
-                              onClick={() => setCommentType(t)}
-                              className={cn(
-                                "cursor-pointer uppercase rounded-none border-2 border-border px-2.5 py-1 text-[10px] font-heading font-bold transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5",
-                                commentType === t
-                                  ? t === "comment"
-                                    ? "bg-yellow text-black"
-                                    : "bg-primary text-primary-foreground"
-                                  : "bg-muted text-foreground",
-                              )}
-                            >
-                              {t}
-                            </button>
-                          ))}
+                          {(["strength", "weakness", "suggestion", "comment"] as const).map((t) => {
+                            const isSelected = commentType === t;
+                            const btnColors = {
+                              strength: isSelected
+                                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 border-border"
+                                : "bg-background/80 text-foreground border-border/40 hover:bg-emerald-500/10",
+                              weakness: isSelected
+                                ? "bg-orange-100 text-orange-700 dark:bg-orange-950/50 dark:text-orange-300 border-border"
+                                : "bg-background/80 text-foreground border-border/40 hover:bg-orange-400/10",
+                              suggestion: isSelected
+                                ? "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300 border-border"
+                                : "bg-background/80 text-foreground border-border/40 hover:bg-blue-500/10",
+                              comment: isSelected
+                                ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 border-border"
+                                : "bg-background/80 text-foreground border-border/40 hover:bg-amber-500/10",
+                            };
+                            return (
+                              <button
+                                key={t}
+                                type="button"
+                                onClick={() => setCommentType(t)}
+                                className={cn(
+                                  "cursor-pointer uppercase rounded-none border-2 px-2.5 py-1 text-[10px] font-heading font-bold transition-all shadow-[var(--shadow-2xs)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5",
+                                  btnColors[t]
+                                )}
+                              >
+                                {t}
+                              </button>
+                            );
+                          })}
                         </div>
                       )}
                       <label htmlFor="comment-text" className="sr-only">
@@ -584,14 +636,14 @@ export default function ResumeDetail() {
                         placeholder={isOwner ? "Add a comment..." : "Write your roast / feedback..."}
                         rows={2}
                         aria-label={isOwner ? "Add a comment" : "Write your roast or feedback"}
-                        className="w-full min-h-16 p-2.5 border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background resize-none text-sm font-medium bg-background leading-relaxed"
+                        className="w-full min-h-16 p-2.5 border-4 border-border rounded-none shadow-[var(--shadow-sm)] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background resize-none text-sm font-medium bg-background leading-relaxed"
                         required
                       />
                       <div className="flex justify-end pt-0.5">
                         <Button
                           type="submit"
                           disabled={posting}
-                          className="min-h-10 min-w-20 px-5 border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading text-sm tracking-wide bg-primary text-primary-foreground "
+                          className="min-h-10 min-w-20 px-5 border-4 border-border shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading text-sm tracking-wide bg-primary text-primary-foreground "
                         >
                           {posting ? "…" : "Post"}
                         </Button>
@@ -600,11 +652,11 @@ export default function ResumeDetail() {
                   ) : (
                     <div className="p-4 text-center">
                       <Link
-                        href="/login"
-                        className={cn(
-                          buttonVariants({ variant: "outline" }),
-                          "inline-flex border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-heading text-xs no-underline hover:no-underline",
-                        )}
+                         href="/login"
+                         className={cn(
+                           buttonVariants({ variant: "outline" }),
+                           "inline-flex border-4 border-border rounded-none shadow-[var(--shadow-sm)] font-heading text-xs no-underline hover:no-underline",
+                         )}
                       >
                         Log in to join the roast
                       </Link>
@@ -618,34 +670,72 @@ export default function ResumeDetail() {
           <>
             {/* Right: Discussion */}
             <div className="order-2 flex flex-col h-[460px] lg:h-[var(--panel-h)]">
-              <Card className="border-4 border-border rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col overflow-hidden h-full bg-card">
+              <Card className="border-4 border-border rounded-none shadow-[var(--shadow-lg)] flex flex-col overflow-hidden h-full bg-card">
                 <CardHeader className={panelHeaderClass}>
                    <div className="flex items-center gap-2.5 min-w-0">
                      <FlameIcon size={20} className="shrink-0 text-yellow-200" strokeWidth={2.5} aria-hidden />
-                     <CardTitle className="text-base  tracking-tight text-primary-foreground truncate">
+                     <CardTitle className="text-base tracking-tight text-primary-foreground truncate">
                        Roast Thread
                      </CardTitle>
                    </div>
                    <Badge
                      variant="secondary"
-                     className="border-2 border-border rounded-none shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] font-heading font-bold text-[10px] uppercase bg-background text-foreground px-2.5 py-1 shrink-0"
+                     className="border-2 border-border rounded-none shadow-[var(--shadow-xs)] font-heading font-bold text-[10px] uppercase bg-background text-foreground px-2.5 py-1 shrink-0"
                    >
                      {comments.length} {comments.length === 1 ? "comment" : "comments"}
                    </Badge>
                 </CardHeader>
 
                 {/* Scrollable comments area */}
-                <div className="bg-background flex-1 overflow-y-auto p-4 min-h-0 flex flex-col">
+                <div className="bg-muted/30 flex-1 overflow-y-auto p-4 min-h-0 flex flex-col scrollbar-thin">
                   {comments.length === 0 ? (
-                    <div className="flex flex-1 min-h-[10rem] flex-col items-center justify-center">
-                      <div className="w-full max-w-xs border-[5px] border-dashed border-border bg-muted/25 px-5 py-8 text-center shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]">
-                        <MessageSquare className="w-10 h-10 mx-auto mb-4 text-muted-foreground/80" strokeWidth={1.75} />
-                        <p className="font-heading text-sm  tracking-tight text-foreground">No feedback yet.</p>
-                        <p className="text-sm mt-2 text-muted-foreground leading-relaxed">Be the first to roast!</p>
+                    <div className="flex flex-col items-center justify-center p-6 text-center my-auto space-y-6">
+                      {/* Visual Preview Container */}
+                      <div className="w-full max-w-sm relative space-y-4 px-2 select-none pointer-events-none opacity-85">
+                        {/* Mock Card 1 */}
+                        <div className="border-[3px] border-border bg-card p-3.5 shadow-[var(--shadow-2xs)] text-left transform -rotate-1 scale-95 translate-y-2 opacity-75 dark:opacity-90">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <div className="w-5 h-5 rounded-full border-2 border-border bg-emerald-500/20 dark:bg-emerald-500/30 flex items-center justify-center text-[9px] font-mono font-bold">
+                              S
+                            </div>
+                            <span className="font-mono text-[10px] font-bold text-foreground">u/SeniorDesigner</span>
+                            <span className="border border-emerald-500/25 rounded-none font-bold uppercase py-0 px-1 text-[8px] bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
+                              strength
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                            Outstanding visual hierarchy. The neobrutalist styling gives this application a distinct, premium identity.
+                          </p>
+                        </div>
+
+                        {/* Mock Card 2 */}
+                        <div className="border-[3px] border-border bg-card p-3.5 shadow-[var(--shadow-xs)] text-left transform rotate-1 relative z-10">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <div className="w-5 h-5 rounded-full border-2 border-border bg-orange-400/20 dark:bg-orange-400/30 flex items-center justify-center text-[9px] font-mono font-bold">
+                              R
+                            </div>
+                            <span className="font-mono text-[10px] font-bold text-foreground">u/RecruiterPro</span>
+                            <span className="border border-orange-400/30 rounded-none font-bold uppercase py-0 px-1 text-[8px] bg-orange-400/20 text-orange-600 dark:bg-orange-400/15 dark:text-orange-300">
+                              weakness
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                            Quantifiable achievements are missing in the early internships. Add clear metrics to stand out.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 max-w-xs">
+                        <h3 className="font-heading text-lg tracking-tight text-foreground">No feedback yet</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {isOwner 
+                            ? "Your resume is ready for review! Share the link with friends, colleagues, or reviewers to start the thread." 
+                            : "Be the first to roast! Highlight strengths, pinpoint weaknesses, or offer suggestions below."}
+                        </p>
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-3 w-full">
+                    <div className="space-y-3.5 w-full">
                       {comments.map((c) => (
                         <EnhancedComment key={c._id} comment={c} onRefresh={loadComments} />
                       ))}
@@ -659,23 +749,36 @@ export default function ResumeDetail() {
                     <form onSubmit={postComment} className="p-3 space-y-2 flex flex-col bg-muted/30">
                       {!isOwner && (
                         <div className="flex gap-1.5 flex-wrap">
-                          {(["strength", "weakness", "suggestion", "comment"] as const).map((t) => (
-                            <button
-                              key={t}
-                              type="button"
-                              onClick={() => setCommentType(t)}
-                              className={cn(
-                                "cursor-pointer uppercase rounded-none border-2 border-border px-2.5 py-1 text-[10px] font-heading font-bold transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5",
-                                commentType === t
-                                  ? t === "comment"
-                                    ? "bg-yellow text-black"
-                                    : "bg-primary text-primary-foreground"
-                                  : "bg-muted text-foreground",
-                              )}
-                            >
-                              {t}
-                            </button>
-                          ))}
+                          {(["strength", "weakness", "suggestion", "comment"] as const).map((t) => {
+                            const isSelected = commentType === t;
+                            const btnColors = {
+                              strength: isSelected
+                                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 border-border"
+                                : "bg-background/80 text-foreground border-border/40 hover:bg-emerald-500/10",
+                              weakness: isSelected
+                                ? "bg-orange-100 text-orange-700 dark:bg-orange-950/50 dark:text-orange-300 border-border"
+                                : "bg-background/80 text-foreground border-border/40 hover:bg-orange-400/10",
+                              suggestion: isSelected
+                                ? "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300 border-border"
+                                : "bg-background/80 text-foreground border-border/40 hover:bg-blue-500/10",
+                              comment: isSelected
+                                ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 border-border"
+                                : "bg-background/80 text-foreground border-border/40 hover:bg-amber-500/10",
+                            };
+                            return (
+                              <button
+                                key={t}
+                                type="button"
+                                onClick={() => setCommentType(t)}
+                                className={cn(
+                                  "cursor-pointer uppercase rounded-none border-2 px-2.5 py-1 text-[10px] font-heading font-bold transition-all shadow-[var(--shadow-2xs)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5",
+                                  btnColors[t]
+                                )}
+                              >
+                                {t}
+                              </button>
+                            );
+                          })}
                         </div>
                       )}
                       <label htmlFor="comment-text" className="sr-only">
@@ -688,14 +791,14 @@ export default function ResumeDetail() {
                         placeholder={isOwner ? "Add a comment..." : "Write your roast / feedback..."}
                         rows={2}
                         aria-label={isOwner ? "Add a comment" : "Write your roast or feedback"}
-                        className="w-full min-h-16 p-2.5 border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background resize-none text-sm font-medium bg-background leading-relaxed"
+                        className="w-full min-h-16 p-2.5 border-4 border-border rounded-none shadow-[var(--shadow-sm)] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background resize-none text-sm font-medium bg-background leading-relaxed"
                         required
                       />
                       <div className="flex justify-end pt-0.5">
                         <Button
                           type="submit"
                           disabled={posting}
-                          className="min-h-10 min-w-20 px-5 border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading text-sm tracking-wide bg-primary text-primary-foreground "
+                          className="min-h-10 min-w-20 px-5 border-4 border-border shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading text-sm tracking-wide bg-primary text-primary-foreground "
                         >
                           {posting ? "…" : "Post"}
                         </Button>
@@ -707,7 +810,7 @@ export default function ResumeDetail() {
                         href="/login"
                         className={cn(
                           buttonVariants({ variant: "outline" }),
-                          "inline-flex border-4 border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-heading text-xs no-underline hover:no-underline",
+                          "inline-flex border-4 border-border rounded-none shadow-[var(--shadow-sm)] font-heading text-xs no-underline hover:no-underline",
                         )}
                       >
                         Log in to join the roast
@@ -722,7 +825,7 @@ export default function ResumeDetail() {
       </div>
 
       {resume.blurb && (
-        <Card className="border-4 border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-yellow/10">
+        <Card className="border-4 border-border rounded-none shadow-[var(--shadow-md)] bg-yellow/10">
           <CardHeader className="py-4 border-b-4 border-border bg-yellow/20">
             <CardTitle className="font-heading text-base tracking-wide flex items-center gap-2">
               <FileText className="w-4 h-4" /> Author&apos;s Note
@@ -736,3 +839,4 @@ export default function ResumeDetail() {
     </div>
   );
 }
+

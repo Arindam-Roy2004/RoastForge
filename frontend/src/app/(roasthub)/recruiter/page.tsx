@@ -53,7 +53,7 @@ export default function RecruiterPage() {
   if (authLoading) {
     return (
       <div className="flex items-center justify-center p-4 py-16 min-h-[40vh]">
-        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card text-center p-8 flex flex-col items-center">
+        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[var(--shadow-md)] bg-card text-center p-8 flex flex-col items-center">
           <Loader2 className="w-10 h-10 text-muted-foreground animate-spin mb-4" />
           <CardTitle className="font-heading  text-xl mb-1 tracking-tighter">Loading…</CardTitle>
           <CardDescription className="font-medium">Checking your session.</CardDescription>
@@ -65,7 +65,7 @@ export default function RecruiterPage() {
   if (!user) {
     return (
       <div className="flex items-center justify-center p-4 py-16">
-        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card text-center p-8 flex flex-col items-center">
+        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[var(--shadow-md)] bg-card text-center p-8 flex flex-col items-center">
           <div className="w-16 h-16 bg-muted border-[3px] border-border rounded-full flex items-center justify-center mb-6 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
             <Briefcase className="w-6 h-6 text-muted-foreground" />
           </div>
@@ -84,7 +84,7 @@ export default function RecruiterPage() {
   if (user.role !== "recruiter") {
     return (
       <div className="flex items-center justify-center p-4 py-16">
-        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card text-center p-8 flex flex-col items-center">
+        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[var(--shadow-md)] bg-card text-center p-8 flex flex-col items-center">
           <div className="w-16 h-16 bg-muted border-[3px] border-border rounded-full flex items-center justify-center mb-6 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
             <Briefcase className="w-6 h-6 text-muted-foreground" />
           </div>
@@ -111,7 +111,7 @@ export default function RecruiterPage() {
         </p>
       </div>
 
-      <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card">
+      <Card className="border-[3px] border-border rounded-none shadow-[var(--shadow-md)] bg-card">
         <CardHeader className="bg-muted/40 border-b-[3px] border-border py-4 px-5">
           <CardTitle className="font-heading text-base tracking-wide">Filters</CardTitle>
         </CardHeader>
@@ -145,7 +145,7 @@ export default function RecruiterPage() {
           result set stays scannable instead of making the whole page scroll.
           `[scrollbar-gutter:stable]` keeps the card grid from shifting when
           the scrollbar appears/disappears on re-query. */}
-      <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card overflow-hidden">
+      <Card className="border-[3px] border-border rounded-none shadow-[var(--shadow-md)] bg-card overflow-hidden">
         <CardHeader className="bg-muted/40 border-b-[3px] border-border py-4 px-5 flex flex-row items-center justify-between space-y-0 gap-3">
           <div className="flex items-center gap-3 min-w-0">
             {rows.length > 0 && (
@@ -179,7 +179,7 @@ export default function RecruiterPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {rows.map((r) => (
-              <Card key={r.resumeId} className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all bg-card flex flex-col h-full min-h-104">
+              <Card key={r.resumeId} className="border-[3px] border-border rounded-none shadow-[var(--shadow-sm)] bg-card flex flex-col h-full min-h-104">
                 <CardHeader className="border-b-[3px] border-border bg-muted/40 py-4 px-5">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 bg-primary/20 border-2 border-border rounded-full flex items-center justify-center font-mono text-sm font-bold uppercase shrink-0">

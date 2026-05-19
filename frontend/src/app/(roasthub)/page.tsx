@@ -440,7 +440,6 @@ export default function HomePage() {
                     key={resume._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    whileHover={{ y: -3 }}
                     className="h-full"
                   >
                     <Link
@@ -448,7 +447,7 @@ export default function HomePage() {
                       data-testid={`link-resume-${resume._id}`}
                       className="block h-full text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
-                      <Card className="h-full flex flex-col border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all bg-card overflow-hidden group">
+                      <Card className="h-full flex flex-col border-[3px] border-border rounded-none shadow-[var(--shadow-sm)] bg-card overflow-hidden group hover:bg-muted/10 transition-colors duration-200">
                         {/* Avatar — landscape frame: shorter card, wider tiles (3-up on lg) */}
                         <div className={cn("relative aspect-[5/4] overflow-hidden border-b-[3px] border-border", cardBg)}>
                           <Image

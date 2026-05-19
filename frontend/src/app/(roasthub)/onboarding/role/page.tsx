@@ -8,6 +8,7 @@ import FlameIcon from "@/components/icons/flame-icon";
 import { useAuth } from "@/store/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 type RoleChoice = "user" | "recruiter";
 
@@ -49,12 +50,20 @@ export default function OnboardingRolePage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 py-16">
-      <Card className="w-full max-w-2xl border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-card overflow-hidden">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 py-16"
+    >
+      <Card className="w-full max-w-2xl border-[3px] border-border rounded-none shadow-[var(--shadow-lg)] bg-card overflow-hidden">
         <CardHeader className="text-center space-y-2 p-8 pb-4">
-          <div className="mx-auto bg-primary w-12 h-12 flex items-center justify-center rounded-full border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mb-2">
+          <motion.div 
+            whileHover={{ scale: 1.08, rotate: 5 }}
+            className="mx-auto bg-primary w-12 h-12 flex items-center justify-center rounded-full border-[3px] border-border shadow-[var(--shadow-xs)] mb-2 cursor-pointer"
+          >
             <FlameIcon size={24} className="text-primary-foreground" strokeWidth={2} />
-          </div>
+          </motion.div>
           <CardTitle className="text-3xl font-heading tracking-tighter">Pick Your Side</CardTitle>
           <CardDescription className="text-muted-foreground font-medium">
             We tailor RoastForge differently for candidates and recruiters. You can change this later in your profile.
@@ -82,14 +91,14 @@ export default function OnboardingRolePage() {
           <Button
             onClick={onSubmit}
             disabled={submitting}
-            className="w-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading text-lg h-12 tracking-wide"
+            className="w-full border-[3px] border-border shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading text-lg h-12 tracking-wide"
             data-testid="button-submit-onboarding"
           >
             {submitting ? "Setting up..." : "Continue"}
           </Button>
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   );
 }
 
@@ -116,8 +125,8 @@ function RoleCard({
       aria-pressed={active}
       className={`text-left border-[3px] border-border rounded-none p-5 transition-all flex flex-col gap-3 ${
         active
-          ? "bg-primary text-primary-foreground shadow-none translate-x-0.5 translate-y-0.5"
-          : "bg-card shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
+          ? "bg-primary text-primary-foreground shadow-none translate-x-0.5 translate-y-0.5 font-semibold"
+          : "bg-card shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
       }`}
     >
       <div
