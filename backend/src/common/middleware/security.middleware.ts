@@ -30,10 +30,13 @@ export const sanitizeBody = (req: Request, _res: Response, next: NextFunction) =
 };
 
 /**
- * Throttle Google ID-token verification. Each call hits Google's tokeninfo /
- * cached JWKS, so this protects both us (CPU) and Google (rate limits) from a
- * burst of bogus tokens. Per-IP because the user isn't authenticated yet.
+ * Shared key function: per-user when authenticated, per-IP otherwise.
  */
+const userOrIp = (req: Request): string => {
+  const userId = (req as Request & { user?: { id?: string } }).user?.id;
+  return userId ? `u:${userId}` : `ip:${ipKeyGenerator(req.ip ?? "")}`;
+};
+
 export const googleAuthRateLimiter = createRateLimiter({
   prefix: "rl:google-auth",
   tokens: 20,
@@ -41,7 +44,6 @@ export const googleAuthRateLimiter = createRateLimiter({
   message: "Too many sign-in attempts. Try again in a minute.",
 });
 
-/** Looser cap for refresh since browsers fire it on startup and reconnects. */
 export const refreshRateLimiter = createRateLimiter({
   prefix: "rl:refresh",
   tokens: 30,
@@ -49,28 +51,49 @@ export const refreshRateLimiter = createRateLimiter({
   message: "Too many refresh attempts.",
 });
 
-/** Expensive AI path — per-user (if authenticated) or per-IP key. */
 export const analysisRateLimiter = createRateLimiter({
   prefix: "rl:analysis",
   tokens: 5,
   window: "60 s",
-  keyFn: (req: Request) => {
-    const userId = (req as Request & { user?: { id?: string } }).user?.id;
-    if (userId) return `u:${userId}`;
-    // ipKeyGenerator normalizes IPv6 into a /64 subnet key so individual IPv6 users can't bypass limits.
-    return `ip:${ipKeyGenerator(req.ip ?? "")}`;
-  },
+  keyFn: userOrIp,
   message: "Too many analysis requests. Slow down.",
 });
 
-/** Signature endpoint: cheap but abusable (enumerating upload slots). Per-user. */
 export const uploadSignRateLimiter = createRateLimiter({
   prefix: "rl:upload-sign",
   tokens: 30,
   window: "60 s",
-  keyFn: (req: Request) => {
-    const userId = (req as Request & { user?: { id?: string } }).user?.id;
-    return userId ? `u:${userId}` : `ip:${ipKeyGenerator(req.ip ?? "")}`;
-  },
+  keyFn: userOrIp,
   message: "Too many upload requests. Slow down.",
+});
+
+export const writeRateLimiter = createRateLimiter({
+  prefix: "rl:write",
+  tokens: 30,
+  window: "60 s",
+  keyFn: userOrIp,
+  message: "You're doing that too fast. Slow down.",
+});
+
+export const reactionRateLimiter = createRateLimiter({
+  prefix: "rl:reaction",
+  tokens: 60,
+  window: "60 s",
+  keyFn: userOrIp,
+  message: "Too many reactions. Slow down.",
+});
+
+export const recruiterRateLimiter = createRateLimiter({
+  prefix: "rl:recruiter",
+  tokens: 30,
+  window: "60 s",
+  keyFn: userOrIp,
+  message: "Too many search requests. Slow down.",
+});
+
+export const publicReadRateLimiter = createRateLimiter({
+  prefix: "rl:public-read",
+  tokens: 120,
+  window: "60 s",
+  message: "Too many requests. Slow down.",
 });

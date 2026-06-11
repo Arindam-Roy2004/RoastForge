@@ -31,7 +31,21 @@ function isAllowedOrigin(origin: string): boolean {
   return false;
 }
 
+/**
+ * Resolves `trust proxy` from env. Defaults to 1 (Vercel / single proxy).
+ */
+function resolveTrustProxy(): number | boolean | string {
+  const raw = process.env.TRUST_PROXY?.trim();
+  if (!raw) return 1;
+  if (raw === "true") return true;
+  if (raw === "false") return false;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : raw;
+}
+
 const app = express();
+
+app.set("trust proxy", resolveTrustProxy());
 
 // Keep CORP loose so Cloudinary-hosted resume/avatar images load in the browser.
 app.use(
