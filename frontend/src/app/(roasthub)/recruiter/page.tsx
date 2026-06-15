@@ -201,7 +201,7 @@ export default function RecruiterPage() {
                       Resume {r.aiScore?.overall ?? "—"}
                     </Badge>
                     <Badge variant="outline" className="border-2 border-border shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] rounded-none text-[10px] px-2 py-0.5 font-bold uppercase">
-                      Talent {r.talentComposite ?? "—"}
+                      Talent {r.talentComposite != null ? Number(r.talentComposite).toFixed(2) : "—"}
                     </Badge>
                     {/* Backend collapses a candidate's matching resumes into one card
                         and returns the top-scoring one. If they have more that also

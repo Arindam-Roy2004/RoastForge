@@ -164,7 +164,7 @@ export default function RecruiterCandidateProfilePage() {
                     variant="outline"
                     className="border-2 border-border rounded-none text-[10px] font-bold uppercase shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
                   >
-                    <Trophy className="w-3 h-3 mr-1" /> Talent {data.talentComposite ?? 0}
+                    <Trophy className="w-3 h-3 mr-1" /> Talent {Number(data.talentComposite ?? 0).toFixed(2)}
                   </Badge>
                   {data.targetRole && (
                     <Badge

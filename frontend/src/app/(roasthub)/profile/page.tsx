@@ -263,7 +263,7 @@ export default function ProfilePage() {
                 {/* Talent score is candidate-only; recruiters never receive talentMetrics from the API. */}
                 {!isRecruiter && displayUser.talentMetrics && (
                   <Badge variant="secondary" className="border-2 border-border shadow-[var(--shadow-2xs)] rounded-none font-bold px-3 py-1 bg-card">
-                    Talent Score: {displayUser.talentMetrics.composite}
+                    Talent Score: {Number(displayUser.talentMetrics.composite).toFixed(2)}
                   </Badge>
                 )}
                 {isRecruiter && (

@@ -45,7 +45,7 @@ export const recalcTalentScore = async (userId: string): Promise<number> => {
   const totalDislikes = Math.max(0, Number(stats?.totalDislikes) || 0);
   const likeBonus = Math.min(10, Math.floor(totalLikes / 5));
   const dislikePenalty = Math.min(5, Math.floor(totalDislikes / 8));
-  const composite = Math.max(0, Math.min(100, base + likeBonus - dislikePenalty));
+  const composite = Math.round((Math.max(0, Math.min(100, base + likeBonus - dislikePenalty)) + Number.EPSILON) * 100) / 100;
 
   await User.findByIdAndUpdate(userId, {
     $set: { "talentMetrics.composite": composite },
