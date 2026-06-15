@@ -1,238 +1,109 @@
 "use client";
 
 import { uploadApi, resumeApi } from "@/lib/api";
-import { AVATAR_STYLES, type AvatarRotate, type AvatarStyle } from "@/lib/avatar";
-import type { AvatarCustomize } from "@/components/upload-avatar-card";
-import { AvatarControlsCard, AvatarGalleryCard } from "@/components/upload-avatar-card";
+import { formatStyleLabel, getDiceBearUrl, type AvatarStyle } from "@/lib/avatar";
+import { ResumePiiEditor } from "@/components/resume-pii-editor";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { CheckCircle2, FileText, X } from "lucide-react";
-import { CloudUploadIcon } from "@/components/icons/cloud-upload-icon";
+import Image from "next/image";
 import Link from "next/link";
+import { ArrowLeft, CheckCircle2, Eye, FileText, Pencil, RefreshCw, UploadCloud, X } from "lucide-react";
 import { useAuth } from "@/store/auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { motion } from "framer-motion";
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 const MAX_UPLOAD_MB = Math.floor(MAX_UPLOAD_BYTES / (1024 * 1024));
+const DEFAULT_STYLE: AvatarStyle = "notionists";
 
-const ALLOWED_ROTATES = [0, 90, 180, 270] as const;
+// Only character/face styles that render visibly in both light and dark mode.
+// Filtered out: glass, icons, identicon, rings, shapes (abstract/invisible on light bg).
+const VISIBLE_STYLES: AvatarStyle[] = [
+  "adventurer",
+  "adventurer-neutral",
+  "avataaars",
+  "avataaars-neutral",
+  "big-ears",
+  "big-ears-neutral",
+  "big-smile",
+  "bottts",
+  "bottts-neutral",
+  "croodles",
+  "croodles-neutral",
+  "dylan",
+  "fun-emoji",
+  "initials",
+  "lorelei",
+  "lorelei-neutral",
+  "micah",
+  "miniavs",
+  "notionists",
+  "notionists-neutral",
+  "open-peeps",
+  "personas",
+  "pixel-art",
+  "pixel-art-neutral",
+  "thumbs",
+];
 
-function coerceRotate(raw: number | undefined): AvatarRotate {
-  return (ALLOWED_ROTATES as readonly number[]).includes(raw ?? 0) ? (raw as AvatarRotate) : 0;
+// A background hex that's visible on both dark (#1a1f2b-ish) and light (#f9f6f1) card surfaces.
+const AVATAR_BG = "d1d4f9";
+
+function formatBytes(n: number): string {
+  return n < 1024 * 1024 ? `${(n / 1024).toFixed(0)} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
 
-function defaultAvatarState(
-  user: {
-    id: string;
-    preferredAvatarStyle?: string | null;
-    preferredAvatarBackgroundColor?: string | null;
-    preferredAvatarFlip?: boolean;
-    preferredAvatarRotate?: number;
-    preferredAvatarRadius?: number;
-    preferredAvatarScale?: number;
-  } | null,
-): AvatarCustomize {
-  if (!user) {
-    return { style: "bottts", seed: "", backgroundColor: null, flip: false, rotate: 0, radius: 0, scale: 100 };
-  }
-  const pref = user.preferredAvatarStyle;
-  const style: AvatarStyle =
-    pref && (AVATAR_STYLES as readonly string[]).includes(pref) ? (pref as AvatarStyle) : "bottts";
-  return {
-    style,
-    seed: user.id,
-    backgroundColor: user.preferredAvatarBackgroundColor ?? null,
-    flip: Boolean(user.preferredAvatarFlip),
-    rotate: coerceRotate(user.preferredAvatarRotate),
-    radius: Number(user.preferredAvatarRadius ?? 0),
-    scale: Number(user.preferredAvatarScale ?? 100),
-  };
-}
-
-// ─── Resume card (left column) ───────────────────────────────────────────────
-
-function FileSlot({
-  file,
-  onClick,
-  onClear,
-}: {
-  file: File | null;
-  onClick: () => void;
-  onClear: () => void;
-}) {
-  if (!file) {
-    return (
-      <motion.button
-        whileHover={{ scale: 1.01, borderColor: "var(--color-primary)" }}
-        whileTap={{ scale: 0.99 }}
-        type="button"
-        onClick={onClick}
-        className={cn(
-          "flex-1 min-h-[150px] w-full border-[3px] border-dashed border-border bg-muted/30 flex flex-col items-center justify-center gap-3",
-          "cursor-pointer hover:bg-muted/50 transition-all rounded-none px-5 py-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
-        )}
-      >
-        <div className="w-14 h-14 rounded-full bg-background border-2 border-border flex items-center justify-center">
-          <FileText className="w-6 h-6 text-muted-foreground" />
-        </div>
-        <div className="text-center">
-          <p className="font-heading text-sm">Click to upload</p>
-          <p className="text-xs text-muted-foreground mt-1">PDF up to {MAX_UPLOAD_MB}MB</p>
-        </div>
-      </motion.button>
-    );
-  }
-
-  return (
-    <motion.div
-      initial={{ scale: 0.97, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
-      className="flex-1 min-h-[150px] border-[3px] border-border bg-background flex flex-col overflow-hidden"
-    >
-      <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-2 p-4 bg-muted/20">
-        <div className="w-14 h-14 rounded-full bg-primary/15 border-2 border-border flex items-center justify-center animate-bounce">
-          <CheckCircle2 className="w-7 h-7 text-primary" />
-        </div>
-        <p className="font-heading text-xs uppercase tracking-[0.14em] text-muted-foreground">Ready to forge</p>
-      </div>
-      <div className="border-t-[3px] border-border p-2.5 flex items-center gap-2.5">
-        <div className="p-2 bg-primary/20 border-2 border-border text-primary shrink-0">
-          <FileText className="w-4 h-4" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-heading truncate text-sm">{file.name}</p>
-          <p className="text-[11px] text-muted-foreground font-mono">{(file.size / 1024 / 1024).toFixed(2)} MB · PDF</p>
-        </div>
-        <Button
-          variant="outline"
-          size="icon-sm"
-          type="button"
-          aria-label="Remove file"
-          onClick={onClear}
-          className="!shadow-none hover:translate-x-0 hover:translate-y-0 active:translate-x-0 active:translate-y-0"
-        >
-          <X className="w-4 h-4" />
-        </Button>
-      </div>
-    </motion.div>
-  );
-}
-
-function ResumeCard({
-  file,
-  title,
-  error,
-  onPickFile,
-  onTitleChange,
-  onClearFile,
-  fileInputRef,
-}: {
-  file: File | null;
-  title: string;
-  error: string | null;
-  onPickFile: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onTitleChange: (v: string) => void;
-  onClearFile: () => void;
-  fileInputRef: React.RefObject<HTMLInputElement | null>;
-}) {
-  return (
-    <Card className="border-[3px] border-border shadow-[var(--shadow-md)] bg-card rounded-none flex flex-col h-full overflow-hidden">
-      <CardHeader className="border-b-[3px] border-border bg-muted/40 py-3 space-y-0.5 shrink-0">
-        <CardTitle className="font-heading text-sm tracking-wide">Resume & title</CardTitle>
-        <CardDescription className="text-xs text-muted-foreground">
-          PDF only — parsed for the AI roast and shown on your post.
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="flex-1 min-h-0 p-4 flex flex-col gap-3">
-        <FileSlot file={file} onClick={() => fileInputRef.current?.click()} onClear={onClearFile} />
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="application/pdf"
-          aria-label="Resume PDF file"
-          className="hidden"
-          onChange={onPickFile}
-        />
-
-        {error && (
-          <div className="bg-destructive/10 border-[3px] border-destructive p-3">
-            <p className="text-[10px] font-bold text-destructive uppercase tracking-widest mb-1">Error</p>
-            <p className="text-sm font-medium text-destructive">{error}</p>
-          </div>
-        )}
-
-        <label className="flex flex-col gap-2 shrink-0">
-          <span className="text-[11px] font-heading uppercase tracking-[0.14em] text-muted-foreground">Post title</span>
-          <Input
-            value={title}
-            onChange={(e) => onTitleChange(e.target.value)}
-            placeholder="e.g. New grad SWE trying to break into FAANG"
-            className="border-[3px] border-border rounded-none bg-background shadow-none focus-visible:ring-2 focus-visible:ring-ring/40 font-medium h-10 text-sm transition-all focus:shadow-[var(--shadow-2xs)]"
-            required
-          />
-          <span className="text-[11px] text-muted-foreground">Shown on your Hall of Shame card.</span>
-        </label>
-
-        <div className="mt-auto border-t-[3px] border-border pt-3 shrink-0">
-          <p className="text-[10px] font-heading uppercase tracking-[0.14em] text-muted-foreground mb-1.5">Tips</p>
-          <ul className="text-[11px] text-muted-foreground space-y-1 list-disc pl-4 marker:text-border">
-            <li>Clean, readable PDF (no scanned images).</li>
-            <li>Include your target role in the title.</li>
-            <li>Feedback is brutal — don&apos;t take it personally.</li>
-          </ul>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-// ─── Page ────────────────────────────────────────────────────────────────────
+type View = "form" | "review";
 
 export default function UploadPage() {
   const router = useRouter();
   const { user, loading, refresh } = useAuth();
+
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
-  const [avatar, setAvatar] = useState<AvatarCustomize>(() => defaultAvatarState(null));
+  const [style, setStyle] = useState<AvatarStyle>(DEFAULT_STYLE);
+  const [view, setView] = useState<View>("form");
+  const [editorOpen, setEditorOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [edited, setEdited] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
   useEffect(() => {
-    if (loading) return;
-    if (user?.role === "recruiter") router.replace("/recruiter");
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  const seed = user?.id || "preview";
+
+  useEffect(() => {
+    if (!loading && user?.role === "recruiter") router.replace("/recruiter");
   }, [loading, user?.role, router]);
 
-  useEffect(() => {
-    if (!user) return;
-    setAvatar(defaultAvatarState(user));
-  }, [user]);
-
-  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
+  function acceptFile(f: File | undefined | null) {
     if (!f) return;
-    if (f.type !== "application/pdf") { setError("Only PDF files are allowed."); return; }
-    if (f.size > MAX_UPLOAD_BYTES) { setError(`File too large. Maximum ${MAX_UPLOAD_MB} MB.`); return; }
+    if (f.type !== "application/pdf") return setError("Only PDF files are allowed.");
+    if (f.size > MAX_UPLOAD_BYTES) return setError(`File too large. Maximum ${MAX_UPLOAD_MB} MB.`);
     setFile(f);
+    setEdited(false);
     setError(null);
   }
 
   function clearFile() {
     setFile(null);
+    setEdited(false);
+    setView("form");
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!file) return;
+  async function submit() {
+    if (!file || !title.trim()) return;
     setUploading(true);
     setError(null);
     try {
@@ -242,55 +113,36 @@ export default function UploadPage() {
         name: file.name,
         fileUrl,
         fileType,
-        avatarStyle: avatar.style,
-        avatarSeed: avatar.seed.trim(),
-        avatarBackgroundColor: avatar.backgroundColor,
-        avatarFlip: avatar.flip,
-        avatarRotate: avatar.rotate,
-        avatarRadius: avatar.radius,
-        avatarScale: avatar.scale,
+        avatarStyle: style,
+        avatarSeed: seed,
+        avatarBackgroundColor: AVATAR_BG,
       });
       await refresh();
       toast.success(created.message || "Resume uploaded & queued!");
       router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
-    } finally {
       setUploading(false);
     }
   }
 
-  if (loading) {
+  if (loading || user?.role === "recruiter") {
     return (
-      <div className="flex items-center justify-center py-16 p-4">
-        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[var(--shadow-md)] text-center p-8 animate-pulse bg-card">
-          <CardTitle className="font-heading text-xl tracking-wide">Loading...</CardTitle>
-        </Card>
-      </div>
-    );
-  }
-
-  if (user?.role === "recruiter") {
-    return (
-      <div className="flex items-center justify-center py-16 p-4">
-        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[var(--shadow-md)] text-center p-8 bg-card">
-          <CardTitle className="font-heading text-xl tracking-wide">Redirecting…</CardTitle>
-        </Card>
+      <div className="flex items-center justify-center py-24">
+        <p className="font-heading text-sm uppercase tracking-wider text-muted-foreground">Loading…</p>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center p-4 py-16">
+      <div className="flex items-center justify-center p-4 py-20">
         <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[var(--shadow-md)] text-center p-8 bg-card">
-          <h1 className="font-heading text-3xl mb-4 tracking-tighter text-foreground">Sign In Required</h1>
-          <p className="text-sm text-muted-foreground mb-6 font-medium">
-            You need to sign in to upload your resume for roasting!
-          </p>
+          <h1 className="font-heading text-3xl mb-3 tracking-tighter">Sign in required</h1>
+          <p className="text-sm text-muted-foreground mb-6 font-medium">Sign in to upload your resume for roasting.</p>
           <Link href="/login">
             <Button size="lg" className="font-heading tracking-wide border-[3px] border-border shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none">
-              Sign In to Upload
+              Sign in
             </Button>
           </Link>
         </Card>
@@ -298,68 +150,272 @@ export default function UploadPage() {
     );
   }
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="min-h-[calc(100vh-4rem)] w-full px-3 sm:px-5 lg:px-6 xl:px-8 py-6 lg:py-8"
-    >
-      <div className="w-full max-w-[1760px] mx-auto space-y-6">
-        <header className="text-center space-y-1.5">
-          <div className="mx-auto bg-primary w-12 h-12 flex items-center justify-center rounded-full border-[3px] border-border shadow-[var(--shadow-xs)]">
-            <CloudUploadIcon size={24} className="text-primary-foreground" />
-          </div>
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-heading tracking-tight">Enter the Forge</h1>
-          <p className="text-sm text-muted-foreground font-medium max-w-xl mx-auto">
-            Drop your PDF, tune your card, pick a vibe. The roast is still the main event.
-          </p>
-        </header>
+  const canSubmit = !!file && !!title.trim() && !uploading;
+  const cardHeadCls = "border-b-[3px] border-border bg-muted/40 py-4";
 
-        <form onSubmit={submit} className="flex flex-col gap-6">
-          <div
-            className={cn(
-              "grid gap-4 lg:gap-5 items-stretch",
-              "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
-              "lg:h-[calc(100vh-13rem)] lg:min-h-[520px] lg:max-h-[700px]",
-            )}
+  // ── Review view: edited PDF takes the screen, with a Back action ──────────
+  if (view === "review" && file && previewUrl) {
+    return (
+      <div className="mx-auto w-full max-w-5xl px-4 py-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="font-heading text-lg tracking-tight leading-none">Review your resume</h1>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {edited ? "Edits applied — this is what will be roasted." : "This is what will be roasted."}
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setView("form")}
+            className="h-10 rounded-none border-[3px] border-border font-heading text-xs uppercase tracking-wider shadow-[var(--shadow-2xs)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all gap-1.5"
           >
-            <ResumeCard
-              file={file}
-              title={title}
-              error={error}
-              onPickFile={handleFile}
-              onTitleChange={setTitle}
-              onClearFile={clearFile}
-              fileInputRef={fileInputRef}
+            <ArrowLeft className="size-4" /> Back
+          </Button>
+        </div>
+
+        <div className="border-[3px] border-border bg-white shadow-[var(--shadow-md)]">
+          <iframe
+            key={previewUrl}
+            src={`${previewUrl}#toolbar=0&navpanes=0&view=FitH`}
+            title="Edited resume preview"
+            className="h-[82vh] w-full"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // ── Form view: upload + details, no preview clutter ───────────────────────
+  return (
+    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:py-10">
+      <header className="mb-8">
+        <h1 className="font-heading text-3xl sm:text-4xl tracking-tight">Upload your resume</h1>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+          Drop a PDF, redact your personal details if you like, pick a card style, then send it to the forge.
+        </p>
+      </header>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Your resume */}
+        <Card className="border-[3px] border-border rounded-none shadow-[var(--shadow-md)] bg-card overflow-hidden flex flex-col lg:h-[540px]">
+          <CardHeader className={cardHeadCls}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <CardTitle className="font-heading text-sm tracking-wide">Your resume</CardTitle>
+                <CardDescription className="text-xs">PDF only · up to {MAX_UPLOAD_MB} MB</CardDescription>
+              </div>
+              {file && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="h-9 rounded-none border-[3px] border-border font-heading text-[11px] uppercase tracking-wider shadow-[var(--shadow-2xs)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all gap-1.5"
+                >
+                  <RefreshCw className="size-3.5" /> Replace
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+
+          <CardContent className="flex flex-1 flex-col p-4">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/pdf"
+              aria-label="Resume PDF file"
+              className="hidden"
+              onChange={(e) => acceptFile(e.target.files?.[0])}
             />
 
-            <AvatarControlsCard value={avatar} onChange={setAvatar} />
-
-            <div className="md:col-span-2 lg:col-span-1 h-full min-h-[420px]">
-              <AvatarGalleryCard value={avatar} onChange={setAvatar} />
-            </div>
-          </div>
-
-          <div className="w-full max-w-md mx-auto flex flex-col items-center gap-2">
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full">
-              <Button
-                type="submit"
-                disabled={uploading || !title.trim() || !file}
-                size="lg"
-                className="w-full h-12 text-sm font-heading tracking-wide border-[3px] border-border shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none"
+            {!file ? (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={(e) => { e.preventDefault(); setDragging(false); acceptFile(e.dataTransfer.files?.[0]); }}
+                className={cn(
+                  "flex min-h-[240px] w-full flex-1 flex-col items-center justify-center gap-4 border-[3px] border-dashed border-border bg-muted/30 px-6 text-center transition-colors",
+                  "cursor-pointer hover:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+                  dragging && "border-primary bg-primary/10",
+                )}
               >
-                {uploading ? "Forging..." : "Upload & Roast!"}
-              </Button>
-            </motion.div>
-            {(!file || !title.trim()) && (
-              <p className="text-[11px] text-muted-foreground">
-                Upload a PDF and give it a title to enable submission.
-              </p>
+                <div className="flex size-16 items-center justify-center rounded-full border-2 border-border bg-background">
+                  <UploadCloud className="size-7 text-muted-foreground" strokeWidth={2} />
+                </div>
+                <div>
+                  <p className="font-heading text-base">Drop your PDF here</p>
+                  <p className="mt-1 text-xs text-muted-foreground">or click to browse · max {MAX_UPLOAD_MB} MB</p>
+                </div>
+              </button>
+            ) : (
+              <div className="flex flex-1 flex-col gap-3">
+                {/* File region — fills the card like the dropzone, for visual balance */}
+                <div className="relative flex flex-1 flex-col items-center justify-center gap-2.5 border-[3px] border-border bg-muted/20 px-6 text-center">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon-sm"
+                    aria-label="Remove file"
+                    onClick={clearFile}
+                    className="absolute right-2 top-2 !shadow-none hover:translate-x-0 hover:translate-y-0"
+                  >
+                    <X className="size-4" />
+                  </Button>
+                  <div className="flex size-16 items-center justify-center rounded-full border-2 border-border bg-background text-primary">
+                    <FileText className="size-7" strokeWidth={2} />
+                  </div>
+                  <p className="max-w-full break-all px-2 font-heading text-sm">{file.name}</p>
+                  <p className="font-mono text-[11px] text-muted-foreground">{formatBytes(file.size)} · PDF</p>
+                  {edited && (
+                    <span className="inline-flex items-center gap-1.5 border-2 border-border bg-primary/15 px-2 py-0.5 font-heading text-[10px] uppercase tracking-wider text-foreground">
+                      <CheckCircle2 className="size-3 text-primary" /> Edited
+                    </span>
+                  )}
+                </div>
+
+                {!edited ? (
+                  <Button
+                    type="button"
+                    onClick={() => setEditorOpen(true)}
+                    className="h-10 w-full shrink-0 rounded-none border-[3px] border-border font-heading text-xs uppercase tracking-wider shadow-[var(--shadow-sm)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all gap-2"
+                  >
+                    <Pencil className="size-4" /> Edit personal info
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setView("review")}
+                    className="h-10 w-full shrink-0 rounded-none border-[3px] border-border font-heading text-xs uppercase tracking-wider shadow-[var(--shadow-2xs)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all gap-2"
+                  >
+                    <Eye className="size-4" /> Review edited resume
+                  </Button>
+                )}
+
+                <p className="shrink-0 text-[11px] leading-relaxed text-muted-foreground">
+                  {edited
+                    ? "Personal info edited. Review your resume before uploading, or Replace to start over."
+                    : <>Use <span className="font-medium text-foreground">Edit personal info</span> to remove your name, email, phone or links before uploading.</>}
+                </p>
+              </div>
             )}
-          </div>
-        </form>
+
+            {error && (
+              <div className="mt-3 border-[3px] border-destructive bg-destructive/10 p-3">
+                <p className="text-sm font-medium text-destructive">{error}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Post details */}
+        <Card className="border-[3px] border-border rounded-none shadow-[var(--shadow-md)] bg-card overflow-hidden flex flex-col lg:h-[540px]">
+          <CardHeader className={cardHeadCls}>
+            <CardTitle className="font-heading text-sm tracking-wide">Post details</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-1 flex-col gap-5 p-4 min-h-0">
+            <div className="space-y-2">
+              <label htmlFor="post-title" className="text-[11px] font-heading uppercase tracking-[0.14em] text-muted-foreground">
+                Post title
+              </label>
+              <Input
+                id="post-title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g. New-grad SWE chasing FAANG"
+                maxLength={120}
+                className="h-10 rounded-none border-[3px] border-border bg-background text-sm shadow-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                required
+              />
+              <p className="text-[11px] text-muted-foreground">Shown on your gallery card.</p>
+            </div>
+
+            <div className="flex min-h-0 flex-1 flex-col gap-2.5">
+              <div className="flex items-center gap-3">
+                <div className="flex size-12 shrink-0 items-center justify-center border-2 border-border bg-muted">
+                  <Image
+                    key={style}
+                    src={getDiceBearUrl(seed, style, 96, { backgroundColor: AVATAR_BG })}
+                    alt="Selected card avatar"
+                    width={44}
+                    height={44}
+                    unoptimized
+                  />
+                </div>
+                <div>
+                  <p className="text-[11px] font-heading uppercase tracking-[0.14em] text-muted-foreground">Card style</p>
+                  <p className="text-sm font-medium">{formatStyleLabel(style)}</p>
+                </div>
+              </div>
+
+              <div className="grid min-h-0 flex-1 grid-cols-4 content-start gap-2 overflow-y-auto border-[3px] border-border bg-background p-2 [scrollbar-gutter:stable]">
+                {VISIBLE_STYLES.map((s) => {
+                  const selected = s === style;
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setStyle(s)}
+                      aria-pressed={selected}
+                      aria-label={formatStyleLabel(s)}
+                      title={formatStyleLabel(s)}
+                      className={cn(
+                        "aspect-square border-2 border-border bg-muted/40 p-1 transition-all",
+                        "hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+                        selected && "bg-primary/10 ring-2 ring-primary ring-offset-1 ring-offset-background",
+                      )}
+                    >
+                      <Image
+                        src={getDiceBearUrl(seed, s, 80, { backgroundColor: AVATAR_BG })}
+                        alt={formatStyleLabel(s)}
+                        width={64}
+                        height={64}
+                        unoptimized
+                        className="size-full object-contain"
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </motion.div>
+
+      <div className="mx-auto mt-6 flex w-full max-w-md flex-col items-center gap-2">
+        <Button
+          type="button"
+          onClick={submit}
+          disabled={!canSubmit}
+          size="lg"
+          className="h-12 w-full rounded-none border-[3px] border-border font-heading text-sm uppercase tracking-wide shadow-[var(--shadow-sm)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all disabled:opacity-60"
+        >
+          {uploading ? "Forging…" : "Upload & roast"}
+        </Button>
+        {!canSubmit && !uploading && (
+          <p className="text-[11px] text-muted-foreground">
+            {!file ? "Add a PDF and a title to continue." : "Give your post a title to continue."}
+          </p>
+        )}
+      </div>
+
+      {editorOpen && file && (
+        <ResumePiiEditor
+          file={file}
+          onCancel={() => setEditorOpen(false)}
+          onApply={(next) => {
+            setFile(next);
+            setEdited(true);
+            setError(null);
+            setEditorOpen(false);
+            setView("review");
+            toast.success("Personal info updated. Review your resume below.");
+          }}
+        />
+      )}
+    </div>
   );
 }

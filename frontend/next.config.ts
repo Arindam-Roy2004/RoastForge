@@ -19,6 +19,13 @@ const SECURITY_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    resolveAlias: {
+      // MuPDF's WASM glue imports Node's `module` on a Node-only branch.
+      // Alias it to a browser stub so the client bundle resolves.
+      module: { browser: "./src/lib/empty-module.js" },
+    },
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },
