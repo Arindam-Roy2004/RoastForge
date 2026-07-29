@@ -14,7 +14,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, ChevronLeft, ChevronRight, X, SlidersHorizontal, MessageSquare } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
+import { TextEffect } from "@/components/motion-primitives/text-effect";
+import { HeroShowcase } from "@/components/hero-media";
 import { useAuth } from "@/store/auth";
 import { toast } from "sonner";
 
@@ -40,7 +42,7 @@ function HallPagination({
         size="sm"
         disabled={page <= 1}
         onClick={() => setPage((p) => Math.max(1, p - 1))}
-        className="border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all h-9 px-3"
+        className="border border-border rounded-lg shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all h-9 px-3"
       >
         <ChevronLeft className="w-4 h-4" />
       </Button>
@@ -53,10 +55,10 @@ function HallPagination({
             variant={page === item ? "default" : "outline"}
             onClick={() => setPage(item as number)}
             className={cn(
-              "w-9 h-9 border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-heading",
+              "w-9 h-9 border border-border rounded-lg shadow-[var(--shadow-xs)] transition-all font-heading",
               page === item
-                ? "translate-x-0.5 translate-y-0.5 shadow-none bg-primary text-primary-foreground"
-                : "hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5",
+                ? "bg-primary text-primary-foreground shadow-none"
+                : "hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5",
             )}
           >
             {item}
@@ -68,7 +70,7 @@ function HallPagination({
         size="sm"
         disabled={page >= pages}
         onClick={() => setPage((p) => Math.min(pages, p + 1))}
-        className="border-[3px] border-border rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all h-9 px-3"
+        className="border border-border rounded-lg shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all h-9 px-3"
       >
         <ChevronRight className="w-4 h-4" />
       </Button>
@@ -264,43 +266,43 @@ export default function HomePage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1180px] px-4 py-4 sm:px-5 lg:px-6">
-      {/* Hero Section — Tokenizer style */}
-      <section className="mx-auto mb-14 max-w-[1080px] space-y-7 border-[3px] border-border bg-accent/30 px-5 py-14 text-center sm:px-7 md:mb-18 md:space-y-8 md:px-10 md:py-20">
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mx-auto max-w-3xl text-4xl font-heading font-bold leading-[0.95] tracking-tighter text-foreground md:text-6xl"
+    <div className="w-full">
+      {/* Hero Section — artwork background, plays a muted loop on hover */}
+      <HeroShowcase>
+        <TextEffect
+          as="h1"
+          per="line"
+          preset="fade-in-blur"
+          speedReveal={1.1}
+          className="mx-auto max-w-3xl text-4xl font-heading font-bold leading-[0.95] tracking-[-0.03em] text-foreground md:text-6xl"
         >
-          Find your resume&apos;s
-          <br /> brutal truth
-        </motion.h1>
+          {"Find your resume's\nbrutal truth"}
+        </TextEffect>
 
-        {/* Search bar — wide, Tokenizer-style */}
+        {/* Search bar */}
         <motion.form
           onSubmit={handleSearch}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mx-auto flex max-w-xl items-stretch gap-0 border-[3px] border-border bg-background"
+          className="mx-auto flex max-w-xl items-stretch gap-0 overflow-hidden rounded-lg border-2 border-border bg-background transition-colors focus-within:border-primary"
         >
           <div className="flex items-center pl-4 pr-2 text-muted-foreground shrink-0">
             <Search className="w-5 h-5" />
           </div>
           <Input
             placeholder="Search by name or use filters"
-            className="flex-1 min-w-0 border-0 shadow-none rounded-none h-12 text-base focus-visible:ring-0 focus-visible:shadow-none bg-transparent"
+            className="flex-1 min-w-0 h-12 rounded-none border-0 bg-transparent text-base shadow-none focus-visible:ring-0 focus-visible:shadow-none"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             data-testid="input-search"
           />
-          <button type="button" className="shrink-0 px-3 py-2 text-muted-foreground hover:text-foreground transition-colors border-l-[3px] border-border">
+          <button type="button" aria-label="Search filters" className="shrink-0 border-l-2 border-border px-3 py-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
             <SlidersHorizontal className="w-5 h-5" />
           </button>
           <Button
             type="submit"
-            className="h-12 px-6 shrink-0 rounded-none border-0 border-l-[3px] border-border font-heading text-sm tracking-wide bg-primary text-primary-foreground hover:bg-primary/90 hover:translate-x-0 hover:translate-y-0 !shadow-none"
+            className="h-12 shrink-0 rounded-none border-0 border-l-2 border-border px-6 text-xs bg-primary text-primary-foreground hover:bg-primary/90 hover:translate-y-0 !shadow-none focus-visible:ring-0"
             data-testid="button-search"
           >
             Find Resumes
@@ -319,7 +321,7 @@ export default function HomePage() {
             <button
               key={tag}
               onClick={() => { setSearchInput(tag); setSearch(tag); setPage(1); }}
-              className="font-heading text-muted-foreground hover:text-primary transition-colors underline underline-offset-4 decoration-2 decoration-border hover:decoration-primary"
+              className="font-heading text-muted-foreground hover:text-primary-strong transition-colors underline underline-offset-4 decoration-2 decoration-border hover:decoration-primary"
             >
               {tag}
             </button>
@@ -334,22 +336,22 @@ export default function HomePage() {
         >
           {user?.role === "recruiter" ? (
             <Link href="/recruiter" data-testid="link-hero-recruiter">
-              <Button size="lg" className="text-base px-8 border-[3px] border-border !shadow-none hover:translate-x-0 hover:translate-y-0 transition-colors rounded-none font-heading tracking-wide h-12">
+              <Button size="lg" className="text-base px-8 border border-border !shadow-none hover:translate-y-0 transition-colors rounded-lg font-heading tracking-wide h-12">
                 Recruiter Dashboard
               </Button>
             </Link>
           ) : (
             <Link href="/upload" data-testid="link-hero-upload">
-              <Button size="lg" className="text-base px-8 border-[3px] border-border !shadow-none hover:translate-x-0 hover:translate-y-0 transition-colors rounded-none font-heading tracking-wide h-12">
+              <Button size="lg" className="text-base px-8 border border-border !shadow-none hover:translate-y-0 transition-colors rounded-lg font-heading tracking-wide h-12">
                 Roast My Resume
               </Button>
             </Link>
           )}
         </motion.div>
-      </section>
+      </HeroShowcase>
 
       {/* Gallery Section */}
-      <section className="mx-auto w-full max-w-[1120px]">
+      <section className="w-full">
         {/* Header row: title + sort + pagination */}
         <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
           <div className="flex flex-col gap-1">
@@ -358,7 +360,7 @@ export default function HomePage() {
                 Hall of Shame
               </h2>
               {!loading && total > 0 && (
-                <span className="text-xs text-muted-foreground font-bold tabular-nums border-2 border-border/50 px-2 py-0.5">
+                <span className="text-xs text-muted-foreground font-bold tabular-nums border border-border px-2 py-0.5">
                   {total}
                 </span>
               )}
@@ -395,13 +397,13 @@ export default function HomePage() {
         {/* Active search badge */}
         {search && (
           <div className="flex items-center gap-2 mb-6">
-            <span className="inline-flex items-center gap-2 bg-card border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] px-3 py-1.5 font-heading text-xs">
+            <span className="inline-flex items-center gap-2 bg-card border border-border shadow-[var(--shadow-xs)] px-3 py-1.5 font-heading text-xs">
               <Search className="w-3.5 h-3.5 text-muted-foreground" />
               <span className="text-foreground">{search}</span>
               <button
                 onClick={clearSearch}
                 aria-label="Clear search"
-                className="-mr-1 flex items-center justify-center w-5 h-5 border-2 border-border bg-background hover:bg-destructive hover:text-destructive-foreground transition-colors active:scale-90"
+                className="-mr-1 flex items-center justify-center w-5 h-5 border border-border bg-background hover:bg-destructive hover:text-destructive-foreground transition-colors active:scale-90"
                 data-testid="button-clear-search"
               >
                 <X className="w-3 h-3" strokeWidth={3} />
@@ -414,7 +416,7 @@ export default function HomePage() {
         {loading ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
             {[...Array(3)].map((_, i) => (
-              <Card key={i} className="border-[3px] border-border rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+              <Card key={i} className="border border-border rounded-lg shadow-[var(--shadow-sm)] overflow-hidden">
                 <Skeleton className="aspect-[5/4] w-full" />
                 <div className="p-3 space-y-2">
                   <Skeleton className="h-4 w-3/4" />
@@ -447,9 +449,9 @@ export default function HomePage() {
                       data-testid={`link-resume-${resume._id}`}
                       className="block h-full text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
-                      <Card className="h-full flex flex-col border-[3px] border-border rounded-none shadow-[var(--shadow-sm)] bg-card overflow-hidden group hover:bg-muted/10 transition-colors duration-200">
+                      <Card className="h-full flex flex-col border border-border rounded-lg shadow-[var(--shadow-sm)] bg-card overflow-hidden group hover:bg-muted/10 transition-colors duration-200">
                         {/* Avatar — landscape frame: shorter card, wider tiles (3-up on lg) */}
-                        <div className={cn("relative aspect-[5/4] overflow-hidden border-b-[3px] border-border", cardBg)}>
+                        <div className={cn("relative aspect-[5/4] overflow-hidden border-b border-border", cardBg)}>
                           <Image
                             src={getDiceBearUrl(avatarSeed, resume.avatarStyle ?? undefined, 176, {
                               backgroundColor: resume.avatarBackgroundColor ?? null,
@@ -477,7 +479,7 @@ export default function HomePage() {
                           </p>
 
                           {/* Stats row */}
-                          <div className="mt-auto pt-1.5 flex items-center justify-between text-[11px] text-muted-foreground border-t border-border/50">
+                          <div className="mt-auto pt-1.5 flex items-center justify-between text-[11px] text-muted-foreground border-t border-border">
                             <span className="flex items-center gap-1">
                               <MessageSquare className="w-3 h-3" />
                               {resume.commentsCount ?? 0} {(resume.commentsCount ?? 0) === 1 ? "comment" : "comments"}
@@ -489,11 +491,11 @@ export default function HomePage() {
                         </div>
 
                         {/* Footer */}
-                        <div className="border-t-[3px] border-border px-3 py-2 bg-muted/40 flex items-center justify-end gap-2">
+                        <div className="border-t border-border px-3 py-2 bg-muted/40 flex items-center justify-end gap-2">
                           {user?.role === "recruiter" && ownerId ? (
                             <span
                               onClick={(e) => e.stopPropagation()}
-                              className="font-heading text-[10px] tracking-wider px-2 py-0.5 border-2 border-border bg-card shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all cursor-pointer"
+                              className="font-heading text-[10px] tracking-wider px-2 py-0.5 border border-border bg-card shadow-[var(--shadow-2xs)] hover:shadow-[var(--shadow-sm)] transition-all cursor-pointer"
                             >
                               <Link href={`/recruiter/candidate/${ownerId}`} data-testid={`link-candidate-${ownerId}`}>
                                 Portfolio
@@ -510,7 +512,7 @@ export default function HomePage() {
                             stopNavigation
                             onReact={(reaction) => void reactOnCard(resume._id, reaction)}
                           />
-                          <span className="font-heading text-[10px] tracking-wider border-2 border-border px-2.5 py-0.5 bg-background hover:bg-primary hover:text-primary-foreground transition-colors">
+                          <span className="font-heading text-[10px] tracking-wider border border-border px-2.5 py-0.5 bg-background hover:bg-primary hover:text-primary-foreground transition-colors">
                             View Roast
                           </span>
                         </div>
