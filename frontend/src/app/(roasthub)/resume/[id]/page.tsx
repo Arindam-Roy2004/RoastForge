@@ -17,7 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 
 export default function ResumeDetail() {
   const { id } = useParams<{ id: string }>();
@@ -244,18 +244,18 @@ export default function ResumeDetail() {
 
   if (loading) {
     return (
-      <div className="mx-auto w-full max-w-7xl space-y-4 p-4 py-8">
-        <Skeleton className="h-16 w-3/4 border-[3px] border-border rounded-none" />
-        <Skeleton className="h-125 w-full border-[3px] border-border rounded-none" />
+      <div className="w-full space-y-4">
+        <Skeleton className="h-16 w-3/4 border border-border rounded-lg" />
+        <Skeleton className="h-125 w-full border border-border rounded-lg" />
       </div>
     );
   }
 
   if (!resume) {
     return (
-      <div className="mx-auto w-full max-w-7xl p-4 py-16 text-center">
+      <div className="w-full py-8 text-center">
         <h1 className="text-4xl font-heading mb-6">Resume not found</h1>
-        <Button onClick={() => router.push("/")} className="border-[3px] border-border rounded-none shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-heading text-lg tracking-wide">
+        <Button onClick={() => router.push("/")} className="border border-border rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all font-heading text-lg tracking-wide">
           Back Home
         </Button>
       </div>
@@ -265,15 +265,15 @@ export default function ResumeDetail() {
   const isPdf = resume.fileType === "pdf";
 
   const panelHeaderClass =
-    "min-h-14 shrink-0 px-4 flex items-center justify-between gap-3 border-b-4 border-border bg-primary text-primary-foreground font-heading tracking-wide";
+    "min-h-14 shrink-0 px-4 flex items-center justify-between gap-3 border-b border-border bg-primary text-primary-foreground font-heading tracking-wide";
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-8">
+    <div className="w-full space-y-8">
       {/* Header */}
       <div className="space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="space-y-4">
-            <Button variant="outline" onClick={() => router.back()} className="border-[3px] border-border shadow-[var(--shadow-2xs)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs h-8 px-3">
+            <Button variant="outline" onClick={() => router.back()} className="border border-border shadow-[var(--shadow-2xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading text-xs h-8 px-3">
               <ArrowLeft className="w-3 h-3 mr-1.5" /> Back
             </Button>
 
@@ -302,7 +302,7 @@ export default function ResumeDetail() {
               <Link href={`/recruiter/candidate/${resume.userId._id}`}>
                 <Button
                   variant="secondary"
-                  className="border-[3px] border-border shadow-[var(--shadow-2xs)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs h-9"
+                  className="border border-border shadow-[var(--shadow-2xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading text-xs h-9"
                   data-testid="link-recruiter-portfolio"
                 >
                   <Briefcase className="w-3 h-3 mr-1.5" /> Candidate portfolio
@@ -310,14 +310,14 @@ export default function ResumeDetail() {
               </Link>
             )}
             {isOwner && (
-              <Button variant="destructive" onClick={deleteThisResume} className="border-[3px] border-border shadow-[var(--shadow-2xs)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-xs h-9">
+              <Button variant="destructive" onClick={deleteThisResume} className="border border-border shadow-[var(--shadow-2xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading text-xs h-9">
                 <Trash2 className="w-3 h-3 mr-1.5" /> Delete
               </Button>
             )}
           </div>
         </div>
 
-        <div className="w-full min-w-0 border-b-[3px] border-border" aria-hidden />
+        <div className="w-full min-w-0 border-b border-border" aria-hidden />
       </div>
   
       <div
@@ -327,7 +327,7 @@ export default function ResumeDetail() {
         )}
       >
         {/* Center: PDF Viewer */}
-        <div className="order-1 border-4 border-border bg-muted overflow-hidden flex flex-col h-[540px] lg:h-[var(--panel-h)]">
+        <div className="order-1 border border-border bg-muted overflow-hidden flex flex-col h-[540px] lg:h-[var(--panel-h)]">
           <div className={cn(panelHeaderClass, "text-sm ")}>
              <div className="flex items-center gap-2.5 min-w-0">
                <FileText className="w-5 h-5 shrink-0" strokeWidth={2.5} /> <span className="truncate">Resume PDF</span>
@@ -338,7 +338,7 @@ export default function ResumeDetail() {
                rel="noreferrer" 
                className={cn(
                  buttonVariants({ variant: "secondary", size: "sm" }),
-                 "border-2 border-border bg-background text-foreground shadow-[var(--shadow-xs)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none font-heading text-[10px] h-9 px-3.5 font-bold shrink-0"
+                 "border border-border bg-background text-foreground shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading text-[10px] h-9 px-3.5 font-bold shrink-0"
                )}
              >
                Open external
@@ -357,7 +357,7 @@ export default function ResumeDetail() {
           <div className="order-2 grid gap-6 lg:h-[var(--panel-h)] lg:grid-rows-[minmax(0,1.12fr)_minmax(0,0.88fr)]">
             {/* Left: AI Roast & Details — owner only */}
             <div className="flex min-h-[20rem] flex-col lg:min-h-0">
-              <Card className="border-4 border-border rounded-none shadow-[var(--shadow-lg)] flex flex-col h-full bg-card">
+              <Card className="border border-border rounded-lg shadow-[var(--shadow-lg)] flex flex-col h-full bg-card">
                 <CardHeader className={cn(panelHeaderClass, "justify-start")}>
                   <CardTitle className="text-base flex items-center gap-2.5 tracking-tight text-primary-foreground">
                     <Sparkles className="w-5 h-5 shrink-0" strokeWidth={2.5} /> AI Analysis
@@ -387,7 +387,7 @@ export default function ResumeDetail() {
                         {isPdf && isOwner && user && (
                           <Button
                             onClick={fetchRoast}
-                            className="w-full border-4 border-border shadow-[var(--shadow-md)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading tracking-wide bg-background text-foreground hover:bg-muted/80 text-sm py-6 min-h-[3.25rem]"
+                            className="w-full border border-border shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading tracking-wide bg-background text-foreground hover:bg-muted/80 text-sm py-6 min-h-[3.25rem]"
                           >
                             <FlameIcon size={20} className="mr-2 shrink-0" strokeWidth={2} /> Run AI Analysis
                           </Button>
@@ -404,7 +404,7 @@ export default function ResumeDetail() {
                         exit={{ opacity: 0 }}
                         className="flex flex-col items-center justify-center gap-5 p-5 flex-1 min-h-0 overflow-y-auto"
                       >
-                        <div className="w-32 h-32 rounded-full border-4 border-border flex items-center justify-center bg-background">
+                        <div className="w-32 h-32 rounded-full border border-border flex items-center justify-center bg-background">
                           <motion.div
                             animate={{ rotate: 360 }}
                             transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
@@ -414,9 +414,9 @@ export default function ResumeDetail() {
                         </div>
                         <p className="text-sm font-bold uppercase text-destructive animate-pulse">Forging roast...</p>
                         <div className="w-full space-y-3 mt-2">
-                          <div className="h-3 bg-muted border-2 border-border rounded-none animate-pulse" />
-                          <div className="h-3 bg-muted border-2 border-border rounded-none animate-pulse w-4/5" />
-                          <div className="h-3 bg-muted border-2 border-border rounded-none animate-pulse w-3/5" />
+                          <div className="h-3 bg-muted border border-border rounded-lg animate-pulse" />
+                          <div className="h-3 bg-muted border border-border rounded-lg animate-pulse w-4/5" />
+                          <div className="h-3 bg-muted border border-border rounded-lg animate-pulse w-3/5" />
                         </div>
                       </motion.div>
                     )}
@@ -435,7 +435,7 @@ export default function ResumeDetail() {
                         <Button
                           onClick={fetchRoast}
                           variant="outline"
-                          className="border-4 border-border rounded-none shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-heading text-xs"
+                          className="border border-border rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all font-heading text-xs"
                         >
                           Try Again
                         </Button>
@@ -452,12 +452,12 @@ export default function ResumeDetail() {
                         transition={{ type: "spring", stiffness: 200 }}
                         className="space-y-3.5 p-4 flex-1 min-h-0 overflow-y-auto scrollbar-thin"
                       >
-                        <div className="flex flex-col items-center gap-1 pb-2 border-b-4 border-border">
+                        <div className="flex flex-col items-center gap-1 pb-2 border-b border-border">
                           <motion.div
                             initial={{ scale: 0.5 }}
                             animate={{ scale: 1 }}
                             transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-                            className="w-20 h-20 rounded-full border-4 border-border shadow-[var(--shadow-sm)] flex flex-col items-center justify-center bg-background gap-0"
+                            className="w-20 h-20 rounded-full border border-border shadow-[var(--shadow-sm)] flex flex-col items-center justify-center bg-background gap-0"
                           >
                             <span className={cn("text-3xl font-heading leading-none", scoreColor(roastData!.score))}>
                               {roastData!.score}
@@ -469,7 +469,7 @@ export default function ResumeDetail() {
                         </div>
 
                         {/* Verdict Bars Grid */}
-                        <div className="border-4 border-border bg-muted/30 p-3 overscroll-contain">
+                        <div className="border border-border bg-muted/30 p-3 overscroll-contain">
                           <h4 className="font-heading text-xs mb-2.5 tracking-wide flex items-center gap-2">
                             Verdict <span className="text-[10px] font-sans font-normal text-muted-foreground normal-case">(1–5 each)</span>
                           </h4>
@@ -485,7 +485,7 @@ export default function ResumeDetail() {
                                     <div
                                       key={step}
                                       className={cn(
-                                        "flex-1 h-2.5 min-w-0 border-2 border-border shadow-[1px_1px_0px_0px_hsl(var(--border))]",
+                                        "flex-1 h-2.5 min-w-0 border border-border shadow-[var(--shadow-2xs)]",
                                         step <= bar.score ? verdictBarFillClass(bar.score) : "bg-background",
                                       )}
                                     />
@@ -500,7 +500,7 @@ export default function ResumeDetail() {
                           type="button"
                           variant="outline"
                           onClick={fetchRoast}
-                          className="w-full border-4 border-border rounded-none shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-heading text-xs h-10 gap-2 mt-1"
+                          className="w-full border border-border rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all font-heading text-xs h-10 gap-2 mt-1"
                         >
                           <RefreshCw className="w-3.5 h-3.5" />
                           Re-roast
@@ -515,7 +515,7 @@ export default function ResumeDetail() {
 
             {/* Right: Discussion */}
             <div className="flex h-[400px] min-h-0 flex-col lg:h-auto lg:min-h-0">
-              <Card className="border-4 border-border rounded-none shadow-[var(--shadow-lg)] flex flex-col overflow-hidden h-full bg-card">
+              <Card className="border border-border rounded-lg shadow-[var(--shadow-lg)] flex flex-col overflow-hidden h-full bg-card">
                 <CardHeader className={panelHeaderClass}>
                    <div className="flex items-center gap-2.5 min-w-0">
                      <FlameIcon size={20} className="shrink-0 text-yellow-200" strokeWidth={2.5} aria-hidden />
@@ -525,7 +525,7 @@ export default function ResumeDetail() {
                    </div>
                    <Badge
                      variant="secondary"
-                     className="border-2 border-border rounded-none shadow-[var(--shadow-xs)] font-heading font-bold text-[10px] uppercase bg-background text-foreground px-2.5 py-1 shrink-0"
+                     className="border border-border rounded-lg shadow-[var(--shadow-xs)] font-heading font-bold text-[10px] uppercase bg-background text-foreground px-2.5 py-1 shrink-0"
                    >
                      {comments.length} {comments.length === 1 ? "comment" : "comments"}
                    </Badge>
@@ -538,13 +538,13 @@ export default function ResumeDetail() {
                       {/* Visual Preview Container */}
                       <div className="w-full max-w-sm relative space-y-4 px-2 select-none pointer-events-none opacity-85">
                         {/* Mock Card 1 */}
-                        <div className="border-[3px] border-border bg-card p-3.5 shadow-[var(--shadow-2xs)] text-left transform -rotate-1 scale-95 translate-y-2 opacity-75 dark:opacity-90">
+                        <div className="border border-border bg-card p-3.5 shadow-[var(--shadow-2xs)] text-left transform -rotate-1 scale-95 translate-y-2 opacity-75 dark:opacity-90">
                           <div className="flex items-center gap-2 mb-1.5">
-                            <div className="w-5 h-5 rounded-full border-2 border-border bg-emerald-500/20 dark:bg-emerald-500/30 flex items-center justify-center text-[9px] font-mono font-bold">
+                            <div className="w-5 h-5 rounded-full border border-border bg-emerald-500/20 dark:bg-emerald-500/30 flex items-center justify-center text-[9px] font-mono font-bold">
                               S
                             </div>
                             <span className="font-mono text-[10px] font-bold text-foreground">u/SeniorDesigner</span>
-                            <span className="border border-emerald-500/25 rounded-none font-bold uppercase py-0 px-1 text-[8px] bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
+                            <span className="border border-emerald-500/25 rounded-lg font-bold uppercase py-0 px-1 text-[8px] bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
                               strength
                             </span>
                           </div>
@@ -554,13 +554,13 @@ export default function ResumeDetail() {
                         </div>
 
                         {/* Mock Card 2 */}
-                        <div className="border-[3px] border-border bg-card p-3.5 shadow-[var(--shadow-xs)] text-left transform rotate-1 relative z-10">
+                        <div className="border border-border bg-card p-3.5 shadow-[var(--shadow-xs)] text-left transform rotate-1 relative z-10">
                           <div className="flex items-center gap-2 mb-1.5">
-                            <div className="w-5 h-5 rounded-full border-2 border-border bg-orange-400/20 dark:bg-orange-400/30 flex items-center justify-center text-[9px] font-mono font-bold">
+                            <div className="w-5 h-5 rounded-full border border-border bg-orange-400/20 dark:bg-orange-400/30 flex items-center justify-center text-[9px] font-mono font-bold">
                               R
                             </div>
                             <span className="font-mono text-[10px] font-bold text-foreground">u/RecruiterPro</span>
-                            <span className="border border-orange-400/30 rounded-none font-bold uppercase py-0 px-1 text-[8px] bg-orange-400/20 text-orange-600 dark:bg-orange-400/15 dark:text-orange-300">
+                            <span className="border border-orange-400/30 rounded-lg font-bold uppercase py-0 px-1 text-[8px] bg-orange-400/20 text-orange-600 dark:bg-orange-400/15 dark:text-orange-300">
                               weakness
                             </span>
                           </div>
@@ -589,7 +589,7 @@ export default function ResumeDetail() {
                 </div>
 
                 {/* Post form — pinned at bottom */}
-                <div className="shrink-0 border-t-4 border-border bg-card">
+                <div className="shrink-0 border-t border-border bg-card">
                   {user ? (
                     <form onSubmit={postComment} className="p-3 space-y-2 flex flex-col bg-muted/30">
                       {!isOwner && (
@@ -599,16 +599,16 @@ export default function ResumeDetail() {
                             const btnColors = {
                               strength: isSelected
                                 ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 border-border"
-                                : "bg-background/80 text-foreground border-border/40 hover:bg-emerald-500/10",
+                                : "bg-background/80 text-foreground border-border hover:bg-emerald-500/10",
                               weakness: isSelected
                                 ? "bg-orange-100 text-orange-700 dark:bg-orange-950/50 dark:text-orange-300 border-border"
-                                : "bg-background/80 text-foreground border-border/40 hover:bg-orange-400/10",
+                                : "bg-background/80 text-foreground border-border hover:bg-orange-400/10",
                               suggestion: isSelected
                                 ? "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300 border-border"
-                                : "bg-background/80 text-foreground border-border/40 hover:bg-blue-500/10",
+                                : "bg-background/80 text-foreground border-border hover:bg-blue-500/10",
                               comment: isSelected
                                 ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 border-border"
-                                : "bg-background/80 text-foreground border-border/40 hover:bg-amber-500/10",
+                                : "bg-background/80 text-foreground border-border hover:bg-amber-500/10",
                             };
                             return (
                               <button
@@ -616,7 +616,7 @@ export default function ResumeDetail() {
                                 type="button"
                                 onClick={() => setCommentType(t)}
                                 className={cn(
-                                  "cursor-pointer uppercase rounded-none border-2 px-2.5 py-1 text-[10px] font-heading font-bold transition-all shadow-[var(--shadow-2xs)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5",
+                                  "cursor-pointer uppercase rounded-lg border px-2.5 py-1 text-[10px] font-heading font-bold transition-all shadow-[var(--shadow-2xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5",
                                   btnColors[t]
                                 )}
                               >
@@ -636,14 +636,14 @@ export default function ResumeDetail() {
                         placeholder={isOwner ? "Add a comment..." : "Write your roast / feedback..."}
                         rows={2}
                         aria-label={isOwner ? "Add a comment" : "Write your roast or feedback"}
-                        className="w-full min-h-16 p-2.5 border-4 border-border rounded-none shadow-[var(--shadow-sm)] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background resize-none text-sm font-medium bg-background leading-relaxed"
+                        className="w-full min-h-16 p-2.5 border border-border rounded-lg shadow-[var(--shadow-sm)] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background resize-none text-sm font-medium bg-background leading-relaxed"
                         required
                       />
                       <div className="flex justify-end pt-0.5">
                         <Button
                           type="submit"
                           disabled={posting}
-                          className="min-h-10 min-w-20 px-5 border-4 border-border shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading text-sm tracking-wide bg-primary text-primary-foreground "
+                          className="min-h-10 min-w-20 px-5 border border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading text-sm tracking-wide bg-primary text-primary-foreground "
                         >
                           {posting ? "…" : "Post"}
                         </Button>
@@ -655,7 +655,7 @@ export default function ResumeDetail() {
                          href="/login"
                          className={cn(
                            buttonVariants({ variant: "outline" }),
-                           "inline-flex border-4 border-border rounded-none shadow-[var(--shadow-sm)] font-heading text-xs no-underline hover:no-underline",
+                           "inline-flex border border-border rounded-lg shadow-[var(--shadow-sm)] font-heading text-xs no-underline hover:no-underline",
                          )}
                       >
                         Log in to join the roast
@@ -670,7 +670,7 @@ export default function ResumeDetail() {
           <>
             {/* Right: Discussion */}
             <div className="order-2 flex flex-col h-[460px] lg:h-[var(--panel-h)]">
-              <Card className="border-4 border-border rounded-none shadow-[var(--shadow-lg)] flex flex-col overflow-hidden h-full bg-card">
+              <Card className="border border-border rounded-lg shadow-[var(--shadow-lg)] flex flex-col overflow-hidden h-full bg-card">
                 <CardHeader className={panelHeaderClass}>
                    <div className="flex items-center gap-2.5 min-w-0">
                      <FlameIcon size={20} className="shrink-0 text-yellow-200" strokeWidth={2.5} aria-hidden />
@@ -680,7 +680,7 @@ export default function ResumeDetail() {
                    </div>
                    <Badge
                      variant="secondary"
-                     className="border-2 border-border rounded-none shadow-[var(--shadow-xs)] font-heading font-bold text-[10px] uppercase bg-background text-foreground px-2.5 py-1 shrink-0"
+                     className="border border-border rounded-lg shadow-[var(--shadow-xs)] font-heading font-bold text-[10px] uppercase bg-background text-foreground px-2.5 py-1 shrink-0"
                    >
                      {comments.length} {comments.length === 1 ? "comment" : "comments"}
                    </Badge>
@@ -693,13 +693,13 @@ export default function ResumeDetail() {
                       {/* Visual Preview Container */}
                       <div className="w-full max-w-sm relative space-y-4 px-2 select-none pointer-events-none opacity-85">
                         {/* Mock Card 1 */}
-                        <div className="border-[3px] border-border bg-card p-3.5 shadow-[var(--shadow-2xs)] text-left transform -rotate-1 scale-95 translate-y-2 opacity-75 dark:opacity-90">
+                        <div className="border border-border bg-card p-3.5 shadow-[var(--shadow-2xs)] text-left transform -rotate-1 scale-95 translate-y-2 opacity-75 dark:opacity-90">
                           <div className="flex items-center gap-2 mb-1.5">
-                            <div className="w-5 h-5 rounded-full border-2 border-border bg-emerald-500/20 dark:bg-emerald-500/30 flex items-center justify-center text-[9px] font-mono font-bold">
+                            <div className="w-5 h-5 rounded-full border border-border bg-emerald-500/20 dark:bg-emerald-500/30 flex items-center justify-center text-[9px] font-mono font-bold">
                               S
                             </div>
                             <span className="font-mono text-[10px] font-bold text-foreground">u/SeniorDesigner</span>
-                            <span className="border border-emerald-500/25 rounded-none font-bold uppercase py-0 px-1 text-[8px] bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
+                            <span className="border border-emerald-500/25 rounded-lg font-bold uppercase py-0 px-1 text-[8px] bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
                               strength
                             </span>
                           </div>
@@ -709,13 +709,13 @@ export default function ResumeDetail() {
                         </div>
 
                         {/* Mock Card 2 */}
-                        <div className="border-[3px] border-border bg-card p-3.5 shadow-[var(--shadow-xs)] text-left transform rotate-1 relative z-10">
+                        <div className="border border-border bg-card p-3.5 shadow-[var(--shadow-xs)] text-left transform rotate-1 relative z-10">
                           <div className="flex items-center gap-2 mb-1.5">
-                            <div className="w-5 h-5 rounded-full border-2 border-border bg-orange-400/20 dark:bg-orange-400/30 flex items-center justify-center text-[9px] font-mono font-bold">
+                            <div className="w-5 h-5 rounded-full border border-border bg-orange-400/20 dark:bg-orange-400/30 flex items-center justify-center text-[9px] font-mono font-bold">
                               R
                             </div>
                             <span className="font-mono text-[10px] font-bold text-foreground">u/RecruiterPro</span>
-                            <span className="border border-orange-400/30 rounded-none font-bold uppercase py-0 px-1 text-[8px] bg-orange-400/20 text-orange-600 dark:bg-orange-400/15 dark:text-orange-300">
+                            <span className="border border-orange-400/30 rounded-lg font-bold uppercase py-0 px-1 text-[8px] bg-orange-400/20 text-orange-600 dark:bg-orange-400/15 dark:text-orange-300">
                               weakness
                             </span>
                           </div>
@@ -744,7 +744,7 @@ export default function ResumeDetail() {
                 </div>
 
                 {/* Post form — pinned at bottom */}
-                <div className="shrink-0 border-t-4 border-border bg-card">
+                <div className="shrink-0 border-t border-border bg-card">
                   {user ? (
                     <form onSubmit={postComment} className="p-3 space-y-2 flex flex-col bg-muted/30">
                       {!isOwner && (
@@ -754,16 +754,16 @@ export default function ResumeDetail() {
                             const btnColors = {
                               strength: isSelected
                                 ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 border-border"
-                                : "bg-background/80 text-foreground border-border/40 hover:bg-emerald-500/10",
+                                : "bg-background/80 text-foreground border-border hover:bg-emerald-500/10",
                               weakness: isSelected
                                 ? "bg-orange-100 text-orange-700 dark:bg-orange-950/50 dark:text-orange-300 border-border"
-                                : "bg-background/80 text-foreground border-border/40 hover:bg-orange-400/10",
+                                : "bg-background/80 text-foreground border-border hover:bg-orange-400/10",
                               suggestion: isSelected
                                 ? "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300 border-border"
-                                : "bg-background/80 text-foreground border-border/40 hover:bg-blue-500/10",
+                                : "bg-background/80 text-foreground border-border hover:bg-blue-500/10",
                               comment: isSelected
                                 ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 border-border"
-                                : "bg-background/80 text-foreground border-border/40 hover:bg-amber-500/10",
+                                : "bg-background/80 text-foreground border-border hover:bg-amber-500/10",
                             };
                             return (
                               <button
@@ -771,7 +771,7 @@ export default function ResumeDetail() {
                                 type="button"
                                 onClick={() => setCommentType(t)}
                                 className={cn(
-                                  "cursor-pointer uppercase rounded-none border-2 px-2.5 py-1 text-[10px] font-heading font-bold transition-all shadow-[var(--shadow-2xs)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5",
+                                  "cursor-pointer uppercase rounded-lg border px-2.5 py-1 text-[10px] font-heading font-bold transition-all shadow-[var(--shadow-2xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5",
                                   btnColors[t]
                                 )}
                               >
@@ -791,14 +791,14 @@ export default function ResumeDetail() {
                         placeholder={isOwner ? "Add a comment..." : "Write your roast / feedback..."}
                         rows={2}
                         aria-label={isOwner ? "Add a comment" : "Write your roast or feedback"}
-                        className="w-full min-h-16 p-2.5 border-4 border-border rounded-none shadow-[var(--shadow-sm)] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background resize-none text-sm font-medium bg-background leading-relaxed"
+                        className="w-full min-h-16 p-2.5 border border-border rounded-lg shadow-[var(--shadow-sm)] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background resize-none text-sm font-medium bg-background leading-relaxed"
                         required
                       />
                       <div className="flex justify-end pt-0.5">
                         <Button
                           type="submit"
                           disabled={posting}
-                          className="min-h-10 min-w-20 px-5 border-4 border-border shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all rounded-none font-heading text-sm tracking-wide bg-primary text-primary-foreground "
+                          className="min-h-10 min-w-20 px-5 border border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading text-sm tracking-wide bg-primary text-primary-foreground "
                         >
                           {posting ? "…" : "Post"}
                         </Button>
@@ -810,7 +810,7 @@ export default function ResumeDetail() {
                         href="/login"
                         className={cn(
                           buttonVariants({ variant: "outline" }),
-                          "inline-flex border-4 border-border rounded-none shadow-[var(--shadow-sm)] font-heading text-xs no-underline hover:no-underline",
+                          "inline-flex border border-border rounded-lg shadow-[var(--shadow-sm)] font-heading text-xs no-underline hover:no-underline",
                         )}
                       >
                         Log in to join the roast
@@ -825,8 +825,8 @@ export default function ResumeDetail() {
       </div>
 
       {resume.blurb && (
-        <Card className="border-4 border-border rounded-none shadow-[var(--shadow-md)] bg-yellow/10">
-          <CardHeader className="py-4 border-b-4 border-border bg-yellow/20">
+        <Card className="border border-border rounded-lg shadow-[var(--shadow-md)] bg-yellow/10">
+          <CardHeader className="py-4 border-b border-border bg-yellow/20">
             <CardTitle className="font-heading text-base tracking-wide flex items-center gap-2">
               <FileText className="w-4 h-4" /> Author&apos;s Note
             </CardTitle>
