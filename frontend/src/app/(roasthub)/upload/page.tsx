@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Eye, FileText, Pencil, RefreshCw, UploadCloud, X } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Eye, FileText, Pencil, RefreshCw, Send, UploadCloud, X } from "lucide-react";
 import { useAuth } from "@/store/auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -72,6 +72,7 @@ export default function UploadPage() {
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
   useEffect(() => {
@@ -103,14 +104,26 @@ export default function UploadPage() {
   }
 
   async function submit() {
-    if (!file || !title.trim()) return;
+    if (!file) {
+      const message = "Add a PDF before posting.";
+      setError(message);
+      toast.error(message);
+      return;
+    }
+    if (!title.trim()) {
+      const message = "Add a post title before posting.";
+      setError(message);
+      toast.error(message, { description: "Your title appears on the gallery card." });
+      titleInputRef.current?.focus();
+      return;
+    }
     setUploading(true);
     setError(null);
     try {
       const { fileUrl, fileType } = await uploadApi.resume(file);
       const created = await resumeApi.create({
         title: title.trim(),
-        name: file.name,
+        name: file.name.slice(0, 120),
         fileUrl,
         fileType,
         avatarStyle: style,
@@ -118,10 +131,12 @@ export default function UploadPage() {
         avatarBackgroundColor: AVATAR_BG,
       });
       await refresh();
-      toast.success(created.message || "Resume uploaded & queued!");
+      toast.success(created.message || "Resume posted & queued!");
       router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed");
+      const message = err instanceof Error ? err.message : "Upload failed";
+      setError(message);
+      toast.error(message, { description: "Your resume was not posted. You can try again." });
       setUploading(false);
     }
   }
@@ -153,26 +168,66 @@ export default function UploadPage() {
   const canSubmit = !!file && !!title.trim() && !uploading;
   const cardHeadCls = "border-b border-border bg-muted/40 py-4";
 
-  // ── Review view: edited PDF takes the screen, with a Back action ──────────
+  // ── Review view: edited PDF takes the screen; posting is available here ───
   if (view === "review" && file && previewUrl) {
     return (
       <div className="w-full">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="font-heading text-lg tracking-tight leading-none">Review your resume</h1>
+        <div className="mb-4 flex items-center gap-3">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => setView("form")}
+            aria-label="Back to resume details"
+            title="Back to resume details"
+            className="shrink-0 rounded-lg"
+          >
+            <ArrowLeft className="size-4" />
+          </Button>
+          <div className="min-w-0 flex-1">
+            <h1 className="font-heading text-lg leading-none tracking-tight">Review your resume</h1>
             <p className="mt-1 text-xs text-muted-foreground">
-              {edited ? "Edits applied — this is what will be roasted." : "This is what will be roasted."}
+              {edited ? "Edits applied — this is what will be posted." : "This is what will be posted."}
             </p>
           </div>
           <Button
             type="button"
-            variant="outline"
-            onClick={() => setView("form")}
-            className="h-10 rounded-lg border border-border font-heading text-xs uppercase tracking-wider shadow-[var(--shadow-2xs)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)] transition-all gap-1.5"
+            onClick={submit}
+            disabled={uploading}
+            aria-busy={uploading}
+            size="sm"
+            className="h-10 shrink-0 whitespace-nowrap rounded-lg border border-border px-3 font-heading text-[11px] uppercase tracking-wider shadow-[var(--shadow-sm)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] disabled:opacity-60 sm:px-4"
           >
-            <ArrowLeft className="size-4" /> Back
+            <Send className="size-3.5" />
+            {uploading ? "Posting…" : "Post your resume"}
           </Button>
         </div>
+
+        <Card className="mb-4 max-w-2xl rounded-lg border border-border bg-card shadow-[var(--shadow-sm)]">
+          <CardContent className="p-4">
+            <label htmlFor="review-post-title" className="mb-2 block text-[11px] font-heading uppercase tracking-[0.14em] text-muted-foreground">
+              Post title
+            </label>
+            <Input
+              ref={titleInputRef}
+              id="review-post-title"
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (error) setError(null);
+              }}
+              placeholder="e.g. New-grad SWE chasing FAANG"
+              maxLength={200}
+              className="h-10 rounded-lg border border-border bg-background text-sm shadow-none focus-visible:ring-2 focus-visible:ring-ring/40"
+            />
+          </CardContent>
+        </Card>
+
+        {error && (
+          <div role="alert" className="mb-4 border border-destructive bg-destructive/10 p-3">
+            <p className="text-sm font-medium text-destructive">{error}</p>
+          </div>
+        )}
 
         <div className="border border-border bg-white shadow-[var(--shadow-md)]">
           <iframe
@@ -297,7 +352,7 @@ export default function UploadPage() {
 
                 <p className="shrink-0 text-[11px] leading-relaxed text-muted-foreground">
                   {edited
-                    ? "Personal info edited. Review your resume before uploading, or Replace to start over."
+                    ? "Personal info edited. Review your resume before posting, or Replace to start over."
                     : <>Use <span className="font-medium text-foreground">Edit personal info</span> to remove your name, email, phone or links before uploading.</>}
                 </p>
               </div>
@@ -322,11 +377,12 @@ export default function UploadPage() {
                 Post title
               </label>
               <Input
+                ref={titleInputRef}
                 id="post-title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. New-grad SWE chasing FAANG"
-                maxLength={120}
+                maxLength={200}
                 className="h-10 rounded-lg border border-border bg-background text-sm shadow-none focus-visible:ring-2 focus-visible:ring-ring/40"
                 required
               />
@@ -393,7 +449,7 @@ export default function UploadPage() {
           size="lg"
           className="h-12 w-full rounded-lg border border-border font-heading text-sm uppercase tracking-wide shadow-[var(--shadow-sm)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)] transition-all disabled:opacity-60"
         >
-          {uploading ? "Forging…" : "Upload & roast"}
+          {uploading ? "Posting…" : "Post your resume"}
         </Button>
         {!canSubmit && !uploading && (
           <p className="text-[11px] text-muted-foreground">
