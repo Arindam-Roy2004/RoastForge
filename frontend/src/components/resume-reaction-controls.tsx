@@ -46,8 +46,8 @@ export function ResumeReactionControls({
         disabled={isDisabled}
         aria-label={viewerReaction === "like" ? "Remove like" : "Like resume"}
         className={cn(
-          "inline-flex h-8 items-center gap-1.5 border-2 border-border bg-background px-2.5 font-heading text-[10px] tracking-wider shadow-[var(--shadow-2xs)] transition-all",
-          "hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none disabled:cursor-not-allowed disabled:opacity-60",
+          "inline-flex h-8 items-center gap-1.5 border border-border bg-background px-2.5 font-heading text-[10px] tracking-wider shadow-[var(--shadow-2xs)] transition-all",
+          " hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)] disabled:cursor-not-allowed disabled:opacity-60",
           viewerReaction === "like"
             ? "bg-primary text-primary-foreground"
             : "text-muted-foreground hover:text-foreground",
@@ -62,8 +62,8 @@ export function ResumeReactionControls({
         disabled={isDisabled}
         aria-label={viewerReaction === "dislike" ? "Remove dislike" : "Dislike resume"}
         className={cn(
-          "inline-flex h-8 items-center gap-1.5 border-2 border-border bg-background px-2.5 font-heading text-[10px] tracking-wider shadow-[var(--shadow-2xs)] transition-all",
-          "hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none disabled:cursor-not-allowed disabled:opacity-60",
+          "inline-flex h-8 items-center gap-1.5 border border-border bg-background px-2.5 font-heading text-[10px] tracking-wider shadow-[var(--shadow-2xs)] transition-all",
+          " hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)] disabled:cursor-not-allowed disabled:opacity-60",
           viewerReaction === "dislike"
             ? "bg-destructive text-destructive-foreground"
             : "text-muted-foreground hover:text-foreground",
