@@ -137,11 +137,11 @@ export default function UploadPage() {
   if (!user) {
     return (
       <div className="flex items-center justify-center p-4 py-20">
-        <Card className="w-full max-w-md border-[3px] border-border rounded-none shadow-[var(--shadow-md)] text-center p-8 bg-card">
+        <Card className="w-full max-w-md border border-border rounded-lg shadow-[var(--shadow-md)] text-center p-8 bg-card">
           <h1 className="font-heading text-3xl mb-3 tracking-tighter">Sign in required</h1>
           <p className="text-sm text-muted-foreground mb-6 font-medium">Sign in to upload your resume for roasting.</p>
           <Link href="/login">
-            <Button size="lg" className="font-heading tracking-wide border-[3px] border-border shadow-[var(--shadow-sm)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all rounded-none">
+            <Button size="lg" className="font-heading tracking-wide border border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg">
               Sign in
             </Button>
           </Link>
@@ -151,12 +151,12 @@ export default function UploadPage() {
   }
 
   const canSubmit = !!file && !!title.trim() && !uploading;
-  const cardHeadCls = "border-b-[3px] border-border bg-muted/40 py-4";
+  const cardHeadCls = "border-b border-border bg-muted/40 py-4";
 
   // ── Review view: edited PDF takes the screen, with a Back action ──────────
   if (view === "review" && file && previewUrl) {
     return (
-      <div className="mx-auto w-full max-w-5xl px-4 py-6">
+      <div className="w-full">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="font-heading text-lg tracking-tight leading-none">Review your resume</h1>
@@ -168,13 +168,13 @@ export default function UploadPage() {
             type="button"
             variant="outline"
             onClick={() => setView("form")}
-            className="h-10 rounded-none border-[3px] border-border font-heading text-xs uppercase tracking-wider shadow-[var(--shadow-2xs)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all gap-1.5"
+            className="h-10 rounded-lg border border-border font-heading text-xs uppercase tracking-wider shadow-[var(--shadow-2xs)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)] transition-all gap-1.5"
           >
             <ArrowLeft className="size-4" /> Back
           </Button>
         </div>
 
-        <div className="border-[3px] border-border bg-white shadow-[var(--shadow-md)]">
+        <div className="border border-border bg-white shadow-[var(--shadow-md)]">
           <iframe
             key={previewUrl}
             src={`${previewUrl}#toolbar=0&navpanes=0&view=FitH`}
@@ -188,7 +188,7 @@ export default function UploadPage() {
 
   // ── Form view: upload + details, no preview clutter ───────────────────────
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:py-10">
+    <div className="w-full">
       <header className="mb-8">
         <h1 className="font-heading text-3xl sm:text-4xl tracking-tight">Upload your resume</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
@@ -198,7 +198,7 @@ export default function UploadPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Your resume */}
-        <Card className="border-[3px] border-border rounded-none shadow-[var(--shadow-md)] bg-card overflow-hidden flex flex-col lg:h-[540px]">
+        <Card className="border border-border rounded-lg shadow-[var(--shadow-md)] bg-card overflow-hidden flex flex-col lg:h-[540px]">
           <CardHeader className={cardHeadCls}>
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -211,7 +211,7 @@ export default function UploadPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
-                  className="h-9 rounded-none border-[3px] border-border font-heading text-[11px] uppercase tracking-wider shadow-[var(--shadow-2xs)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all gap-1.5"
+                  className="h-9 rounded-lg border border-border font-heading text-[11px] uppercase tracking-wider shadow-[var(--shadow-2xs)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)] transition-all gap-1.5"
                 >
                   <RefreshCw className="size-3.5" /> Replace
                 </Button>
@@ -237,12 +237,12 @@ export default function UploadPage() {
                 onDragLeave={() => setDragging(false)}
                 onDrop={(e) => { e.preventDefault(); setDragging(false); acceptFile(e.dataTransfer.files?.[0]); }}
                 className={cn(
-                  "flex min-h-[240px] w-full flex-1 flex-col items-center justify-center gap-4 border-[3px] border-dashed border-border bg-muted/30 px-6 text-center transition-colors",
+                  "flex min-h-[240px] w-full flex-1 flex-col items-center justify-center gap-4 border border-dashed border-border bg-muted/30 px-6 text-center transition-colors",
                   "cursor-pointer hover:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
                   dragging && "border-primary bg-primary/10",
                 )}
               >
-                <div className="flex size-16 items-center justify-center rounded-full border-2 border-border bg-background">
+                <div className="flex size-16 items-center justify-center rounded-full border border-border bg-background">
                   <UploadCloud className="size-7 text-muted-foreground" strokeWidth={2} />
                 </div>
                 <div>
@@ -253,25 +253,25 @@ export default function UploadPage() {
             ) : (
               <div className="flex flex-1 flex-col gap-3">
                 {/* File region — fills the card like the dropzone, for visual balance */}
-                <div className="relative flex flex-1 flex-col items-center justify-center gap-2.5 border-[3px] border-border bg-muted/20 px-6 text-center">
+                <div className="relative flex flex-1 flex-col items-center justify-center gap-2.5 border border-border bg-muted/20 px-6 text-center">
                   <Button
                     type="button"
                     variant="outline"
                     size="icon-sm"
                     aria-label="Remove file"
                     onClick={clearFile}
-                    className="absolute right-2 top-2 !shadow-none hover:translate-x-0 hover:translate-y-0"
+                    className="absolute right-2 top-2 !shadow-none hover:translate-y-0"
                   >
                     <X className="size-4" />
                   </Button>
-                  <div className="flex size-16 items-center justify-center rounded-full border-2 border-border bg-background text-primary">
+                  <div className="flex size-16 items-center justify-center rounded-full border border-border bg-background text-primary-strong">
                     <FileText className="size-7" strokeWidth={2} />
                   </div>
                   <p className="max-w-full break-all px-2 font-heading text-sm">{file.name}</p>
                   <p className="font-mono text-[11px] text-muted-foreground">{formatBytes(file.size)} · PDF</p>
                   {edited && (
-                    <span className="inline-flex items-center gap-1.5 border-2 border-border bg-primary/15 px-2 py-0.5 font-heading text-[10px] uppercase tracking-wider text-foreground">
-                      <CheckCircle2 className="size-3 text-primary" /> Edited
+                    <span className="inline-flex items-center gap-1.5 border border-border bg-primary/15 px-2 py-0.5 font-heading text-[10px] uppercase tracking-wider text-foreground">
+                      <CheckCircle2 className="size-3 text-primary-strong" /> Edited
                     </span>
                   )}
                 </div>
@@ -280,7 +280,7 @@ export default function UploadPage() {
                   <Button
                     type="button"
                     onClick={() => setEditorOpen(true)}
-                    className="h-10 w-full shrink-0 rounded-none border-[3px] border-border font-heading text-xs uppercase tracking-wider shadow-[var(--shadow-sm)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all gap-2"
+                    className="h-10 w-full shrink-0 rounded-lg border border-border font-heading text-xs uppercase tracking-wider shadow-[var(--shadow-sm)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)] transition-all gap-2"
                   >
                     <Pencil className="size-4" /> Edit personal info
                   </Button>
@@ -289,7 +289,7 @@ export default function UploadPage() {
                     type="button"
                     variant="outline"
                     onClick={() => setView("review")}
-                    className="h-10 w-full shrink-0 rounded-none border-[3px] border-border font-heading text-xs uppercase tracking-wider shadow-[var(--shadow-2xs)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all gap-2"
+                    className="h-10 w-full shrink-0 rounded-lg border border-border font-heading text-xs uppercase tracking-wider shadow-[var(--shadow-2xs)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)] transition-all gap-2"
                   >
                     <Eye className="size-4" /> Review edited resume
                   </Button>
@@ -304,7 +304,7 @@ export default function UploadPage() {
             )}
 
             {error && (
-              <div className="mt-3 border-[3px] border-destructive bg-destructive/10 p-3">
+              <div className="mt-3 border border-destructive bg-destructive/10 p-3">
                 <p className="text-sm font-medium text-destructive">{error}</p>
               </div>
             )}
@@ -312,7 +312,7 @@ export default function UploadPage() {
         </Card>
 
         {/* Post details */}
-        <Card className="border-[3px] border-border rounded-none shadow-[var(--shadow-md)] bg-card overflow-hidden flex flex-col lg:h-[540px]">
+        <Card className="border border-border rounded-lg shadow-[var(--shadow-md)] bg-card overflow-hidden flex flex-col lg:h-[540px]">
           <CardHeader className={cardHeadCls}>
             <CardTitle className="font-heading text-sm tracking-wide">Post details</CardTitle>
           </CardHeader>
@@ -327,7 +327,7 @@ export default function UploadPage() {
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. New-grad SWE chasing FAANG"
                 maxLength={120}
-                className="h-10 rounded-none border-[3px] border-border bg-background text-sm shadow-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                className="h-10 rounded-lg border border-border bg-background text-sm shadow-none focus-visible:ring-2 focus-visible:ring-ring/40"
                 required
               />
               <p className="text-[11px] text-muted-foreground">Shown on your gallery card.</p>
@@ -335,7 +335,7 @@ export default function UploadPage() {
 
             <div className="flex min-h-0 flex-1 flex-col gap-2.5">
               <div className="flex items-center gap-3">
-                <div className="flex size-12 shrink-0 items-center justify-center border-2 border-border bg-muted">
+                <div className="flex size-12 shrink-0 items-center justify-center border border-border bg-muted">
                   <Image
                     key={style}
                     src={getDiceBearUrl(seed, style, 96, { backgroundColor: AVATAR_BG })}
@@ -351,7 +351,7 @@ export default function UploadPage() {
                 </div>
               </div>
 
-              <div className="grid min-h-0 flex-1 grid-cols-4 content-start gap-2 overflow-y-auto border-[3px] border-border bg-background p-2 [scrollbar-gutter:stable]">
+              <div className="grid min-h-0 flex-1 grid-cols-4 content-start gap-2 overflow-y-auto border border-border bg-background p-2 [scrollbar-gutter:stable]">
                 {VISIBLE_STYLES.map((s) => {
                   const selected = s === style;
                   return (
@@ -363,7 +363,7 @@ export default function UploadPage() {
                       aria-label={formatStyleLabel(s)}
                       title={formatStyleLabel(s)}
                       className={cn(
-                        "aspect-square border-2 border-border bg-muted/40 p-1 transition-all",
+                        "aspect-square border border-border bg-muted/40 p-1 transition-all",
                         "hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
                         selected && "bg-primary/10 ring-2 ring-primary ring-offset-1 ring-offset-background",
                       )}
@@ -391,7 +391,7 @@ export default function UploadPage() {
           onClick={submit}
           disabled={!canSubmit}
           size="lg"
-          className="h-12 w-full rounded-none border-[3px] border-border font-heading text-sm uppercase tracking-wide shadow-[var(--shadow-sm)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all disabled:opacity-60"
+          className="h-12 w-full rounded-lg border border-border font-heading text-sm uppercase tracking-wide shadow-[var(--shadow-sm)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)] transition-all disabled:opacity-60"
         >
           {uploading ? "Forging…" : "Upload & roast"}
         </Button>
