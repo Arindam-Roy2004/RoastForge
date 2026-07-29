@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Briefcase, ExternalLink, FileText, Sparkles, Trophy, UserRound } from "lucide-react";
 import FlameIcon from "@/components/icons/flame-icon";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -59,22 +59,22 @@ export default function RecruiterCandidateProfilePage() {
 
   if (authLoading || (loading && !error && user?.role === "recruiter")) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-5xl space-y-6">
-        <Skeleton className="h-12 w-64 border-[3px] border-border rounded-none" />
-        <Skeleton className="h-40 w-full border-[3px] border-border rounded-none" />
-        <Skeleton className="h-64 w-full border-[3px] border-border rounded-none" />
+      <div className="w-full space-y-6">
+        <Skeleton className="h-12 w-64 border border-border rounded-lg" />
+        <Skeleton className="h-40 w-full border border-border rounded-lg" />
+        <Skeleton className="h-64 w-full border border-border rounded-lg" />
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="container mx-auto px-4 py-16 max-w-md">
-        <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-8 text-center bg-card">
+      <div className="mx-auto w-full max-w-md">
+        <Card className="border border-border rounded-lg shadow-[var(--shadow-md)] p-8 text-center bg-card">
           <CardTitle className="font-heading text-2xl mb-4 tracking-tighter ">Sign in</CardTitle>
           <p className="text-muted-foreground text-sm mb-6">Recruiters must sign in to view candidate portfolios.</p>
           <Link href="/login">
-            <Button className="w-full border-[3px] border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 rounded-none font-heading">
+            <Button className="w-full border border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 rounded-lg font-heading">
               Sign In
             </Button>
           </Link>
@@ -85,15 +85,15 @@ export default function RecruiterCandidateProfilePage() {
 
   if (user.role !== "recruiter" || error) {
     return (
-      <div className="container mx-auto px-4 py-16 max-w-lg text-center">
-        <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-8 bg-card">
+      <div className="mx-auto w-full max-w-lg text-center">
+        <Card className="border border-border rounded-lg shadow-[var(--shadow-md)] p-8 bg-card">
           <Briefcase className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
           <h1 className="font-heading text-2xl  mb-2">Unavailable</h1>
           <p className="text-muted-foreground text-sm mb-6">{error || "This page is for recruiter accounts only."}</p>
           <Button
             variant="outline"
             onClick={() => router.push("/")}
-            className="border-[3px] border-border rounded-none font-heading shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
+            className="border border-border rounded-lg font-heading shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5"
           >
             Hall of Shame
           </Button>
@@ -104,15 +104,15 @@ export default function RecruiterCandidateProfilePage() {
 
   if (!data) {
     return (
-      <div className="container mx-auto px-4 py-16 max-w-lg text-center">
-        <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-8 bg-card">
+      <div className="mx-auto w-full max-w-lg text-center">
+        <Card className="border border-border rounded-lg shadow-[var(--shadow-md)] p-8 bg-card">
           <UserRound className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
           <h1 className="font-heading text-2xl mb-2">Profile not found</h1>
           <p className="text-muted-foreground text-sm mb-6">This candidate profile is unavailable or no longer exists.</p>
           <Button
             variant="outline"
             onClick={() => router.push("/recruiter")}
-            className="border-[3px] border-border rounded-none font-heading shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
+            className="border border-border rounded-lg font-heading shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5"
           >
             Back to candidates
           </Button>
@@ -126,22 +126,22 @@ export default function RecruiterCandidateProfilePage() {
   const initial = alias.charAt(0).toUpperCase();
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl space-y-10">
+    <div className="w-full space-y-10">
       <div className="flex flex-col gap-4">
         <Button
           variant="outline"
           onClick={() => router.back()}
-          className="w-fit border-[3px] border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 rounded-none font-heading text-xs h-9"
+          className="w-fit border border-border shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 rounded-lg font-heading text-xs h-9"
         >
           <ArrowLeft className="w-3 h-3 mr-2" /> Back
         </Button>
 
-        <Card className="border-[3px] border-border rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden bg-card">
-          <CardHeader className="border-b-[3px] border-border bg-muted/50 p-6 md:p-8">
+        <Card className="border border-border rounded-lg shadow-[var(--shadow-md)] overflow-hidden bg-card">
+          <CardHeader className="border-b border-border bg-muted/50 p-6 md:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-6">
               <div
                 className={cn(
-                  "size-20 shrink-0 rounded-full border-[3px] border-border flex items-center justify-center text-3xl font-heading shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
+                  "size-20 shrink-0 rounded-full border border-border flex items-center justify-center text-3xl font-heading shadow-[var(--shadow-sm)]",
                   data.avatar ? "bg-muted overflow-hidden p-0" : "bg-primary/25",
                 )}
               >
@@ -153,7 +153,7 @@ export default function RecruiterCandidateProfilePage() {
               </div>
               <div className="min-w-0 flex-1 space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <UserRound className="w-5 h-5 text-primary shrink-0" />
+                  <UserRound className="w-5 h-5 text-primary-strong shrink-0" />
                   <h1 className="font-heading text-3xl md:text-4xl uppercase tracking-tighter  text-foreground leading-tight">
                     {display || `u/${alias}`}
                   </h1>
@@ -162,14 +162,14 @@ export default function RecruiterCandidateProfilePage() {
                 <div className="flex flex-wrap gap-2 pt-1">
                   <Badge
                     variant="outline"
-                    className="border-2 border-border rounded-none text-[10px] font-bold uppercase shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                    className="border border-border rounded-lg text-[10px] font-bold uppercase shadow-[var(--shadow-2xs)]"
                   >
                     <Trophy className="w-3 h-3 mr-1" /> Talent {Number(data.talentComposite ?? 0).toFixed(2)}
                   </Badge>
                   {data.targetRole && (
                     <Badge
                       variant="secondary"
-                      className="border-2 border-border rounded-none text-[10px] font-bold uppercase shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                      className="border border-border rounded-lg text-[10px] font-bold uppercase shadow-[var(--shadow-2xs)]"
                     >
                       <Briefcase className="w-3 h-3 mr-1" /> {data.targetRole}
                     </Badge>
@@ -177,7 +177,7 @@ export default function RecruiterCandidateProfilePage() {
                   {!data.identity && (
                     <Badge
                       variant="secondary"
-                      className="border-2 border-border rounded-none text-[10px] font-bold uppercase shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                      className="border border-border rounded-lg text-[10px] font-bold uppercase shadow-[var(--shadow-2xs)]"
                     >
                       Identity not shared
                     </Badge>
@@ -191,7 +191,7 @@ export default function RecruiterCandidateProfilePage() {
                         <Badge
                           key={s}
                           variant="outline"
-                          className="border-2 border-border rounded-none text-[10px] font-bold uppercase shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] px-2 py-0.5"
+                          className="border border-border rounded-lg text-[10px] font-bold uppercase shadow-[var(--shadow-2xs)] px-2 py-0.5"
                         >
                           {s}
                         </Badge>
@@ -207,7 +207,7 @@ export default function RecruiterCandidateProfilePage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-2 border-[3px] border-border bg-card text-sm font-heading tracking-wide shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all",
+                          "inline-flex items-center gap-1.5 px-3 py-2 border border-border bg-card text-sm font-heading tracking-wide shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all",
                         )}
                       >
                         <FaLinkedin className="w-4 h-4" /> LinkedIn
@@ -220,7 +220,7 @@ export default function RecruiterCandidateProfilePage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className={cn(
-                          "inline-flex items-center gap-1.5 px-3 py-2 border-[3px] border-border bg-card text-sm font-heading tracking-wide shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all",
+                          "inline-flex items-center gap-1.5 px-3 py-2 border border-border bg-card text-sm font-heading tracking-wide shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all",
                         )}
                       >
                         <FaGithub className="w-4 h-4" /> GitHub
@@ -236,16 +236,16 @@ export default function RecruiterCandidateProfilePage() {
       </div>
 
       <section className="flex min-h-0 flex-col space-y-4">
-        <div className="flex items-center gap-2 border-b-[3px] border-border pb-3">
-          <FileText className="w-6 h-6 text-primary" />
+        <div className="flex items-center gap-2 border-b border-border pb-3">
+          <FileText className="w-6 h-6 text-primary-strong" />
           <h2 className="font-heading text-2xl tracking-tighter ">Resumes on RoastForge</h2>
         </div>
         <div
-          className="min-h-0 max-h-[min(40rem,calc(100vh-14rem))] overflow-y-auto overscroll-y-contain rounded-none border-[3px] border-border bg-muted/20 p-4 sm:p-6 [scrollbar-gutter:stable]"
+          className="min-h-0 max-h-[min(40rem,calc(100vh-14rem))] overflow-y-auto overscroll-y-contain rounded-lg border border-border bg-muted/20 p-4 sm:p-6 [scrollbar-gutter:stable]"
           aria-label="Candidate resumes"
         >
           {data.resumes.length === 0 ? (
-            <p className="text-sm text-muted-foreground font-medium border-[3px] border-dashed border-border p-8 text-center bg-muted/30">
+            <p className="text-sm text-muted-foreground font-medium border border-dashed border-border p-8 text-center bg-muted/30">
               No public resumes yet.
             </p>
           ) : (
@@ -258,13 +258,13 @@ export default function RecruiterCandidateProfilePage() {
               {data.resumes.map((r) => (
                 <motion.li key={r._id} variants={itemVariants}>
                   <Link href={`/resume/${r._id}`} className="block h-full group">
-                    <Card className="h-full border-[3px] border-border rounded-none shadow-[var(--shadow-sm)] bg-card group-hover:bg-muted/30 transition-colors duration-200">
-                      <CardHeader className="pb-2 border-b-[3px] border-border bg-muted/40">
+                    <Card className="h-full border border-border rounded-lg shadow-[var(--shadow-sm)] bg-card group-hover:bg-muted/30 transition-colors duration-200">
+                      <CardHeader className="pb-2 border-b border-border bg-muted/40">
                         <CardTitle className="font-heading text-base leading-tight line-clamp-2">
                           {r.title || "Untitled"}
                         </CardTitle>
                         {r.aiScoreOverall != null && (
-                          <Badge className="w-fit mt-2 border-2 border-border rounded-none text-[10px] font-heading shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                          <Badge className="w-fit mt-2 border border-border rounded-md text-[10px] font-heading shadow-[var(--shadow-2xs)]">
                             AI {r.aiScoreOverall}
                           </Badge>
                         )}
@@ -273,13 +273,13 @@ export default function RecruiterCandidateProfilePage() {
                         {r.blurb ? (
                           <CardDescription className="text-sm line-clamp-3 font-medium">{r.blurb}</CardDescription>
                         ) : null}
-                        <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-wider mt-3">
+                        <p className="text-[11px] text-muted-foreground label-mono mt-3">
                           {r.commentsCount} comments · {r.likesCount} likes ·{" "}
                           {new Date(r.createdAt).toLocaleDateString()}
                         </p>
                       </CardContent>
-                      <CardFooter className="border-t-[3px] border-border bg-muted/30 pt-3">
-                        <span className="font-heading text-xs tracking-wide text-primary">Open thread →</span>
+                      <CardFooter className="border-t border-border bg-muted/30 pt-3">
+                        <span className="font-heading text-xs tracking-wide text-primary-strong">Open thread →</span>
                       </CardFooter>
                     </Card>
                   </Link>
@@ -291,16 +291,16 @@ export default function RecruiterCandidateProfilePage() {
       </section>
 
       <section className="flex min-h-0 flex-col space-y-4">
-        <div className="flex items-center gap-2 border-b-[3px] border-border pb-3">
-          <Sparkles className="w-6 h-6 text-primary" />
+        <div className="flex items-center gap-2 border-b border-border pb-3">
+          <Sparkles className="w-6 h-6 text-primary-strong" />
           <h2 className="font-heading text-2xl tracking-tighter ">Projects</h2>
         </div>
         <div
-          className="min-h-0 max-h-[min(40rem,calc(100vh-14rem))] overflow-y-auto overscroll-y-contain rounded-none border-[3px] border-border bg-muted/20 p-4 sm:p-6 [scrollbar-gutter:stable]"
+          className="min-h-0 max-h-[min(40rem,calc(100vh-14rem))] overflow-y-auto overscroll-y-contain rounded-lg border border-border bg-muted/20 p-4 sm:p-6 [scrollbar-gutter:stable]"
           aria-label="Candidate projects"
         >
           {data.projects.length === 0 ? (
-            <p className="text-sm text-muted-foreground font-medium border-[3px] border-dashed border-border p-8 text-center bg-muted/30">
+            <p className="text-sm text-muted-foreground font-medium border border-dashed border-border p-8 text-center bg-muted/30">
               No projects listed.
             </p>
           ) : (
@@ -312,8 +312,8 @@ export default function RecruiterCandidateProfilePage() {
             >
               {data.projects.map((project) => (
                 <motion.div key={project._id} variants={itemVariants}>
-                  <Card className="border-[3px] border-border rounded-none shadow-[var(--shadow-md)] bg-card overflow-hidden">
-                    <CardHeader className="border-b-[3px] border-border flex flex-row flex-wrap items-start justify-between gap-3 bg-muted/30 p-5">
+                  <Card className="border border-border rounded-lg shadow-[var(--shadow-md)] bg-card overflow-hidden">
+                    <CardHeader className="border-b border-border flex flex-row flex-wrap items-start justify-between gap-3 bg-muted/30 p-5">
                       <div className="min-w-0">
                         <CardTitle className="font-heading text-lg tracking-wide leading-tight">
                           {project.title}
@@ -321,7 +321,7 @@ export default function RecruiterCandidateProfilePage() {
                         <Badge
                           variant="outline"
                           className={cn(
-                            "mt-2 border-2 border-border rounded-none text-[10px] font-bold uppercase shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]",
+                            "mt-2 border border-border rounded-lg text-[10px] font-bold uppercase shadow-[var(--shadow-2xs)]",
                             project.aiStatus === "done"
                               ? "bg-green-300 text-foreground"
                               : project.aiStatus === "failed"
@@ -340,7 +340,7 @@ export default function RecruiterCandidateProfilePage() {
                           {project.techStack.map((tech) => (
                             <span
                               key={tech}
-                              className="text-[10px] font-heading tracking-wider px-2 py-1 border-2 border-border bg-muted shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                              className="text-[10px] font-heading tracking-wider px-2 py-1 border border-border bg-muted shadow-[var(--shadow-2xs)]"
                             >
                               {tech}
                             </span>
@@ -348,8 +348,8 @@ export default function RecruiterCandidateProfilePage() {
                         </div>
                       )}
                       {project.aiEvaluation?.summary && (
-                        <div className="border-[3px] border-border border-dashed bg-muted/40 p-4 space-y-1">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1">
+                        <div className="border border-border border-dashed bg-muted/40 p-4 space-y-1">
+                          <p className="text-[10px] label-mono text-muted-foreground flex items-center gap-1">
                             <FlameIcon size={12} strokeWidth={2} /> AI note
                           </p>
                           <p className="text-sm text-muted-foreground leading-relaxed">{project.aiEvaluation.summary}</p>
@@ -366,7 +366,7 @@ export default function RecruiterCandidateProfilePage() {
                             >
                               <Button
                                 variant="outline"
-                                className="w-full border-[3px] border-border rounded-none font-heading text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
+                                className="w-full border border-border rounded-lg font-heading text-xs shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5"
                               >
                                 <FaGithub className="w-4 h-4 mr-2" /> Repo
                               </Button>
@@ -374,7 +374,7 @@ export default function RecruiterCandidateProfilePage() {
                           )}
                           {project.liveDemo && (
                             <a href={project.liveDemo} target="_blank" rel="noopener noreferrer" className="flex-1">
-                              <Button className="w-full border-[3px] border-border rounded-none font-heading text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5">
+                              <Button className="w-full border border-border rounded-lg font-heading text-xs shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5">
                                 <ExternalLink className="w-4 h-4 mr-2" /> Live demo
                               </Button>
                             </a>
