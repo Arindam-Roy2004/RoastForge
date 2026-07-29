@@ -141,10 +141,10 @@ export function ResumePiiEditor({ file, onCancel, onApply }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background">
       {/* Top bar */}
-      <header className="shrink-0 border-b-[3px] border-border bg-card">
+      <header className="shrink-0 border-b border-border bg-card">
         <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between gap-4 px-4 py-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-full border-2 border-border bg-primary text-primary-foreground">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-primary text-primary-foreground">
               <ShieldUser className="size-5" strokeWidth={2.25} />
             </div>
             <div className="min-w-0">
@@ -160,7 +160,7 @@ export function ResumePiiEditor({ file, onCancel, onApply }: Props) {
               variant="outline"
               onClick={onCancel}
               disabled={applying}
-              className="h-9 rounded-none border-[3px] border-border font-heading text-xs uppercase tracking-wider shadow-[var(--shadow-2xs)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
+              className="h-9 rounded-lg border border-border font-heading text-xs uppercase tracking-wider shadow-[var(--shadow-2xs)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)] transition-all"
             >
               Cancel
             </Button>
@@ -168,7 +168,7 @@ export function ResumePiiEditor({ file, onCancel, onApply }: Props) {
               type="button"
               onClick={requestConvert}
               disabled={applying || loading}
-              className="h-9 rounded-none border-[3px] border-border font-heading text-xs uppercase tracking-wider shadow-[var(--shadow-sm)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
+              className="h-9 rounded-lg border border-border font-heading text-xs uppercase tracking-wider shadow-[var(--shadow-sm)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)] transition-all"
             >
               {applying ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
               {editCount > 0 ? "Convert" : "Use as-is"}
@@ -187,13 +187,13 @@ export function ResumePiiEditor({ file, onCancel, onApply }: Props) {
         )}
 
         {error && !loading && (
-          <div className="mx-auto mt-10 max-w-md border-[3px] border-destructive bg-destructive/10 p-5 text-center">
+          <div className="mx-auto mt-10 max-w-md border border-destructive bg-destructive/10 p-5 text-center">
             <p className="text-sm font-medium text-destructive">{error}</p>
             <Button
               type="button"
               variant="outline"
               onClick={onCancel}
-              className="mt-4 rounded-none border-[3px] border-border font-heading text-xs uppercase tracking-wider"
+              className="mt-4 rounded-lg border border-border font-heading text-xs uppercase tracking-wider"
             >
               Go back
             </Button>
@@ -207,7 +207,7 @@ export function ResumePiiEditor({ file, onCancel, onApply }: Props) {
               return (
                 <div
                   key={page.pageIndex}
-                  className="relative border-[3px] border-border bg-white shadow-[var(--shadow-md)]"
+                  className="relative border border-border bg-white shadow-[var(--shadow-md)]"
                   style={{ width: page.cssWidth, height: page.cssHeight }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -312,7 +312,7 @@ function EditField({
           if (e.key === "Escape") onCancel();
         }}
         onBlur={() => onCommit(value)}
-        className="h-7 min-w-[160px] rounded-none border-2 border-primary !bg-white !text-black px-1.5 text-sm font-medium shadow-[var(--shadow-2xs)] focus-visible:ring-1"
+        className="h-7 min-w-[160px] rounded-lg border border-primary !bg-white !text-black px-1.5 text-sm font-medium shadow-[var(--shadow-2xs)] focus-visible:ring-1"
         style={{ height: Math.max(box.height + 6, 24) }}
       />
       <span className="rounded-[1px] border border-border bg-card px-1 py-0.5 text-[9px] font-bold uppercase text-muted-foreground">
