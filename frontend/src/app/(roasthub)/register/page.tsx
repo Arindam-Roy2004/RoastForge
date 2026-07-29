@@ -8,7 +8,7 @@ import FlameIcon from "@/components/icons/flame-icon";
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { useAuth } from "@/store/auth";
 import { useTheme } from "@/store/theme";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 /**
  * Sign-up surface. Functionally identical to /login — both POST the same Google
@@ -57,10 +57,10 @@ export default function RegisterPage() {
       className="min-h-[calc(100vh-5rem)] flex items-center justify-center px-4 py-12"
     >
       {/* Outer wrapper — no hover translate on page-level cards */}
-      <div className="w-full max-w-4xl border-[3px] border-border rounded-none shadow-[var(--shadow-lg)] bg-card overflow-hidden">
+      <div className="w-full max-w-4xl border border-border rounded-lg shadow-[var(--shadow-lg)] bg-card overflow-hidden">
         <div className="grid md:grid-cols-[1fr_1.2fr] min-h-[480px]">
           {/* Left — illustration panel */}
-          <div className="hidden md:flex flex-col items-center justify-center bg-accent/30 border-r-[3px] border-border px-10 py-14 gap-8">
+          <div className="hidden md:flex flex-col items-center justify-center bg-secondary border-r border-border px-10 py-14 gap-8">
             <motion.img
               src="https://api.dicebear.com/9.x/bottts/svg?seed=roastforge-signup&size=200"
               alt=""
@@ -77,13 +77,13 @@ export default function RegisterPage() {
               </p>
             </div>
             {/* Tab switcher */}
-            <div className="flex items-center border-[3px] border-border bg-background shadow-[var(--shadow-2xs)]">
-              <span className="px-5 py-2 text-xs font-heading uppercase tracking-wider bg-primary text-primary-foreground border-r-[3px] border-border font-bold">
+            <div className="flex items-center overflow-hidden rounded-md border-2 border-border bg-background">
+              <span className="px-5 py-2 text-xs label-mono bg-primary text-primary-foreground border-r border-border font-bold">
                 Sign up
               </span>
               <Link
                 href="/login"
-                className="px-5 py-2 text-xs font-heading uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                className="px-5 py-2 text-xs label-mono text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
                 data-testid="link-go-login-side"
               >
                 Sign in
@@ -96,7 +96,7 @@ export default function RegisterPage() {
             {/* Icon */}
             <motion.div 
               whileHover={{ scale: 1.08, rotate: 5 }}
-              className="bg-primary w-14 h-14 flex items-center justify-center rounded-full border-[3px] border-border shadow-[var(--shadow-xs)] cursor-pointer"
+              className="bg-primary w-14 h-14 flex items-center justify-center rounded-full border border-border shadow-[var(--shadow-xs)] cursor-pointer"
             >
               <FlameIcon size={28} className="text-primary-foreground" strokeWidth={2} />
             </motion.div>
@@ -137,10 +137,10 @@ export default function RegisterPage() {
         </div>
 
         {/* Mobile footer — visible only on small screens */}
-        <div className="flex justify-center border-t-[3px] border-border bg-muted/50 px-6 py-4 md:hidden">
+        <div className="flex justify-center border-t border-border bg-muted/50 px-6 py-4 md:hidden">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="font-heading text-muted-foreground tracking-wider underline underline-offset-4 decoration-2 decoration-border transition-colors hover:text-primary hover:decoration-primary" data-testid="link-go-login">
+            <Link href="/login" className="font-heading text-muted-foreground tracking-wider underline underline-offset-4 decoration-2 decoration-border transition-colors hover:text-primary-strong hover:decoration-primary" data-testid="link-go-login">
               Sign in
             </Link>
           </p>
