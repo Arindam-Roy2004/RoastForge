@@ -254,7 +254,7 @@ export function CommentThread({ resumeId, initialComments }: Props) {
               {(user.anonymousUsername || user.name)[0].toUpperCase()}
             </div>
           ) : (
-            <div className="size-9 rounded-full bg-[var(--color-surface-elevated)] border-2 border-dashed border-[var(--color-border)] shrink-0" />
+            <div className="size-9 rounded-full bg-[var(--color-surface-elevated)] border border-dashed border-[var(--color-border)] shrink-0" />
           )}
           <div className="flex-1 space-y-2">
             <textarea
