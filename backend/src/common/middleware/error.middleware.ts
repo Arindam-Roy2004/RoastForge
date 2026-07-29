@@ -10,10 +10,17 @@ type AnyErr = Error & {
 
 export const errorHandler = (
   err: AnyErr,
-  _req: Request,
+  req: Request,
   res: Response,
-  _next: NextFunction,
+  next: NextFunction,
 ) => {
+  // If the response already started, Express's built-in finalhandler takes over
+  // and emits a bare "Internal Server Error". Log it here so the real cause is
+  // visible instead of silently disappearing.
+  if (res.headersSent) {
+    console.error(`Error after response started on ${req.method} ${req.originalUrl}:`, err);
+    return next(err);
+  }
   // Known multer error codes.
   if (err.code === "LIMIT_FILE_SIZE") {
     return res.status(400).json({ success: false, message: "File too large" });
@@ -40,7 +47,7 @@ export const errorHandler = (
   }
 
   // Log the raw error server-side but never leak internals to the client in production.
-  console.error("Unhandled error:", err);
+  console.error(`Unhandled error on ${req.method} ${req.originalUrl}:`, err);
 
   const isProd = process.env.NODE_ENV === "production";
   const statusCode = typeof err.statusCode === "number" ? err.statusCode : 500;
