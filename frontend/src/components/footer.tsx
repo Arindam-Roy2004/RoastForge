@@ -5,87 +5,99 @@ import { useAuth } from "@/store/auth";
 import FlameIcon from "@/components/icons/flame-icon";
 import BugIcon from "@/components/icons/bug-icon";
 
+const linkCls =
+  "label-mono text-[0.6875rem] text-muted-foreground transition-colors hover:text-foreground";
+
 export default function Footer() {
   const { user } = useAuth();
   const isRecruiter = user?.role === "recruiter";
 
   return (
-    <footer className="mt-auto w-full border-t-[3px] border-border bg-card">
-      <div className="mx-auto w-full max-w-[1760px] px-4 sm:px-6 lg:px-8">
-        {/* Main footer row */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 py-6">
-          {/* Left: Brand + tagline */}
-          <div className="flex flex-col items-center sm:items-start gap-1">
+    <footer className="mt-20 w-full border-t border-border bg-card">
+      <div className="container-app">
+        {/* Upper: brand block left, links inline on the same row */}
+        <div className="flex flex-col gap-8 py-9 sm:flex-row sm:items-center sm:justify-between sm:gap-12">
+          <div className="max-w-sm space-y-2">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 shrink-0"
+              className="inline-flex items-center gap-2"
               data-testid="footer-brand"
             >
-              <FlameIcon size={18} className="shrink-0 text-primary" strokeWidth={2.25} aria-hidden />
-              <span className="font-heading text-lg tracking-tighter text-foreground leading-none">
+              <FlameIcon
+                size={16}
+                className="shrink-0 text-primary-strong"
+                strokeWidth={2.25}
+                aria-hidden
+              />
+              <span className="label-mono text-sm leading-none text-foreground">
                 RoastForge
               </span>
             </Link>
-            <p className="text-xs text-muted-foreground">
-              Get your resume brutally roasted.
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Get your resume brutally roasted — by AI, and by everyone else.
             </p>
           </div>
 
-          {/* Center: Nav links */}
-          <nav className="flex items-center gap-1 flex-wrap justify-center" aria-label="Footer navigation">
-            <Link
-              href="/"
-              className="px-3 py-1.5 text-xs font-heading uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-              data-testid="footer-link-home"
-            >
-              Browse
-            </Link>
-            {isRecruiter ? (
-              <Link
-                href="/recruiter"
-                className="px-3 py-1.5 text-xs font-heading uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-                data-testid="footer-link-recruiter"
-              >
-                Dashboard
-              </Link>
-            ) : (
-              <Link
-                href="/upload"
-                className="px-3 py-1.5 text-xs font-heading uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-                data-testid="footer-link-upload"
-              >
-                Upload
-              </Link>
-            )}
-            <Link
-              href="/profile"
-              className="px-3 py-1.5 text-xs font-heading uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-              data-testid="footer-link-profile"
-            >
-              Profile
-            </Link>
+          <nav
+            aria-label="Footer navigation"
+            className="flex items-center gap-5 sm:gap-7"
+          >
+            <span className="label-mono hidden text-[0.625rem] text-muted-foreground/60 sm:inline">
+              Navigate
+            </span>
+            <ul className="flex flex-wrap items-center gap-x-6 gap-y-2">
+              <li>
+                <Link href="/" className={linkCls} data-testid="footer-link-home">
+                  Browse
+                </Link>
+              </li>
+              <li>
+                {isRecruiter ? (
+                  <Link
+                    href="/recruiter"
+                    className={linkCls}
+                    data-testid="footer-link-recruiter"
+                  >
+                    Dashboard
+                  </Link>
+                ) : (
+                  <Link
+                    href="/upload"
+                    className={linkCls}
+                    data-testid="footer-link-upload"
+                  >
+                    Upload
+                  </Link>
+                )}
+              </li>
+              <li>
+                <Link
+                  href="/profile"
+                  className={linkCls}
+                  data-testid="footer-link-profile"
+                >
+                  Profile
+                </Link>
+              </li>
+            </ul>
           </nav>
-
-          {/* Right: Report bug */}
-          <div className="flex items-center">
-            <a
-              href="https://docs.google.com/forms/d/e/1FAIpQLSdIqU2QCmm7VMje1JWvpOm39tDHXv4QcwDvGzI9j1U54vcGYA/viewform?usp=publish-editor"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-heading uppercase tracking-wider text-muted-foreground border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all bg-background"
-              data-testid="footer-link-report-bug"
-            >
-              <BugIcon size={13} strokeWidth={2.25} className="shrink-0" />
-              Report Bug
-            </a>
-          </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="border-t border-border/50 py-3 text-center">
-          <p className="text-[10px] text-muted-foreground/70 tracking-wide">
-            &copy; {new Date().getFullYear()} RoastForge. All rights reserved.
+        {/* Lower: copyright left, utility right */}
+        <div className="flex flex-col items-center justify-between gap-3 border-t border-border py-5 sm:flex-row">
+          <p className="label-mono text-[0.625rem] text-muted-foreground/70">
+            &copy; {new Date().getFullYear()} RoastForge
           </p>
+          <a
+            href="https://docs.google.com/forms/d/e/1FAIpQLSdIqU2QCmm7VMje1JWvpOm39tDHXv4QcwDvGzI9j1U54vcGYA/viewform?usp=publish-editor"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="label-mono inline-flex items-center gap-1.5 text-[0.6875rem] text-muted-foreground transition-colors hover:text-foreground"
+            data-testid="footer-link-report-bug"
+          >
+            <BugIcon size={13} strokeWidth={2.25} className="shrink-0" />
+            Report Bug
+          </a>
         </div>
       </div>
     </footer>
