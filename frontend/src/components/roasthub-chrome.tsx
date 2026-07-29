@@ -22,7 +22,7 @@ export function RoastHubChrome({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Navbar />
-      <main className="mx-auto w-full min-w-0 max-w-[1760px] flex-1 px-4 py-6 sm:px-6 lg:px-8">
+      <main className="container-app min-w-0 flex-1 py-8">
         {children}
       </main>
       <Footer />
