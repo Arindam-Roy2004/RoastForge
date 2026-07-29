@@ -20,6 +20,10 @@
 
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
+  /* Text-safe teal. The brand teal is tuned for fills; on light surfaces it
+     only reaches ~2.9:1 contrast, so teal *text* and icons use this darker
+     step instead (~6.4:1). Fills keep the original brand teal. */
+  --color-primary-strong: hsl(var(--primary-strong));
 
   --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
@@ -59,14 +63,21 @@
 
 :root {
   /* RoastForge light: off-white #F9F6F1, charcoal #2B303B, brand teal #43999D,
-     hero wash #C8E5E8, deep navy copy on hero #1C212C. */
+     hero wash #C8E5E8. Original brand colors — unchanged.
+     Borders are softened to a low-contrast tint of the ink so edges read as
+     quiet structure (Autosend-style) instead of hard neobrutalist outlines. */
   --background: 40 33% 96%;
   --foreground: 222 16% 20%;
 
+  /* Borders are a definite, readable line (not a near-white ghost): a
+     desaturated tint of the charcoal ink, ~#D4D7DD. Sits clearly against both
+     the off-white page and the pure-white card, so inner and outer surfaces
+     stay visually separated the way Autosend's #e5e5e5 on #fafafa does. */
   --border: 222 16% 20%;
   --input: 222 16% 20%;
   --ring: 182 40% 44%;
 
+  /* Card is pure white and lifts off the warm off-white page. */
   --card: 0 0% 100%;
   --card-foreground: 222 16% 20%;
   --card-border: 222 16% 20%;
@@ -77,6 +88,7 @@
 
   --primary: 182 40% 44%;
   --primary-foreground: 216 30% 10%;
+  --primary-strong: 184 42% 27%;
 
   --secondary: 40 24% 92%;
   --secondary-foreground: 222 16% 20%;
@@ -90,26 +102,28 @@
   --destructive: 0 72% 48%;
   --destructive-foreground: 0 0% 98%;
 
-  /* Neobrutalism: flat, stark corners */
-  --radius: 0rem;
-
-  /* Hard offset “ink” = rgb(25, 29, 36) / #191D24 */
-  --shadow-2xs: 2px 2px 0px 0px hsl(220 18% 12%);
-  --shadow-xs: 3px 3px 0px 0px hsl(220 18% 12%);
-  --shadow-sm: 4px 4px 0px 0px hsl(220 18% 12%);
-  --shadow: 5px 5px 0px 0px hsl(220 18% 12%);
-  --shadow-md: 6px 6px 0px 0px hsl(220 18% 12%);
-  --shadow-lg: 8px 8px 0px 0px hsl(220 18% 12%);
-  --shadow-xl: 12px 12px 0px 0px hsl(220 18% 12%);
-  --shadow-2xl: 16px 16px 0px 0px hsl(220 18% 12%);
+  /* Restrained radius scale (Autosend-style): 8px is the workhorse, 12px for
+     large surfaces. Large pill radii read as toy-like at this density. */
+  --radius: 0.5rem;
+  /* Soft, low-opacity elevation tinted with the charcoal ink. */
+  --shadow-2xs: 0 1px 2px hsl(220 18% 12% / 0.05);
+  --shadow-xs: 0 1px 3px hsl(220 18% 12% / 0.07);
+  --shadow-sm: 0 4px 10px hsl(220 18% 12% / 0.07);
+  --shadow: 0 8px 20px hsl(220 18% 12% / 0.08);
+  --shadow-md: 0 14px 32px hsl(220 18% 12% / 0.09);
+  --shadow-lg: 0 22px 48px hsl(220 18% 12% / 0.11);
+  --shadow-xl: 0 32px 64px hsl(220 18% 12% / 0.13);
+  --shadow-2xl: 0 44px 88px hsl(220 18% 12% / 0.15);
 }
 
-/* Dark: premium deep midnight-slate #0e1117 base, lifted cards, warm mist text,
-   glowing brand teal; borders stay clean and sharp. */
+/* Dark: original deep midnight-slate base, lifted cards, warm mist text,
+   glowing brand teal. Colors unchanged; borders softened. */
 .dark {
   --background: 222 24% 8%;
   --foreground: 40 28% 95%;
 
+  /* Dark mode inverts the same logic: the card is *lighter* than the page and
+     the border is a lifted slate line, so edges stay legible without glowing. */
   --border: 222 20% 20%;
   --input: 222 20% 18%;
   --ring: 182 60% 48%;
@@ -124,6 +138,8 @@
 
   --primary: 182 60% 46%;
   --primary-foreground: 222 24% 8%;
+  /* Dark mode inverts: on a near-black surface the text-safe step is lighter. */
+  --primary-strong: 182 58% 62%;
 
   --secondary: 222 18% 15%;
   --secondary-foreground: 40 26% 95%;
@@ -137,19 +153,14 @@
   --destructive: 0 75% 55%;
   --destructive-foreground: 40 20% 98%;
 
-  /*
-   * Offset shadows on dark UI: Pure black with a subtle blue tint (#050608)
-   * for a crisp, razor-sharp, high-contrast neobrutalist stamp effect that
-   * looks premium, flat, and intentional.
-   */
-  --shadow-2xs: 2px 2px 0px 0px hsl(222 24% 4%);
-  --shadow-xs: 3px 3px 0px 0px hsl(222 24% 4%);
-  --shadow-sm: 4px 4px 0px 0px hsl(222 24% 4%);
-  --shadow: 5px 5px 0px 0px hsl(222 24% 4%);
-  --shadow-md: 6px 6px 0px 0px hsl(222 24% 4%);
-  --shadow-lg: 8px 8px 0px 0px hsl(222 24% 4%);
-  --shadow-xl: 12px 12px 0px 0px hsl(222 24% 4%);
-  --shadow-2xl: 16px 16px 0px 0px hsl(222 24% 4%);
+  --shadow-2xs: 0 1px 2px hsl(222 24% 3% / 0.3);
+  --shadow-xs: 0 2px 6px hsl(222 24% 3% / 0.34);
+  --shadow-sm: 0 8px 20px hsl(222 24% 3% / 0.38);
+  --shadow: 0 12px 28px hsl(222 24% 3% / 0.42);
+  --shadow-md: 0 20px 44px hsl(222 24% 3% / 0.46);
+  --shadow-lg: 0 28px 60px hsl(222 24% 3% / 0.5);
+  --shadow-xl: 0 40px 80px hsl(222 24% 3% / 0.54);
+  --shadow-2xl: 0 52px 104px hsl(222 24% 3% / 0.58);
 }
 
 @layer base {
@@ -173,8 +184,69 @@
     @apply border-border;
   }
   
+  /* Tight, confident display headings (Autosend-style) instead of the previous
+     wide letterspacing. `text-pretty` prevents widows per web guidelines. */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading tracking-wide;
+    @apply font-heading tracking-tight text-pretty;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Honor prefers-reduced-motion globally (web-design-guidelines requirement). */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Removes the 300ms double-tap zoom delay on touch targets. */
+  button, a, [role="button"] {
+    touch-action: manipulation;
+  }
+}
+
+@layer components {
+  /* Micro-label: uppercase mono with wide tracking. This is the single most
+     recognisable part of the reference styling — used for nav items, button
+     labels, section eyebrows, and stat captions. */
+  .label-mono {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    font-weight: 500;
+  }
+
+  /* The single canonical page container. Navbar, page content, and footer all
+     use this so every left/right edge in the app lines up on one grid. Do not
+     add competing `max-w-*` + `px-*` wrappers at page level. */
+  .container-app {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 1180px;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 640px) {
+    .container-app { padding-inline: 1.5rem; }
+  }
+  @media (min-width: 1024px) {
+    .container-app { padding-inline: 2rem; }
+  }
+
+  /* Section eyebrow, e.g. "#03 — EMAIL AUTOMATION". */
+  .eyebrow {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.6875rem;
+    color: hsl(var(--primary-strong));
   }
 
   /* The Heming display font (loaded as `--font-heading`) ships with sparse kerning
