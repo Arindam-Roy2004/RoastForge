@@ -1,6 +1,6 @@
 import { forwardRef, useImperativeHandle } from "react";
 import type { AnimatedIconHandle, AnimatedIconProps } from "./types";
-import { motion, useAnimate } from "framer-motion";
+import { motion, useAnimate } from "motion/react";
 
 const FlameIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(
   (
