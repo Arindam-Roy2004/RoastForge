@@ -372,7 +372,7 @@ async function applyReactionMutation(
         },
       },
     ],
-    { new: true, session, updatePipeline: true } as mongoose.QueryOptions,
+    { returnDocument: "after", session, updatePipeline: true } as mongoose.QueryOptions,
   ).select("userId likesCount dislikesCount");
 
   if (!updated) throw ApiError.notfound("Resume not found");
