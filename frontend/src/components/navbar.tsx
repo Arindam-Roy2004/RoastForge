@@ -9,6 +9,9 @@ import { Moon, Sun } from "lucide-react";
 import FlameIcon from "@/components/icons/flame-icon";
 import { cn } from "@/lib/utils";
 
+const NAV_LINK =
+  "label-mono rounded-md px-3 py-2 text-[0.6875rem] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground";
+
 export default function Navbar() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme, mounted } = useTheme();
@@ -17,25 +20,49 @@ export default function Navbar() {
   const isDark = mounted && theme === "dark";
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b-[3px] border-border bg-card">
-      <div className="mx-auto flex min-h-16 w-full max-w-[1760px] items-center justify-between gap-4 px-4 py-2 sm:min-h-17 sm:px-6 sm:py-2.5 lg:px-8">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
+      <div className="container-app flex h-16 items-center gap-4 sm:gap-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-3 shrink-0 py-1"
+          className="inline-flex shrink-0 items-center gap-2.5"
           data-testid="link-home"
         >
           <FlameIcon
             size={20}
-            className="shrink-0 text-primary"
+            className="shrink-0 text-primary-strong"
             strokeWidth={2.25}
             aria-hidden
           />
-          <span className="inline-flex h-10 items-center font-heading text-xl leading-none tracking-tight text-foreground sm:text-[1.35rem]">
+          <span className="label-mono text-sm leading-none text-foreground">
             RoastForge
           </span>
         </Link>
 
-        <div className="flex min-h-10 items-center gap-1 overflow-x-auto sm:gap-2">
+        {/* Primary navigation — sits next to the wordmark, like Vercel/Autosend.
+            Scrolls horizontally on narrow screens rather than disappearing. */}
+        <nav
+          aria-label="Main navigation"
+          className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          <Link href="/" className={NAV_LINK} data-testid="link-browse">Browse</Link>
+          {isAuthenticated && (
+            <>
+              {user?.role !== "recruiter" && (
+                <>
+                  <Link href="/upload" className={NAV_LINK} data-testid="link-upload">Upload</Link>
+                  <Link href="/projects" className={NAV_LINK} data-testid="link-projects">Projects</Link>
+                </>
+              )}
+              <Link href="/profile" className={NAV_LINK} data-testid="link-profile">Profile</Link>
+              {user?.role === "recruiter" && (
+                <Link href="/recruiter" className={NAV_LINK} data-testid="link-recruiter">Dashboard</Link>
+              )}
+            </>
+          )}
+        </nav>
+
+        {/* Account actions, pinned to the right edge and separated by a rule. */}
+        <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={toggleTheme}
@@ -43,7 +70,7 @@ export default function Navbar() {
             aria-pressed={mounted ? isDark : undefined}
             suppressHydrationWarning
             data-testid="button-theme-toggle"
-            className="relative inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-none border-2 border-border bg-card text-foreground shadow-[var(--shadow-xs)] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:translate-x-[2px] active:translate-y-[2px] active:shadow-none focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="relative inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
           >
             <Sun
               className="absolute size-[18px] rotate-0 scale-100 opacity-100 transition-all dark:rotate-90 dark:scale-0 dark:opacity-0"
@@ -56,52 +83,34 @@ export default function Navbar() {
               aria-hidden
             />
           </button>
-          <Link href="/" className="rounded-none border-[3px] border-transparent px-3 py-2 text-xs font-heading uppercase tracking-wider text-muted-foreground transition-all hover:border-border hover:bg-muted hover:text-foreground sm:py-2.5" data-testid="link-browse">Browse</Link>
-          
+
+          <span aria-hidden className="hidden h-5 w-px bg-border sm:block" />
+
           {isAuthenticated ? (
-            <>
-              {user?.role !== "recruiter" && (
-                <>
-                  <Link href="/upload" className="rounded-none border-[3px] border-transparent px-3 py-2 text-xs font-heading uppercase tracking-wider text-muted-foreground transition-all hover:border-border hover:bg-muted hover:text-foreground sm:py-2.5" data-testid="link-upload">Upload</Link>
-                  <Link href="/projects" className="rounded-none border-[3px] border-transparent px-3 py-2 text-xs font-heading uppercase tracking-wider text-muted-foreground transition-all hover:border-border hover:bg-muted hover:text-foreground sm:py-2.5" data-testid="link-projects">Projects</Link>
-                </>
-              )}
-              <Link href="/profile" className="rounded-none border-[3px] border-transparent px-3 py-2 text-xs font-heading uppercase tracking-wider text-muted-foreground transition-all hover:border-border hover:bg-muted hover:text-foreground sm:py-2.5" data-testid="link-profile">Profile</Link>
-              {user?.role === "recruiter" && (
-                <Link href="/recruiter" className="rounded-none border-[3px] border-transparent px-3 py-2 text-xs font-heading uppercase tracking-wider text-muted-foreground transition-all hover:border-border hover:bg-primary/20 hover:text-foreground sm:py-2.5" data-testid="link-recruiter">Dashboard</Link>
-              )}
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="ml-1 h-9 rounded-none border-[3px] border-border px-3.5 font-heading text-[11px] uppercase tracking-wider shadow-[var(--shadow-2xs)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
-                onClick={async () => {
-                  try { await logout(); } catch {}
-                  router.push("/login");
-                }}
-                data-testid="button-logout"
-              >
-                Logout
-              </Button>
-            </>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                try { await logout(); } catch {}
+                router.push("/login");
+              }}
+              data-testid="button-logout"
+            >
+              Logout
+            </Button>
           ) : (
             <>
               <Link
                 href="/login"
                 data-testid="link-login"
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "sm" }),
-                  "h-9 rounded-none border-[3px] border-border px-3.5 font-heading text-[11px] uppercase tracking-wider shadow-[var(--shadow-2xs)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
-                )}
+                className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
               >
                 Login
               </Link>
               <Link
                 href="/register"
                 data-testid="link-register"
-                className={cn(
-                  buttonVariants({ size: "sm" }),
-                  "h-9 rounded-none border-[3px] border-border px-3.5 font-heading text-[11px] uppercase tracking-wider shadow-[var(--shadow-2xs)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
-                )}
+                className={cn(buttonVariants({ size: "sm" }))}
               >
                 Register
               </Link>
@@ -109,6 +118,6 @@ export default function Navbar() {
           )}
         </div>
       </div>
-    </nav>
+    </header>
   );
 }
