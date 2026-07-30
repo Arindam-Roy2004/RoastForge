@@ -3,7 +3,7 @@
  * non-trivial. Called from both server.ts (long-running) and the serverless entry
  * so misconfiguration is caught at boot rather than on the first request.
  */
-const REQUIRED = ["JWT_ACCESS_SECRET", "JWT_REFRESH_SECRET", "GOOGLE_CLIENT_ID"] as const;
+const REQUIRED = ["JWT_ACCESS_SECRET", "JWT_REFRESH_SECRET", "GOOGLE_CLIENT_ID", "GOOGLE_AI_KEY"] as const;
 const MIN_SECRET_LEN = 16;
 // GOOGLE_CLIENT_ID has its own format (numeric.apps.googleusercontent.com) so we
 // only check presence; the JWT secrets keep the entropy floor.

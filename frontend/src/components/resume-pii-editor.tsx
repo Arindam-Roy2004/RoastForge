@@ -58,9 +58,12 @@ export function ResumePiiEditor({ file, onCancel, onApply }: Props) {
           if (cancelled.current) return;
           const d = res.data;
           values = d ? [d.name, d.location].filter((v): v is string => !!v) : [];
-        } catch {
+        } catch (err) {
           if (!cancelled.current) {
-            toast.message("Couldn't auto-detect your name — click it in the page to edit it.");
+            const reason = err instanceof Error ? err.message : "The detection service is unavailable.";
+            toast.message("Couldn't auto-detect your name", {
+              description: `${reason} You can still click the name in the page to edit it.`,
+            });
           }
         }
         if (!cancelled.current) {
