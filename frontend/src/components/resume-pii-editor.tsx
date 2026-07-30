@@ -48,17 +48,18 @@ export function ResumePiiEditor({ file, onCancel, onApply }: Props) {
           return;
         }
 
+        let values: string[] = [];
         try {
           const res = await analysisApi.detectPii(loaded.fullText);
           if (cancelled.current) return;
           const d = res.data;
-          const values = d
+          values = d
             ? [d.name, d.email, d.phone, d.location, ...(d.links || [])].filter((v): v is string => !!v)
             : [];
-          setEditItems(deriveEditableItems(loaded.pages, loaded.lines, values));
         } catch {
-          if (!cancelled.current) toast.message("Couldn't auto-detect fields — try a different resume.");
+          if (!cancelled.current) toast.message("Couldn't auto-detect name/email/phone — links are still highlighted.");
         }
+        if (!cancelled.current) setEditItems(deriveEditableItems(loaded.pages, loaded.lines, values));
       } catch {
         if (!cancelled.current) setError("Could not open this PDF for editing.");
       } finally {

@@ -196,6 +196,75 @@ export function rgbCss(c: RGB): string {
   return `rgb(${c.r}, ${c.g}, ${c.b})`;
 }
 
+// Heuristic link/handle detector. Runs alongside the AI-detected values so a
+// profile link, portfolio site, or platform handle still becomes editable
+// even when the AI missed it, reformatted it, or the detection call failed.
+// Label words that precede a profile/social/portfolio link, e.g. "LinkedIn:",
+// "GitHub -", "Portfolio". Edit this list to teach the detector new keywords.
+export const LINK_LABEL_KEYWORDS = [
+  "linkedin", "github", "gitlab", "leetcode", "codeforces", "codechef",
+  "hackerrank", "hackerearth", "kaggle", "twitter", "behance", "dribbble",
+  "medium", "stackoverflow", "youtube", "notion", "portfolio", "website", "blog",
+];
+
+// Domains recognized as profile/social/portfolio links even without a label
+// or protocol in front of them. Edit this list to teach the detector new
+// platforms.
+export const LINK_DOMAIN_KEYWORDS = [
+  "linkedin.com", "github.com", "gitlab.com", "leetcode.com", "codeforces.com",
+  "codechef.com", "hackerrank.com", "hackerearth.com", "kaggle.com",
+  "twitter.com", "x.com", "behance.net", "dribbble.com", "medium.com",
+  "stackoverflow.com", "youtube.com", "notion.so", "npmjs.com", "replit.com",
+  "devpost.com", "itch.io", "angel.co", "wellfound.com", "instagram.com", "dev.to",
+];
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const LINK_KEYWORDS = LINK_LABEL_KEYWORDS.map(escapeRegExp).join("|");
+const KNOWN_LINK_DOMAINS = LINK_DOMAIN_KEYWORDS.map(escapeRegExp).join("|");
+
+const STOP_CHARS = "[^\\s|,;()<>]";
+
+// 1. A URL with an explicit protocol, e.g. "https://github.com/john".
+const URL_WITH_PROTOCOL = /https?:\/\/[^\s|,;()<>]+/gi;
+// 2. "www.<domain>/<path>" without a protocol.
+const URL_WITH_WWW = /www\.[a-z0-9-]+\.[a-z]{2,}(?:\/[^\s|,;()<>]*)?/gi;
+// 3. A recognized platform domain, with or without protocol/www, plus path.
+const KNOWN_DOMAIN = new RegExp(
+  `(?:https?:\\/\\/)?(?:www\\.)?(?:${KNOWN_LINK_DOMAINS})(?:\\/${STOP_CHARS}*)?`,
+  "gi",
+);
+// 4. Whatever value follows a link-related label, e.g. "Portfolio: jane.dev"
+//    or "GitHub - johndoe", so generic/unknown domains and bare handles are
+//    caught too — not just the platforms in the list above.
+// Optional filler word between the keyword and the value, e.g.
+// "Codeforces handle: arindam_cf" or "GitHub profile - github.com/john".
+const LINK_FILLER_WORDS = "handle|profile|id|username|url|link|account";
+const LABELED_HANDLE = new RegExp(
+  `(?:${LINK_KEYWORDS})\\s*(?:${LINK_FILLER_WORDS})?\\s*[:\\-]?\\s*(${STOP_CHARS}{2,80})`,
+  "gi",
+);
+
+function extractLinkCandidates(text: string): string[] {
+  const out = new Set<string>();
+  const collect = (re: RegExp) => {
+    re.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(text))) {
+      const raw = (m[1] ?? m[0]).trim().replace(/[.,;:]+$/, "");
+      if (raw.length >= 3) out.add(raw);
+      if (m[0].length === 0) re.lastIndex += 1; // guard against zero-length match loops
+    }
+  };
+  collect(URL_WITH_PROTOCOL);
+  collect(URL_WITH_WWW);
+  collect(KNOWN_DOMAIN);
+  collect(LABELED_HANDLE);
+  return Array.from(out);
+}
+
 function overlaps(a: PdfTextItem, b: PdfTextItem): boolean {
   if (a.pageIndex !== b.pageIndex) return false;
   const ax1 = a.x + a.width;
@@ -215,8 +284,13 @@ export function deriveEditableItems(
   lines: PdfLine[],
   values: string[],
 ): PdfTextItem[] {
-  const vals = Array.from(new Set(values.map((v) => v.trim()).filter((v) => v.length >= 2)))
-    .sort((a, b) => b.length - a.length);
+  // Merge AI-detected values with a local link/handle heuristic run over each
+  // line's raw text, so profile links stay editable even when the AI missed
+  // one, reformatted it, or the detection call failed outright.
+  const heuristicLinks = lines.flatMap((line) => extractLinkCandidates(line.text));
+  const vals = Array.from(
+    new Set([...values, ...heuristicLinks].map((v) => v.trim()).filter((v) => v.length >= 2)),
+  ).sort((a, b) => b.length - a.length);
 
   // A match glued to a letter/digit is only part of a larger token → reject it
   // (e.g. LinkedIn "arindam-roy" inside "github.com/Arindam-Roy2004").
