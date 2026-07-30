@@ -28,6 +28,18 @@ export type PdfLine = {
   chars: CharBox[];
 };
 
+// A real, clickable hyperlink annotation embedded in the PDF (e.g. an icon or
+// "My Profile" label that links out even though the visible text isn't a
+// URL). Bounds are in PDF points, top-left origin — same space as CharBox.
+export type PdfLinkAnnotation = {
+  pageIndex: number;
+  uri: string;
+  x: number;
+  top: number;
+  width: number;
+  height: number;
+};
+
 // An editable target: the value region of a line, in PDF points (top-left origin).
 export type PdfTextItem = {
   id: string;
@@ -60,6 +72,7 @@ export type LoadedPdf = {
   pages: PdfPageRender[];
   lines: PdfLine[];
   fullText: string;
+  linkAnnotations: PdfLinkAnnotation[];
 };
 
 export type PdfEdit = {
@@ -122,6 +135,7 @@ export async function loadPdf(file: File): Promise<LoadedPdf> {
   const pages: PdfPageRender[] = [];
   const lines: PdfLine[] = [];
   const textChunks: string[] = [];
+  const linkAnnotations: PdfLinkAnnotation[] = [];
 
   const n = doc.countPages();
   for (let p = 0; p < n; p++) {
@@ -142,6 +156,24 @@ export async function loadPdf(file: File): Promise<LoadedPdf> {
       cssWidth: widthPts * DISPLAY_SCALE,
       cssHeight: heightPts * DISPLAY_SCALE,
     });
+
+    // Real clickable link annotations — captures links on text that doesn't
+    // look like a URL/keyword at all (icons, "Click here", a plain name).
+    try {
+      for (const link of page.getLinks()) {
+        const uri = link.getURI();
+        if (!uri) continue;
+        const [x0, y0, x1, y1] = link.getBounds();
+        linkAnnotations.push({
+          pageIndex: p,
+          uri,
+          x: Math.min(x0, x1),
+          top: Math.min(y0, y1),
+          width: Math.abs(x1 - x0),
+          height: Math.abs(y1 - y0),
+        });
+      }
+    } catch { /* some PDFs have malformed link dicts — skip them */ }
 
     const st = page.toStructuredText("preserve-whitespace");
     const lineList: CharBox[][] = [];
@@ -180,7 +212,7 @@ export async function loadPdf(file: File): Promise<LoadedPdf> {
   }
 
   try { (doc as unknown as { destroy?: () => void }).destroy?.(); } catch { /* ignore */ }
-  return { pages, lines, fullText: textChunks.join("\n") };
+  return { pages, lines, fullText: textChunks.join("\n"), linkAnnotations };
 }
 
 export function itemToCssBox(item: PdfTextItem, page: PdfPageRender) {
@@ -200,11 +232,13 @@ export function rgbCss(c: RGB): string {
 // profile link, portfolio site, or platform handle still becomes editable
 // even when the AI missed it, reformatted it, or the detection call failed.
 // Label words that precede a profile/social/portfolio link, e.g. "LinkedIn:",
-// "GitHub -", "Portfolio". Edit this list to teach the detector new keywords.
+// "GitHub -", "Portfolio", "Profile". Edit this list to teach the detector
+// new keywords.
 export const LINK_LABEL_KEYWORDS = [
   "linkedin", "github", "gitlab", "leetcode", "codeforces", "codechef",
   "hackerrank", "hackerearth", "kaggle", "twitter", "behance", "dribbble",
   "medium", "stackoverflow", "youtube", "notion", "portfolio", "website", "blog",
+  "profile", "profiles", "social", "socials", "links", "contact",
 ];
 
 // Domains recognized as profile/social/portfolio links even without a label
@@ -246,6 +280,17 @@ const LABELED_HANDLE = new RegExp(
   `(?:${LINK_KEYWORDS})\\s*(?:${LINK_FILLER_WORDS})?\\s*[:\\-]?\\s*(${STOP_CHARS}{2,80})`,
   "gi",
 );
+// A keyword sitting by itself with no value after it on the line, e.g. a line
+// that just says "Profile" or "LinkedIn" — the actual URL usually lives only
+// in a hyperlink annotation on that same text, not as visible characters.
+const STANDALONE_KEYWORD = new RegExp(`^\\s*(?:${LINK_KEYWORDS})\\s*[:\\-]?\\s*$`, "i");
+
+// Local (no AI) detectors for the other common personal-info fields, so
+// email/phone stay editable without sending resume text to a model.
+const EMAIL_PATTERN = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi;
+// Matches phone numbers with optional country code, spaces/dots/dashes/parens,
+// requiring at least 7 digits total so short numbers (e.g. a year) don't match.
+const PHONE_PATTERN = /(?:\+?\d{1,3}[\s.-]?)?(?:\(\d{2,4}\)[\s.-]?)?\d[\d\s.-]{6,}\d/g;
 
 function extractLinkCandidates(text: string): string[] {
   const out = new Set<string>();
@@ -262,6 +307,24 @@ function extractLinkCandidates(text: string): string[] {
   collect(URL_WITH_WWW);
   collect(KNOWN_DOMAIN);
   collect(LABELED_HANDLE);
+  if (STANDALONE_KEYWORD.test(text)) out.add(text.trim().replace(/[:\-]+$/, ""));
+  return Array.from(out);
+}
+
+/** Local (no AI) detector for email + phone number values in a line of text. */
+function extractContactCandidates(text: string): string[] {
+  const out = new Set<string>();
+  const collect = (re: RegExp) => {
+    re.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(text))) {
+      const raw = m[0].trim();
+      const digits = raw.replace(/\D/g, "");
+      if (raw.includes("@") || digits.length >= 7) out.add(raw);
+    }
+  };
+  collect(EMAIL_PATTERN);
+  collect(PHONE_PATTERN);
   return Array.from(out);
 }
 
@@ -283,13 +346,17 @@ export function deriveEditableItems(
   _pages: PdfPageRender[],
   lines: PdfLine[],
   values: string[],
+  linkAnnotations: PdfLinkAnnotation[] = [],
 ): PdfTextItem[] {
-  // Merge AI-detected values with a local link/handle heuristic run over each
-  // line's raw text, so profile links stay editable even when the AI missed
-  // one, reformatted it, or the detection call failed outright.
+  // Fully local detection: a link/handle heuristic plus an email/phone
+  // heuristic run over each line's raw text. `values` may still carry
+  // externally-supplied values (e.g. a known name) but no AI call is made.
   const heuristicLinks = lines.flatMap((line) => extractLinkCandidates(line.text));
+  const heuristicContacts = lines.flatMap((line) => extractContactCandidates(line.text));
   const vals = Array.from(
-    new Set([...values, ...heuristicLinks].map((v) => v.trim()).filter((v) => v.length >= 2)),
+    new Set(
+      [...values, ...heuristicLinks, ...heuristicContacts].map((v) => v.trim()).filter((v) => v.length >= 2),
+    ),
   ).sort((a, b) => b.length - a.length);
 
   // A match glued to a letter/digit is only part of a larger token → reject it
@@ -359,6 +426,54 @@ export function deriveEditableItems(
       }
     }
   }
+
+  // Real hyperlink annotations: highlight whatever text sits under the link,
+  // regardless of what it says (an icon caption, "Click here", a bare name).
+  // This catches links the keyword/URL heuristics above can't, since the
+  // visible text carries no clue that it's a link at all.
+  for (const link of linkAnnotations) {
+    const rectLeft = link.x;
+    const rectRight = link.x + link.width;
+    const rectTop = link.top;
+    const rectBottom = link.top + link.height;
+
+    const covered = lines
+      .filter((l) => l.pageIndex === link.pageIndex)
+      .flatMap((l) => l.chars)
+      .filter((c) => {
+        const cx = (c.x0 + c.x1) / 2;
+        const cy = (c.top + c.bottom) / 2;
+        return cx >= rectLeft && cx <= rectRight && cy >= rectTop && cy <= rectBottom;
+      });
+
+    // Build the highlighted region from the covered glyphs when there are
+    // any (keeps the box tight to the actual text); otherwise fall back to
+    // the annotation's own rect so an icon-only link is still clickable.
+    const x0 = covered.length ? Math.min(...covered.map((c) => c.x0)) : rectLeft;
+    const x1 = covered.length ? Math.max(...covered.map((c) => c.x1)) : rectRight;
+    const top = covered.length ? Math.min(...covered.map((c) => c.top)) : rectTop;
+    const bottom = covered.length ? Math.max(...covered.map((c) => c.bottom)) : rectBottom;
+
+    const item: PdfTextItem = {
+      id: `e${counter++}`,
+      pageIndex: link.pageIndex,
+      str: covered.length ? covered.map((c) => c.ch).join("") : link.uri,
+      x: x0,
+      top,
+      width: Math.max(x1 - x0, 4),
+      height: Math.max(bottom - top, 4),
+      baseline: covered.length ? median(covered.map((c) => c.baseline)) : bottom,
+      fontSize: covered.length ? median(covered.map((c) => c.size)) : link.height,
+      serif: covered.length ? majority(covered.map((c) => c.serif)) : false,
+      bold: covered.length ? majority(covered.map((c) => c.bold)) : false,
+      italic: covered.length ? majority(covered.map((c) => c.italic)) : false,
+      color: covered.length ? averageColor(covered) : { r: 0, g: 0, b: 0 },
+      bg: { r: 255, g: 255, b: 255 },
+    };
+
+    if (!out.some((e) => overlaps(e, item))) out.push(item);
+  }
+
   return out;
 }
 

@@ -98,10 +98,3 @@ export const publicReadRateLimiter = createRateLimiter({
   message: "Too many requests. Slow down.",
 });
 
-export const piiDetectRateLimiter = createRateLimiter({
-  prefix: "rl:pii-detect",
-  tokens: 15,
-  window: "60 s",
-  keyFn: userOrIp,
-  message: "Too many requests. Slow down.",
-});

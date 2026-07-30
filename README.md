@@ -42,7 +42,7 @@ The App Router wraps pages in shared layout (theme tokens, fonts). Client pages 
 - Comments: threads, replies, voting
 - Uploads: resume + avatar via Cloudinary
 - Analysis: AI roast endpoint with caching via `roastHash`
-- **PII detection:** `POST /api/analysis/detect-pii` — Gemini extracts personal info (name, email, phone, location, profile links) from resume text so the frontend editor can highlight editable fields
+- **PII detection:** fully client-side — a regex heuristic plus MuPDF hyperlink annotations locate name/email/phone/links directly in the resume text so the frontend editor can highlight editable fields (no AI call, no server round-trip)
 - Projects module with optional AI evaluation
 - Recruiter search and candidate profile endpoints
 - MongoDB + Mongoose, validation, centralized errors, CORS + cookies, `GET /health`

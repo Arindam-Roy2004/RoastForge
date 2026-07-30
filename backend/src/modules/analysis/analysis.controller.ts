@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import Resume from "../resume/resume.model.js";
 import { generateContentHash } from "../../common/utils/hash.js";
-import { generateResumeRoast, normalizeRoastResult, detectPersonalInfo, type RoastResult } from "./analysis.service.js";
+import { generateResumeRoast, normalizeRoastResult, type RoastResult } from "./analysis.service.js";
 import redis from "../../common/config/redis.js";
 import ApiResponse from "../../common/utils/api-response.js";
 import ApiError from "../../common/utils/api-error.js";
@@ -128,14 +128,3 @@ export const analyzeResume = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-/**
- * Detects personal contact info (name, email, phone, location, links) in
- * resume text supplied by the client. Used by the upload-flow editor so the
- * user can locate and edit those fields before publishing. The text is the
- * user's own resume, extracted client-side; we never persist it here.
- */
-export const detectPii = async (req: Request, res: Response) => {
-  const text = req.body.text as string;
-  const result = await detectPersonalInfo(text);
-  return ApiResponse.ok(res, "Personal info detected", result);
-};

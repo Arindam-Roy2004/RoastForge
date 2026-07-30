@@ -277,19 +277,6 @@ export type RoastData = {
 export const analysisApi = {
   roast: (resumeId: string) =>
     apiFetch<RoastData>(`/api/analysis/${resumeId}`, { method: "POST" }),
-  detectPii: (text: string) =>
-    apiFetch<PersonalInfo>("/api/analysis/detect-pii", {
-      method: "POST",
-      body: JSON.stringify({ text }),
-    }),
-};
-
-export type PersonalInfo = {
-  name: string | null;
-  email: string | null;
-  phone: string | null;
-  location: string | null;
-  links: string[];
 };
 
 // ─── Comments ────────────────────────────────────────────────────────────────
