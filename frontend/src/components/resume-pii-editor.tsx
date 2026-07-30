@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { analysisApi } from "@/lib/api";
 import {
   buildEditedPdf,
   deriveEditableItems,
@@ -47,11 +48,23 @@ export function ResumePiiEditor({ file, onCancel, onApply }: Props) {
           return;
         }
 
-        // Personal info + link detection is fully local: a regex heuristic
-        // over the extracted text plus real MuPDF hyperlink annotations. No
-        // AI call, so this never fails or leaks resume text to a model.
+        // Links, emails, and phone numbers are found locally (deterministic
+        // patterns + real PDF hyperlink annotations). Name and location have
+        // no such pattern, so those come from the model. If that call fails
+        // we still highlight everything the local pass found.
+        let values: string[] = [];
+        try {
+          const res = await analysisApi.detectPii(loaded.fullText);
+          if (cancelled.current) return;
+          const d = res.data;
+          values = d ? [d.name, d.location].filter((v): v is string => !!v) : [];
+        } catch {
+          if (!cancelled.current) {
+            toast.message("Couldn't auto-detect your name — click it in the page to edit it.");
+          }
+        }
         if (!cancelled.current) {
-          setEditItems(deriveEditableItems(loaded.pages, loaded.lines, [], loaded.linkAnnotations));
+          setEditItems(deriveEditableItems(loaded.pages, loaded.lines, values, loaded.linkAnnotations));
         }
       } catch {
         if (!cancelled.current) setError("Could not open this PDF for editing.");

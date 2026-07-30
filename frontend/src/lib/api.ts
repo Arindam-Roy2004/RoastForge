@@ -277,6 +277,21 @@ export type RoastData = {
 export const analysisApi = {
   roast: (resumeId: string) =>
     apiFetch<RoastData>(`/api/analysis/${resumeId}`, { method: "POST" }),
+  detectPii: (text: string) =>
+    apiFetch<PersonalInfo>("/api/analysis/detect-pii", {
+      method: "POST",
+      body: JSON.stringify({ text }),
+    }),
+};
+
+/**
+ * Only the fields the client can't detect on its own. Links, emails, and
+ * phone numbers are found locally in `pdf-edit.ts` from deterministic
+ * patterns and real PDF hyperlink annotations.
+ */
+export type PersonalInfo = {
+  name: string | null;
+  location: string | null;
 };
 
 // ─── Comments ────────────────────────────────────────────────────────────────
