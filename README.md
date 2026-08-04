@@ -13,13 +13,13 @@ The stack is built with Express 5 + TypeScript + MongoDB on the backend and Next
 
 ## Architecture
 
-These diagrams live in [`docs/architecture/`](docs/architecture/) as PNGs. Below they are rendered as interactive **Mermaid diagrams** alongside reference image links.
+Below are the interactive **Mermaid diagrams** representing the system data model, backend API pipeline, and frontend application pipeline.
 
 ### Data Model
 
 Resumes sit at the core: each resume belongs to a user, collects reactions (`likes` collection—one row per viewer per resume with `reaction: "like" | "dislike"`), and anchors threaded comments and comment votes. Projects provide a parallel portfolio track for the same user. The user document holds a **derived** `talentMetrics.composite` score recomputed whenever resumes or reactions are modified.
 
-#### Entity Relationship Diagram (Mermaid)
+#### Entity Relationship Diagram
 
 ```mermaid
 erDiagram
@@ -92,8 +92,6 @@ erDiagram
     }
 ```
 
-![Entity-relationship overview: users, resumes, likes/reactions, comments, comment votes, projects](docs/architecture/data-model.png)
-
 ---
 
 ### Backend Pipeline
@@ -129,8 +127,6 @@ flowchart TD
     Gemini --> Database
 ```
 
-![Backend: Express middleware, routes, controllers, services, MongoDB, reaction and talent-score side flows](docs/architecture/backend-pipeline.png)
-
 ---
 
 ### Frontend Pipeline
@@ -152,8 +148,6 @@ flowchart LR
     NetworkCheck -->|Offline| OfflineQueue["LocalStorage Queue"]
     OfflineQueue -->|Reconnected| SyncAPI
 ```
-
-![Frontend: Next.js pages, layout/theme, auth + API layer, optimistic reactions and offline queue](docs/architecture/frontend-pipeline.png)
 
 ---
 
