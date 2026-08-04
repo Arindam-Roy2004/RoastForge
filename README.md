@@ -34,7 +34,7 @@ erDiagram
     COMMENT ||--o{ COMMENT_VOTE : receives
 
     USER {
-        ObjectId id PK
+        string id PK
         string name
         string email UK
         string googleId UK
@@ -44,8 +44,8 @@ erDiagram
     }
 
     RESUME {
-        ObjectId id PK
-        ObjectId userId FK
+        string id PK
+        string userId FK
         string title
         string name
         string fileUrl
@@ -57,32 +57,32 @@ erDiagram
     }
 
     LIKE {
-        ObjectId id PK
-        ObjectId resumeId FK
-        ObjectId userId FK
+        string id PK
+        string resumeId FK
+        string userId FK
         string reaction
     }
 
     COMMENT {
-        ObjectId id PK
-        ObjectId resumeId FK
-        ObjectId userId FK
+        string id PK
+        string resumeId FK
+        string userId FK
         string text
-        ObjectId parentId FK
+        string parentId FK
         int upvotesCount
         int downvotesCount
     }
 
     COMMENT_VOTE {
-        ObjectId id PK
-        ObjectId commentId FK
-        ObjectId userId FK
+        string id PK
+        string commentId FK
+        string userId FK
         string voteType
     }
 
     PROJECT {
-        ObjectId id PK
-        ObjectId userId FK
+        string id PK
+        string userId FK
         string title
         string description
         string techStack
@@ -102,31 +102,31 @@ Requests flow into Express, through security headers (`helmet`), CORS, body pars
 
 ```mermaid
 flowchart TD
-    Client["Client Request"] --> Express["Express App / Helmet / CORS / Cookies"]
-    Express --> AuthCheck{"Auth Middleware"}
-    AuthCheck -->|Valid JWT| Router["Module Routers"]
-    AuthCheck -->|Invalid| Err401["401 / 403 Response"]
+    Client["Client Request"] --> Express["Express Middleware Layer"]
+    Express --> AuthCheck{"Auth Guard"}
+    AuthCheck -->|Authorized| Router["Module Controllers"]
+    AuthCheck -->|Unauthorized| AuthErr["401 or 403 Response"]
 
-    Router --> AuthMod["Auth Module"]
-    Router --> ResumeMod["Resume Module"]
-    Router --> CommentMod["Comment Module"]
-    Router --> UploadMod["Upload Module"]
-    Router --> AnalysisMod["Analysis Module"]
-    Router --> ProjectMod["Project Module"]
-    Router --> RecruiterMod["Recruiter Module"]
+    Router --> AuthMod["Auth Service"]
+    Router --> ResumeMod["Resume Service"]
+    Router --> CommentMod["Comment Service"]
+    Router --> UploadMod["Upload Service"]
+    Router --> AnalysisMod["Analysis Service"]
+    Router --> ProjectMod["Project Service"]
+    Router --> RecruiterMod["Recruiter Service"]
 
-    AuthMod --> MongoDB[("MongoDB Database")]
-    ResumeMod --> MongoDB
-    CommentMod --> MongoDB
-    ProjectMod --> MongoDB
+    AuthMod --> Database[("MongoDB Database")]
+    ResumeMod --> Database
+    CommentMod --> Database
+    ProjectMod --> Database
 
-    UploadMod -->|Direct or Signed| Cloudinary["Cloudinary CDN"]
+    UploadMod --> Storage["Cloudinary Storage"]
     
-    ResumeMod -->|Reaction or Score Update| TalentCalc["Recalculate User Composite Talent Score"]
-    TalentCalc --> MongoDB
+    ResumeMod --> TalentCalc["Talent Score Aggregation"]
+    TalentCalc --> Database
 
-    AnalysisMod -->|Cache Miss| Gemini["Google Gemini API"]
-    Gemini -->|Persist Roast or PII| MongoDB
+    AnalysisMod --> Gemini["Google Gemini AI"]
+    Gemini --> Database
 ```
 
 ![Backend: Express middleware, routes, controllers, services, MongoDB, reaction and talent-score side flows](docs/architecture/backend-pipeline.png)
@@ -139,21 +139,18 @@ The Next.js App Router wraps pages in a root layout providing design system toke
 
 ```mermaid
 flowchart LR
-    AppRouter["Next.js App Router"] --> Layout["Root Layout & Design System"]
-    Layout --> Pages["Pages: Gallery, Detail, Profile, Upload, Recruiter, Projects"]
+    AppRouter["NextJS App Router"] --> Layout["Root Layout"]
+    Layout --> Pages["Client Pages"]
     Pages --> AuthStore["Zustand Auth Store"]
-    Pages --> ApiClient["Central API Client"]
+    Pages --> ApiClient["API Client"]
 
-    ApiClient -->|Authenticated Requests| BackendAPI["Backend Express API"]
+    ApiClient --> API["Express Backend API"]
 
-    subgraph ReactionFlow["Optimistic Reaction & Offline Queue"]
-        UserClick["User Clicks Reaction"] --> Optimistic["Optimistic UI Update"]
-        Optimistic --> NetworkCheck{"Online?"}
-        NetworkCheck -->|Yes| ReactReq["POST /api/resumes/:id/reaction"]
-        NetworkCheck -->|Offline| OfflineQueue["LocalStorage Queue"]
-        OfflineQueue -->|On Reconnect| Flush["Flush Pending Queue"]
-        Flush --> ReactReq
-    end
+    UserClick["User Reaction Click"] --> Optimistic["Optimistic UI Update"]
+    Optimistic --> NetworkCheck{"Network Status"}
+    NetworkCheck -->|Online| SyncAPI["Sync Reaction to API"]
+    NetworkCheck -->|Offline| OfflineQueue["LocalStorage Queue"]
+    OfflineQueue -->|Reconnected| SyncAPI
 ```
 
 ![Frontend: Next.js pages, layout/theme, auth + API layer, optimistic reactions and offline queue](docs/architecture/frontend-pipeline.png)
