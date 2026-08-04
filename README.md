@@ -137,7 +137,7 @@ The Next.js App Router wraps pages in a root layout providing design system toke
 flowchart LR
     AppRouter["NextJS App Router"] --> Layout["Root Layout"]
     Layout --> Pages["Client Pages"]
-    Pages --> AuthStore["Zustand Auth Store"]
+    Pages --> AuthStore["React Auth Context"]
     Pages --> ApiClient["API Client"]
 
     ApiClient --> API["Express Backend API"]
@@ -319,7 +319,7 @@ Stores side projects submitted by candidate users along with AI code quality eva
 - **Design System & Aesthetics**: Dark/light theme support using CSS custom properties, responsive typography, and Framer Motion micro-animations.
 - **Optimistic UI & Offline Queue**: Reaction buttons update counters instantly; failed network requests queue in `localStorage` and sync automatically when online.
 - **Interactive PDF PII Redaction Editor**: Local candidate extraction (emails, links, phone numbers, PDF hyperlink annotations) merged with AI-detected name/location markers.
-- **Global Auth & State**: Zustand global auth store with automatic token refreshing via central API client.
+- **Global Auth & State**: React Context API global auth provider (`AuthProvider` / `useAuth`) with automatic token refreshing via central API client.
 
 ---
 
