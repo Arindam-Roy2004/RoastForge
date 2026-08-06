@@ -184,9 +184,6 @@ export default function UploadPage() {
           </Button>
           <div className="min-w-0 flex-1">
             <h1 className="font-heading text-lg leading-none tracking-tight">Review your resume</h1>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {edited ? "Edits applied — this is what will be posted." : "This is what will be posted."}
-            </p>
           </div>
           <Button
             type="button"
@@ -244,8 +241,7 @@ export default function UploadPage() {
     <div className="w-full">
       {/* Centred over the two-card grid below, matching /try. */}
       <header className="mb-8 text-center">
-        <p className="eyebrow">Post to the gallery</p>
-        <h1 className="mt-2 text-3xl sm:text-4xl">Upload your resume</h1>
+        <h1 className="text-3xl sm:text-4xl">Upload your resume</h1>
       </header>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -347,11 +343,7 @@ export default function UploadPage() {
                   </Button>
                 )}
 
-                <p className="shrink-0 text-[11px] leading-relaxed text-muted-foreground">
-                  {edited
-                    ? "Personal info edited. Review your resume before posting, or Replace to start over."
-                    : <>Use <span className="font-medium text-foreground">Edit personal info</span> to remove your name, email, phone or links before uploading.</>}
-                </p>
+
               </div>
             )}
 
@@ -383,7 +375,7 @@ export default function UploadPage() {
                 className="h-10 rounded-lg border border-border bg-background text-sm shadow-none focus-visible:ring-2 focus-visible:ring-ring/40"
                 required
               />
-              <p className="text-[11px] text-muted-foreground">Shown on your gallery card.</p>
+
             </div>
 
             <div className="flex min-h-0 flex-1 flex-col gap-2.5">
@@ -465,7 +457,7 @@ export default function UploadPage() {
             setError(null);
             setEditorOpen(false);
             setView("review");
-            toast.success("Personal info updated. Review your resume below.");
+            toast.success("Personal info updated");
           }}
         />
       )}

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { AlertTriangle, ArrowRight, FileText, Lock, UploadCloud, X } from "lucide-react";
+import { AlertTriangle, ArrowRight, FileText, UploadCloud, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import FlameIcon from "@/components/icons/flame-icon";
 import { RoastScoreDial, RoastVerdictBars } from "@/components/roast-verdict";
@@ -42,47 +42,6 @@ function formatBytes(n: number): string {
 }
 
 type Phase = "idle" | "reading" | "roasting" | "done";
-
-/** Renders the two-step progress so the local-only read step is visible, not implied. */
-function PhaseSteps({ phase }: { phase: Phase }) {
-  const steps = [
-    { key: "reading", label: "Read in browser" },
-    { key: "roasting", label: "AI verdict" },
-  ] as const;
-
-  const activeIndex = phase === "reading" ? 0 : phase === "roasting" ? 1 : phase === "done" ? 2 : -1;
-
-  return (
-    <ol className="flex items-center gap-2" aria-label="Progress">
-      {steps.map((step, i) => {
-        const done = activeIndex > i;
-        const active = activeIndex === i;
-        return (
-          <li key={step.key} className="flex min-w-0 items-center gap-2">
-            <span
-              aria-hidden
-              className={cn(
-                "size-1.5 shrink-0 rounded-full border border-border transition-colors",
-                done && "bg-primary",
-                active && "bg-primary-strong",
-                !done && !active && "bg-background",
-              )}
-            />
-            <span
-              className={cn(
-                "label-mono truncate text-[0.625rem] transition-colors",
-                active || done ? "text-foreground" : "text-muted-foreground",
-              )}
-            >
-              {step.label}
-            </span>
-            {i < steps.length - 1 && <span aria-hidden className="h-px w-3 bg-border" />}
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
 
 export default function TryPage() {
   const router = useRouter();
@@ -177,8 +136,7 @@ export default function TryPage() {
     >
       {/* Centred over the two-card grid below, matching /upload. */}
       <header className="mb-8 text-center">
-        <p className="eyebrow">Guest · one free roast</p>
-        <h1 className="mt-2 text-3xl sm:text-4xl">Roast my resume</h1>
+        <h1 className="text-3xl sm:text-4xl">Roast my resume</h1>
       </header>
 
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
@@ -250,11 +208,6 @@ export default function TryPage() {
                   <p className="font-mono text-[11px] text-muted-foreground">
                     {formatBytes(file.size)} · PDF
                   </p>
-                  {busy && (
-                    <div className="mt-1">
-                      <PhaseSteps phase={phase} />
-                    </div>
-                  )}
                 </div>
 
                 <Button
@@ -265,13 +218,7 @@ export default function TryPage() {
                   className="label-mono h-11 w-full shrink-0 gap-2 rounded-lg border border-border text-[0.6875rem] shadow-[var(--shadow-sm)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)] disabled:opacity-60"
                 >
                   <FlameIcon size={16} strokeWidth={2.25} aria-hidden />
-                  {phase === "reading"
-                    ? "Reading PDF…"
-                    : phase === "roasting"
-                      ? "Forging roast…"
-                      : phase === "done"
-                        ? "Roast complete"
-                        : "Roast my resume"}
+                  {busy ? "Roasting…" : phase === "done" ? "Done" : "Roast my resume"}
                 </Button>
               </div>
             )}
@@ -282,11 +229,7 @@ export default function TryPage() {
               </div>
             )}
 
-            {/* The one trust claim worth making, and the reason this flow exists. */}
-            <p className="mt-3 flex shrink-0 items-center gap-2 text-[11px] text-muted-foreground">
-              <Lock className="size-3.5 shrink-0" strokeWidth={2.25} aria-hidden />
-              Never uploaded. Read in your browser.
-            </p>
+
           </CardContent>
         </Card>
 
@@ -294,7 +237,6 @@ export default function TryPage() {
         <Card className={CARD_SHELL}>
           <CardHeader className={CARD_HEAD}>
             <CardTitle className="text-sm">The verdict</CardTitle>
-            <CardDescription className="text-xs">Score plus a five-point breakdown</CardDescription>
           </CardHeader>
 
           <CardContent className="flex min-h-0 flex-1 flex-col p-0">
@@ -315,10 +257,7 @@ export default function TryPage() {
                       <FlameIcon size={48} className="text-destructive" strokeWidth={2} />
                     </motion.div>
                   </div>
-                  <p className="label-mono animate-pulse text-xs text-destructive">
-                    {phase === "reading" ? "Reading your PDF" : "Forging roast"}
-                  </p>
-                  <div className="mt-2 w-full space-y-3">
+                  <div className="w-full space-y-3">
                     <div className="h-2.5 animate-pulse border border-border bg-muted" />
                     <div className="h-2.5 w-4/5 animate-pulse border border-border bg-muted" />
                     <div className="h-2.5 w-3/5 animate-pulse border border-border bg-muted" />
@@ -362,13 +301,7 @@ export default function TryPage() {
                         </Button>
                       </Link>
                     </>
-                  ) : (
-                    !error && (
-                      <p className="max-w-[220px] text-sm text-muted-foreground">
-                        Your score lands here.
-                      </p>
-                    )
-                  )}
+                  ) : null}
                 </motion.div>
               )}
 
