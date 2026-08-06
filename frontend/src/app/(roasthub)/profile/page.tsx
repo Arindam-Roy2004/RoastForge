@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { ResumeCard } from "@/components/resume-card";
 import { useAuth } from "@/store/auth";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 import { motion } from "motion/react";
 
 const pageVariants = {
@@ -82,7 +83,8 @@ type Resume = {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user: authUser, loading: authLoading, logout } = useAuth();
+  const { logout } = useAuth();
+  const { user: authUser, loading: authLoading } = useRequireAuth();
   const [user, setUser] = useState<User | null>(null);
   const [detailLoading, setDetailLoading] = useState(true);
   const [resumes, setResumes] = useState<Resume[]>([]);
@@ -216,21 +218,14 @@ export default function ProfilePage() {
     );
   }
 
+  // Signed-out visitors are redirected to /login by useRequireAuth; render a
+  // quiet placeholder for the frame before that navigation commits.
   if (!authUser) {
     return (
-      <div className="flex items-center justify-center p-4 py-16">
-        <Card className="w-full max-w-md border border-border rounded-lg shadow-[var(--shadow-md)] text-center p-8 bg-card flex flex-col items-center">
-          <div className="w-16 h-16 bg-muted border border-border rounded-full flex items-center justify-center mb-6 shadow-[var(--shadow-2xs)]">
-            <LogOut className="w-6 h-6 text-muted-foreground" />
-          </div>
-          <h1 className="font-heading text-3xl mb-3 tracking-wide">Sign In Required</h1>
-          <p className="text-sm text-muted-foreground mb-8 text-balance">You need to sign in to view your profile, manage your resumes, and interact with the community.</p>
-          <Link href="/login" className="w-full">
-            <Button className="w-full border border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading tracking-wide">
-              Sign In Now
-            </Button>
-          </Link>
-        </Card>
+      <div className="flex items-center justify-center py-24">
+        <p className="font-heading text-sm uppercase tracking-wider text-muted-foreground">
+          Redirecting to sign in…
+        </p>
       </div>
     );
   }
@@ -427,8 +422,8 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <Card className="border border-border rounded-lg shadow-[var(--shadow-sm)] bg-card p-8 text-center">
-                  <CardDescription className="text-base font-medium text-foreground mb-4">
-                    Recruiter accounts don&apos;t upload resumes or projects. Use the dashboard to search candidates.
+                  <CardDescription className="mb-4 text-base font-medium text-foreground">
+                    Recruiters search candidates from the dashboard.
                   </CardDescription>
                   <Link href="/recruiter">
                     <Button className="border border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading tracking-wide px-6 cursor-pointer">
@@ -445,10 +440,9 @@ export default function ProfilePage() {
             ) : resumes.length === 0 ? (
               <Card className="border border-border border-dashed bg-muted/30 rounded-lg text-center p-10 flex-1 flex flex-col items-center justify-center shadow-none hover:shadow-[var(--shadow-sm)] hover:translate-y-0 active:translate-y-0 transition-colors">
                 <FileText className="w-8 h-8 text-muted-foreground mb-4 opacity-50" />
-                <CardDescription className="text-base font-medium text-foreground mb-1">
-                  No resumes uploaded yet
+                <CardDescription className="mb-6 text-base font-medium text-foreground">
+                  No resumes yet
                 </CardDescription>
-                <p className="text-sm text-muted-foreground mb-6">Drop your first PDF to get roasted by the community.</p>
                 <Link href="/upload">
                   <Button className="border border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading tracking-wide px-6 cursor-pointer">
                     Upload Resume

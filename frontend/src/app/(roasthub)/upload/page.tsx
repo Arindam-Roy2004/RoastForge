@@ -8,9 +8,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
-import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Eye, FileText, Pencil, RefreshCw, Send, UploadCloud, X } from "lucide-react";
 import { useAuth } from "@/store/auth";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,7 +60,10 @@ type View = "form" | "review";
 
 export default function UploadPage() {
   const router = useRouter();
-  const { user, loading, refresh } = useAuth();
+  const { refresh } = useAuth();
+  // Sends signed-out visitors to /login?next=/upload instead of parking them on
+  // a page they can't use.
+  const { user, loading } = useRequireAuth();
 
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
@@ -149,18 +152,13 @@ export default function UploadPage() {
     );
   }
 
+  // useRequireAuth has already scheduled the redirect to /login at this point.
   if (!user) {
     return (
-      <div className="flex items-center justify-center p-4 py-20">
-        <Card className="w-full max-w-md border border-border rounded-lg shadow-[var(--shadow-md)] text-center p-8 bg-card">
-          <h1 className="font-heading text-3xl mb-3 tracking-tighter">Sign in required</h1>
-          <p className="text-sm text-muted-foreground mb-6 font-medium">Sign in to upload your resume for roasting.</p>
-          <Link href="/login">
-            <Button size="lg" className="font-heading tracking-wide border border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg">
-              Sign in
-            </Button>
-          </Link>
-        </Card>
+      <div className="flex items-center justify-center py-24">
+        <p className="font-heading text-sm uppercase tracking-wider text-muted-foreground">
+          Redirecting to sign in…
+        </p>
       </div>
     );
   }
@@ -244,11 +242,10 @@ export default function UploadPage() {
   // ── Form view: upload + details, no preview clutter ───────────────────────
   return (
     <div className="w-full">
-      <header className="mb-8">
-        <h1 className="font-heading text-3xl sm:text-4xl tracking-tight">Upload your resume</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Drop a PDF, redact your personal details if you like, pick a card style, then send it to the forge.
-        </p>
+      {/* Centred over the two-card grid below, matching /try. */}
+      <header className="mb-8 text-center">
+        <p className="eyebrow">Post to the gallery</p>
+        <h1 className="mt-2 text-3xl sm:text-4xl">Upload your resume</h1>
       </header>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

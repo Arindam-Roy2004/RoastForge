@@ -17,6 +17,7 @@ import { Search, ChevronLeft, ChevronRight, X, SlidersHorizontal, MessageSquare 
 import { motion } from "motion/react";
 import { TextEffect } from "@/components/motion-primitives/text-effect";
 import { HeroShowcase } from "@/components/hero-media";
+import { useHashScroll } from "@/hooks/use-hash-scroll";
 import { useAuth } from "@/store/auth";
 import { toast } from "sonner";
 
@@ -244,6 +245,10 @@ export default function HomePage() {
     return () => window.removeEventListener("online", onOnline);
   }, [load]);
 
+  // The gallery is fetched client-side, so a `#hall-of-shame` link can't be left
+  // to the browser's own hash handling — it resolves before the rows exist.
+  useHashScroll(!loading);
+
   const changeSort = (s: SortTab) => {
     if (s === sort) return;
     setSort(s);
@@ -350,13 +355,18 @@ export default function HomePage() {
         </motion.div>
       </HeroShowcase>
 
-      {/* Gallery Section */}
-      <section className="w-full">
+      {/* Gallery Section — the navbar's "Browse" link targets this anchor.
+          scroll-mt clears the sticky h-16 navbar so the heading isn't hidden
+          under it when jumped to. */}
+      <section id="hall-of-shame" aria-labelledby="hall-of-shame-heading" className="w-full scroll-mt-24">
         {/* Header row: title + sort + pagination */}
         <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-3">
-              <h2 className="text-3xl md:text-4xl font-heading font-bold tracking-tighter text-foreground">
+              <h2
+                id="hall-of-shame-heading"
+                className="text-3xl md:text-4xl font-heading font-bold tracking-tighter text-foreground"
+              >
                 Hall of Shame
               </h2>
               {!loading && total > 0 && (

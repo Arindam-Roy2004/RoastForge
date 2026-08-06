@@ -44,7 +44,10 @@ export default function Navbar() {
           aria-label="Main navigation"
           className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          <Link href="/" className={NAV_LINK} data-testid="link-browse">Browse</Link>
+          {/* Anchored at the gallery rather than "/" so it also does something
+              when you're already on the home page (where the hero fills the
+              viewport and the gallery sits below the fold). */}
+          <Link href="/#hall-of-shame" className={NAV_LINK} data-testid="link-browse">Browse</Link>
           {isAuthenticated && (
             <>
               {user?.role !== "recruiter" && (

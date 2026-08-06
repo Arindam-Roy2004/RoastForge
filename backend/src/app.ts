@@ -11,25 +11,7 @@ import projectRoute from "./modules/project/project.routes.js";
 import recruiterRoute from "./modules/recruiter/recruiter.routes.js";
 import { errorHandler } from "./common/middleware/error.middleware.js";
 import { sanitizeBody } from "./common/middleware/security.middleware.js";
-
-/** Comma-separated FRONTEND_ORIGIN (e.g. prod + previews). Required on Vercel for split deploys. */
-function allowedBrowserOrigins(): string[] {
-  const raw = process.env.FRONTEND_ORIGIN ?? "http://localhost:3000";
-  return raw
-    .split(",")
-    .map((o) => o.trim().replace(/\/$/, ""))
-    .filter(Boolean);
-}
-
-// Every Vercel PR preview gets a unique hostname (e.g. `frontend-git-feat-x-user.vercel.app`),
-// so exact-match CORS would reject them. Opt-in via ALLOW_VERCEL_PREVIEWS=true so we don't
-// accidentally trust previews in environments where they shouldn't be allowed.
-const VERCEL_PREVIEW_RE = /^https:\/\/[\w-]+\.vercel\.app$/;
-function isAllowedOrigin(origin: string): boolean {
-  if (allowedBrowserOrigins().includes(origin)) return true;
-  if (process.env.ALLOW_VERCEL_PREVIEWS === "true" && VERCEL_PREVIEW_RE.test(origin)) return true;
-  return false;
-}
+import { isAllowedBrowserOrigin } from "./common/config/origins.js";
 
 /**
  * Resolves `trust proxy` from env. Defaults to 1 (Vercel / single proxy).
@@ -62,7 +44,7 @@ app.use(
         callback(null, true);
         return;
       }
-      if (isAllowedOrigin(origin)) {
+      if (isAllowedBrowserOrigin(origin)) {
         callback(null, true);
         return;
       }

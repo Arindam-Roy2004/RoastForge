@@ -5,7 +5,8 @@ import { ResumeReactionControls } from "@/components/resume-reaction-controls";
 import { cn } from "@/lib/utils";
 import { resumeApi, commentApi, analysisApi, type Resume, type Comment, type RoastData } from "@/lib/api";
 import { enqueueResumeReaction, flushQueuedResumeReactions } from "@/lib/resume-reaction-sync";
-import { coalesceVerdictBars, isCompleteRoastPayload, verdictBarFillClass } from "@/lib/verdict-dimensions";
+import { coalesceVerdictBars, isCompleteRoastPayload } from "@/lib/verdict-dimensions";
+import { RoastScoreDial, RoastVerdictBars } from "@/components/roast-verdict";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -100,7 +101,6 @@ export default function ResumeDetail() {
       return {
         cached: true,
         score: ar.score,
-        roastText: ar.roastText,
         verdictBars: coalesceVerdictBars(ar.verdictBars),
       };
     });
@@ -233,13 +233,6 @@ export default function ResumeDetail() {
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to delete resume");
     }
-  }
-
-  // Score color helper
-  function scoreColor(score: number) {
-    if (score >= 70) return "text-green-600";
-    if (score >= 40) return "text-yellow-600";
-    return "text-destructive";
   }
 
   if (loading) {
@@ -452,49 +445,9 @@ export default function ResumeDetail() {
                         transition={{ type: "spring", stiffness: 200 }}
                         className="space-y-3.5 p-4 flex-1 min-h-0 overflow-y-auto scrollbar-thin"
                       >
-                        <div className="flex flex-col items-center gap-1 pb-2 border-b border-border">
-                          <motion.div
-                            initial={{ scale: 0.5 }}
-                            animate={{ scale: 1 }}
-                            transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-                            className="w-20 h-20 rounded-full border border-border shadow-[var(--shadow-sm)] flex flex-col items-center justify-center bg-background gap-0"
-                          >
-                            <span className={cn("text-3xl font-heading leading-none", scoreColor(roastData!.score))}>
-                              {roastData!.score}
-                            </span>
-                          </motion.div>
-                          <p className="text-center text-[11px] text-muted-foreground font-bold uppercase tracking-wide px-2">
-                            {roastData!.score >= 70 ? "Not terrible." : roastData!.score >= 40 ? "Mediocre at best." : "Brutal."}
-                          </p>
-                        </div>
+                        <RoastScoreDial score={roastData!.score} />
 
-                        {/* Verdict Bars Grid */}
-                        <div className="border border-border bg-muted/30 p-3 overscroll-contain">
-                          <h4 className="font-heading text-xs mb-2.5 tracking-wide flex items-center gap-2">
-                            Verdict <span className="text-[10px] font-sans font-normal text-muted-foreground normal-case">(1–5 each)</span>
-                          </h4>
-                          <div className="space-y-2.5">
-                            {coalesceVerdictBars(roastData!.verdictBars).map((bar) => (
-                              <div key={bar.id} className="space-y-1">
-                                <div className="flex justify-between items-baseline gap-2 text-[11px] font-bold uppercase tracking-tight">
-                                  <span className="text-foreground leading-tight min-w-0">{bar.label}</span>
-                                  <span className="shrink-0 tabular-nums text-muted-foreground">{bar.score}/5</span>
-                                </div>
-                                <div className="flex gap-0.5 w-full" role="img" aria-label={`${bar.label}: ${bar.score} out of 5`}>
-                                  {[1, 2, 3, 4, 5].map((step) => (
-                                    <div
-                                      key={step}
-                                      className={cn(
-                                        "flex-1 h-2.5 min-w-0 border border-border shadow-[var(--shadow-2xs)]",
-                                        step <= bar.score ? verdictBarFillClass(bar.score) : "bg-background",
-                                      )}
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+                        <RoastVerdictBars bars={roastData!.verdictBars} />
 
                         <Button
                           type="button"

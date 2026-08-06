@@ -47,11 +47,6 @@ export default function Footer() {
             </span>
             <ul className="flex flex-wrap items-center gap-x-6 gap-y-2">
               <li>
-                <Link href="/" className={linkCls} data-testid="footer-link-home">
-                  Browse
-                </Link>
-              </li>
-              <li>
                 {isRecruiter ? (
                   <Link
                     href="/recruiter"

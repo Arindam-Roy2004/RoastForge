@@ -1,16 +1,14 @@
 "use client";
 
-import { display, body } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/store/auth";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 import { toast } from "sonner";
 import { Plus, Trash2, ExternalLink, Code, Sparkles } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardFooter, CardDescription, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -42,7 +40,7 @@ const itemVariants = {
 
 export default function ProjectsPage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useRequireAuth();
   const [list, setList] = useState<Project[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -74,14 +72,8 @@ export default function ProjectsPage() {
 
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center p-4 py-16 min-h-[40vh]">
-        <Card className="w-full max-w-md border border-border rounded-lg shadow-[var(--shadow-md)] bg-card p-8">
-          <CardTitle className="font-heading text-center text-xl tracking-wide text-muted-foreground animate-pulse">Loading…</CardTitle>
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <Skeleton className="h-10 w-full border border-border rounded-lg animate-pulse" />
-            <Skeleton className="h-10 w-full border border-border rounded-lg animate-pulse" />
-          </div>
-        </Card>
+      <div className="flex min-h-[40vh] items-center justify-center py-16">
+        <p className="label-mono text-xs text-muted-foreground">Loading…</p>
       </div>
     );
   }
@@ -117,26 +109,17 @@ export default function ProjectsPage() {
 
   if (user?.role === "recruiter") {
     return (
-      <div className="flex items-center justify-center p-4 py-16">
-        <Card className="w-full max-w-md border border-border rounded-lg shadow-[var(--shadow-md)] bg-card text-center p-8">
-          <CardTitle className="font-heading text-xl tracking-wide">Redirecting…</CardTitle>
-        </Card>
+      <div className="flex items-center justify-center py-24">
+        <p className="label-mono text-xs text-muted-foreground">Redirecting…</p>
       </div>
     );
   }
 
+  // useRequireAuth has already scheduled the redirect to /login.
   if (!user) {
     return (
-      <div className="flex items-center justify-center p-4 py-16">
-        <Card className="w-full max-w-md border border-border rounded-lg shadow-[var(--shadow-md)] text-center p-8 bg-card">
-          <h1 className="font-heading text-3xl mb-4 tracking-tighter text-foreground">Sign In Required</h1>
-          <p className="text-sm text-muted-foreground mb-6">Sign in to add and manage your projects.</p>
-          <Link href="/login">
-            <Button className="border border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading tracking-wide px-8 h-12 cursor-pointer">
-              Sign In Now
-            </Button>
-          </Link>
-        </Card>
+      <div className="flex items-center justify-center py-24">
+        <p className="label-mono text-xs text-muted-foreground">Redirecting to sign in…</p>
       </div>
     );
   }
@@ -150,8 +133,8 @@ export default function ProjectsPage() {
     >
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-4xl md:text-5xl font-heading tracking-tighter text-foreground mb-2">Projects</h1>
-          <p className="text-muted-foreground text-lg tracking-tight">Showcase what you've built beyond your resume.</p>
+          <p className="eyebrow">Portfolio</p>
+          <h1 className="mt-2 text-3xl sm:text-4xl">Projects</h1>
         </div>
 
         <Dialog open={open} onOpenChange={setOpen}>

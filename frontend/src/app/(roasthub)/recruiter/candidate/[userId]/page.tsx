@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useAuth } from "@/store/auth";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 import { recruiterApi, type RecruiterCandidateProfile } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ const itemVariants = {
 export default function RecruiterCandidateProfilePage() {
   const { userId } = useParams<{ userId: string }>();
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useRequireAuth();
   const [data, setData] = useState<RecruiterCandidateProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -67,18 +67,11 @@ export default function RecruiterCandidateProfilePage() {
     );
   }
 
+  // useRequireAuth has already scheduled the redirect to /login.
   if (!user) {
     return (
-      <div className="mx-auto w-full max-w-md">
-        <Card className="border border-border rounded-lg shadow-[var(--shadow-md)] p-8 text-center bg-card">
-          <CardTitle className="font-heading text-2xl mb-4 tracking-tighter ">Sign in</CardTitle>
-          <p className="text-muted-foreground text-sm mb-6">Recruiters must sign in to view candidate portfolios.</p>
-          <Link href="/login">
-            <Button className="w-full border border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 rounded-lg font-heading">
-              Sign In
-            </Button>
-          </Link>
-        </Card>
+      <div className="flex items-center justify-center py-24">
+        <p className="label-mono text-xs text-muted-foreground">Redirecting to sign in…</p>
       </div>
     );
   }
@@ -86,14 +79,13 @@ export default function RecruiterCandidateProfilePage() {
   if (user.role !== "recruiter" || error) {
     return (
       <div className="mx-auto w-full max-w-lg text-center">
-        <Card className="border border-border rounded-lg shadow-[var(--shadow-md)] p-8 bg-card">
-          <Briefcase className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-          <h1 className="font-heading text-2xl  mb-2">Unavailable</h1>
-          <p className="text-muted-foreground text-sm mb-6">{error || "This page is for recruiter accounts only."}</p>
+        <Card className="rounded-lg border border-border bg-card p-8 shadow-[var(--shadow-md)]">
+          <Briefcase className="mx-auto mb-4 size-10 text-muted-foreground" aria-hidden />
+          <h1 className="mb-6 text-2xl">{error || "Recruiters only"}</h1>
           <Button
             variant="outline"
             onClick={() => router.push("/")}
-            className="border border-border rounded-lg font-heading shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5"
+            className="rounded-lg border border-border shadow-[var(--shadow-xs)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)]"
           >
             Hall of Shame
           </Button>
@@ -105,14 +97,13 @@ export default function RecruiterCandidateProfilePage() {
   if (!data) {
     return (
       <div className="mx-auto w-full max-w-lg text-center">
-        <Card className="border border-border rounded-lg shadow-[var(--shadow-md)] p-8 bg-card">
-          <UserRound className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-          <h1 className="font-heading text-2xl mb-2">Profile not found</h1>
-          <p className="text-muted-foreground text-sm mb-6">This candidate profile is unavailable or no longer exists.</p>
+        <Card className="rounded-lg border border-border bg-card p-8 shadow-[var(--shadow-md)]">
+          <UserRound className="mx-auto mb-4 size-10 text-muted-foreground" aria-hidden />
+          <h1 className="mb-6 text-2xl">Profile not found</h1>
           <Button
             variant="outline"
             onClick={() => router.push("/recruiter")}
-            className="border border-border rounded-lg font-heading shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5"
+            className="rounded-lg border border-border shadow-[var(--shadow-xs)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)]"
           >
             Back to candidates
           </Button>

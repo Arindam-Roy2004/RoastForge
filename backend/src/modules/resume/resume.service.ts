@@ -26,6 +26,20 @@ function stripPrivateRoastFields<T extends Record<string, unknown>>(doc: T): T {
   return out;
 }
 
+/**
+ * Drops `aiRoast.roastText` from an owner's payload.
+ *
+ * The prose is the model's scoring rationale, not UI copy — no screen renders
+ * it. It stays in the database as the owner's record; there's just no reason to
+ * ship a few hundred characters the client immediately discards.
+ */
+function stripRoastProse<T extends Record<string, unknown>>(doc: T): T {
+  const roast = doc.aiRoast;
+  if (!roast || typeof roast !== "object") return doc;
+  const { roastText: _roastText, ...rest } = roast as Record<string, unknown>;
+  return { ...doc, aiRoast: rest };
+}
+
 function resumeOwnerId(resume: { userId: unknown }): string {
   const u = resume.userId as { _id?: mongoose.Types.ObjectId } | mongoose.Types.ObjectId | string;
   if (u && typeof u === "object" && "_id" in u && u._id) return u._id.toString();
@@ -141,7 +155,7 @@ export const getResumeById = async (id: string, viewerId?: string) => {
   const obj = resume.toObject() as Record<string, unknown>;
   const ownerId = resumeOwnerId(resume);
   const isOwner = Boolean(viewerId && viewerId === ownerId);
-  const safe = isOwner ? obj : stripPrivateRoastFields(obj);
+  const safe = isOwner ? stripRoastProse(obj) : stripPrivateRoastFields(obj);
 
   return {
     ...safe,

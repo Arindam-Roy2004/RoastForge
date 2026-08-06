@@ -1,13 +1,12 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
 import { useCallback, useState } from "react";
-import { useAuth } from "@/store/auth";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 import { toast } from "sonner";
-import { Search, Briefcase, UserX, Loader2, FileText, ArrowLeft } from "lucide-react";
+import { Search, Briefcase, UserX, FileText, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +27,7 @@ type CandidateRow = {
 };
 
 export default function RecruiterPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useRequireAuth();
   const [skills, setSkills] = useState("");
   const [minScore, setMinScore] = useState("");
   const [minTalent, setMinTalent] = useState("");
@@ -52,46 +51,33 @@ export default function RecruiterPage() {
 
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center p-4 py-16 min-h-[40vh]">
-        <Card className="w-full max-w-md border border-border rounded-lg shadow-[var(--shadow-md)] bg-card text-center p-8 flex flex-col items-center">
-          <Loader2 className="w-10 h-10 text-muted-foreground animate-spin mb-4" />
-          <CardTitle className="font-heading  text-xl mb-1 tracking-tighter">Loading…</CardTitle>
-          <CardDescription className="font-medium">Checking your session.</CardDescription>
-        </Card>
+      <div className="flex min-h-[40vh] items-center justify-center py-16">
+        <p className="label-mono text-xs text-muted-foreground">Loading…</p>
       </div>
     );
   }
 
+  // useRequireAuth has already scheduled the redirect to /login.
   if (!user) {
     return (
-      <div className="flex items-center justify-center p-4 py-16">
-        <Card className="w-full max-w-md border border-border rounded-lg shadow-[var(--shadow-md)] bg-card text-center p-8 flex flex-col items-center">
-          <div className="w-16 h-16 bg-muted border border-border rounded-full flex items-center justify-center mb-6 shadow-[var(--shadow-xs)]">
-            <Briefcase className="w-6 h-6 text-muted-foreground" />
-          </div>
-          <CardTitle className="font-heading  text-3xl mb-3 tracking-tighter">Recruiter Access</CardTitle>
-          <CardDescription className="mb-8 font-medium">Sign in with a recruiter account to discover candidates.</CardDescription>
-          <Link href="/login" className="w-full">
-            <Button className="w-full border border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading text-lg h-12 tracking-wide">
-              Sign In
-            </Button>
-          </Link>
-        </Card>
+      <div className="flex items-center justify-center py-24">
+        <p className="label-mono text-xs text-muted-foreground">Redirecting to sign in…</p>
       </div>
     );
   }
 
+  // Signed in, but as a candidate. A redirect would fight the navbar link, so
+  // this stays an explicit dead end with a way back.
   if (user.role !== "recruiter") {
     return (
       <div className="flex items-center justify-center p-4 py-16">
-        <Card className="w-full max-w-md border border-border rounded-lg shadow-[var(--shadow-md)] bg-card text-center p-8 flex flex-col items-center">
-          <div className="w-16 h-16 bg-muted border border-border rounded-full flex items-center justify-center mb-6 shadow-[var(--shadow-xs)]">
-            <Briefcase className="w-6 h-6 text-muted-foreground" />
+        <Card className="flex w-full max-w-md flex-col items-center rounded-lg border border-border bg-card p-8 text-center shadow-[var(--shadow-md)]">
+          <div className="mb-6 flex size-16 items-center justify-center rounded-full border border-border bg-muted shadow-[var(--shadow-xs)]">
+            <Briefcase className="size-6 text-muted-foreground" />
           </div>
-          <CardTitle className="font-heading  text-2xl mb-3 tracking-tighter">Recruiters only</CardTitle>
-          <CardDescription className="mb-6 font-medium">This workspace is for recruiter accounts.</CardDescription>
+          <CardTitle className="mb-6 text-2xl">Recruiters only</CardTitle>
           <Link href="/" className="w-full">
-            <Button variant="outline" className="w-full border border-border rounded-lg font-heading h-12">
+            <Button variant="outline" className="h-11 w-full rounded-lg border border-border">
               Back to hub
             </Button>
           </Link>
@@ -103,12 +89,10 @@ export default function RecruiterPage() {
   return (
     <div className="w-full space-y-8">
       <div>
-          <h1 className="text-4xl font-heading flex items-center gap-3 tracking-tighter ">
-          <Briefcase className="w-8 h-8 text-primary-strong" /> Recruiter Discovery
+        <p className="eyebrow">Identity hidden until opted in</p>
+        <h1 className="mt-2 flex items-center gap-3 text-3xl sm:text-4xl">
+          <Briefcase className="size-7 text-primary-strong" aria-hidden /> Recruiter Discovery
         </h1>
-        <p className="text-muted-foreground mt-2 font-medium">
-          Filter candidates by skills, AI score, talent composite, and role. Identity is hidden until opted in.
-        </p>
       </div>
 
       <Card className="border border-border rounded-lg shadow-[var(--shadow-md)] bg-card">

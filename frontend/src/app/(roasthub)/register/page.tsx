@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import FlameIcon from "@/components/icons/flame-icon";
+import { GuestTrialOption } from "@/components/guest-trial-option";
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { useAuth } from "@/store/auth";
 import { useTheme } from "@/store/theme";
@@ -133,6 +134,8 @@ export default function RegisterPage() {
             <p className="mt-6 text-[10px] text-center text-muted-foreground/70 font-medium tracking-wide max-w-[280px]">
               We only use your Google name &amp; email. We never post on your behalf.
             </p>
+
+            <GuestTrialOption />
           </div>
         </div>
 

@@ -65,8 +65,8 @@ export default function OnboardingRolePage() {
             <FlameIcon size={24} className="text-primary-foreground" strokeWidth={2} />
           </motion.div>
           <CardTitle className="text-3xl font-heading tracking-tighter">Pick Your Side</CardTitle>
-          <CardDescription className="text-muted-foreground font-medium">
-            We tailor RoastForge differently for candidates and recruiters. You can change this later in your profile.
+          <CardDescription className="font-medium text-muted-foreground">
+            You can change this later in your profile.
           </CardDescription>
         </CardHeader>
         <CardContent className="px-6 pb-8 space-y-6 sm:px-8">

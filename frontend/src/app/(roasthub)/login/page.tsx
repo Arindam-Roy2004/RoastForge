@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import FlameIcon from "@/components/icons/flame-icon";
+import { GuestTrialOption } from "@/components/guest-trial-option";
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { useAuth } from "@/store/auth";
 import { useTheme } from "@/store/theme";
@@ -15,13 +16,35 @@ import { motion } from "motion/react";
  * routed onward to /onboarding/role to pick Candidate or Recruiter; returning
  * users go straight to the gallery.
  */
+/**
+ * Where to send the user after a successful sign-in.
+ *
+ * `useRequireAuth` appends `?next=<path>` when it bounces someone off a gated
+ * page, so they land back where they were headed. Only same-site absolute paths
+ * are honoured — accepting an arbitrary value here would turn the login page
+ * into an open redirect that phishing links could point at another host.
+ */
+function safeNextPath(raw: string | null): string | null {
+  if (!raw) return null;
+  if (!raw.startsWith("/") || raw.startsWith("//")) return null;
+  return raw;
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const { signInWithGoogle } = useAuth();
   const { theme, mounted } = useTheme();
   const [busy, setBusy] = useState(false);
+  const [next, setNext] = useState<string | null>(null);
 
   const isDark = mounted && theme === "dark";
+
+  // Read from `window` rather than `useSearchParams` so this page doesn't need a
+  // Suspense boundary to stay statically renderable.
+  useEffect(() => {
+    const raw = new URLSearchParams(window.location.search).get("next");
+    setNext(safeNextPath(raw));
+  }, []);
 
   async function onGoogleSuccess(res: CredentialResponse) {
     if (!res.credential) {
@@ -32,7 +55,13 @@ export default function LoginPage() {
     try {
       const user = await signInWithGoogle(res.credential);
       toast.success("Welcome to RoastForge");
-      router.push(user.onboardingCompleted === false ? "/onboarding/role" : "/");
+      // Role picker wins over `next`: a brand-new account can't use a gated page
+      // until it has chosen Candidate or Recruiter anyway.
+      if (user.onboardingCompleted === false) {
+        router.push("/onboarding/role");
+        return;
+      }
+      router.push(next ?? "/");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Sign-in failed");
     } finally {
@@ -124,6 +153,8 @@ export default function LoginPage() {
             <p className="mt-6 text-[10px] text-center text-muted-foreground/70 font-medium tracking-wide max-w-[280px]">
               We only use your Google name &amp; email. We never post on your behalf.
             </p>
+
+            <GuestTrialOption />
           </div>
         </div>
 

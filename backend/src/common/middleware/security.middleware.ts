@@ -1,6 +1,7 @@
 import { ipKeyGenerator } from "express-rate-limit";
 import type { NextFunction, Request, Response } from "express";
 import { createRateLimiter } from "./rate-limit.js";
+import { createDailyBudgetGuard } from "./daily-budget.js";
 
 /**
  * Recursively strips keys that start with `$` or contain `.` from an object.
@@ -105,4 +106,37 @@ export const piiDetectRateLimiter = createRateLimiter({
   window: "60 s",
   keyFn: userOrIp,
   message: "Too many requests. Slow down.",
+});
+
+// ─── Public trial roast (no account) ─────────────────────────────────────────
+//
+// `POST /api/analysis/try` is the only unauthenticated endpoint that spends
+// money, so it gets two independent brakes: one per visitor, one global.
+
+/**
+ * Exactly one free roast per IP per day.
+ *
+ * Keyed strictly on IP. There's no user to key on, and honouring any
+ * client-supplied identifier (header, cookie, body field) would just hand the
+ * caller a free way to reset their own bucket. A single token also makes a
+ * separate burst limiter pointless — the second request of the day is already
+ * refused.
+ */
+export const tryRoastRateLimiter = createRateLimiter({
+  prefix: "rl:try-roast",
+  tokens: 1,
+  window: "86400 s",
+  keyFn: (req: Request) => `ip:${ipKeyGenerator(req.ip ?? "")}`,
+  message: "You've used your free roast for today. Sign in with Google for unlimited roasts.",
+});
+
+/**
+ * Caps total spend across every caller, which the per-IP limits above cannot do
+ * (a distributed script gets a fresh bucket per address). Override the ceiling
+ * with TRY_ROAST_DAILY_BUDGET.
+ */
+export const tryRoastBudgetGuard = createDailyBudgetGuard({
+  name: "try-roast",
+  limit: Number(process.env.TRY_ROAST_DAILY_BUDGET ?? 200),
+  message: "Free roasts are all claimed for today. Sign in with Google to roast now.",
 });

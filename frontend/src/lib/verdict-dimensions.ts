@@ -26,15 +26,21 @@ export function coalesceVerdictBars(bars: VerdictBar[] | undefined | null): Verd
   return VERDICT_DIMENSIONS.map((d) => ({ ...d, score: 3 }));
 }
 
-/** Only then show AI result UI (avoids empty circle / placeholder bars when DB has partial aiRoast). */
+/**
+ * Only then show AI result UI (avoids empty circle / placeholder bars when DB
+ * has partial aiRoast).
+ *
+ * Validates exactly what gets rendered — the score and the five bars. It used to
+ * also require a non-empty `roastText`, which made an invisible field decide
+ * whether the visible ones appeared: a roast with good scores but empty prose
+ * would silently render nothing.
+ */
 export function isCompleteRoastPayload(
-  data: { score?: unknown; roastText?: unknown; verdictBars?: unknown } | null | undefined,
+  data: { score?: unknown; verdictBars?: unknown } | null | undefined,
 ): boolean {
   if (!data || typeof data !== "object") return false;
   const score = (data as { score?: unknown }).score;
   if (typeof score !== "number" || Number.isNaN(score)) return false;
-  const text = typeof (data as { roastText?: unknown }).roastText === "string" ? (data as { roastText: string }).roastText.trim() : "";
-  if (text.length < 4) return false;
   const bars = (data as { verdictBars?: unknown }).verdictBars;
   if (!Array.isArray(bars) || bars.length < 5) return false;
   return bars.slice(0, 5).every((b) => {

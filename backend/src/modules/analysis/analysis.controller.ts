@@ -10,6 +10,21 @@ import { safeRecalcTalentScore } from "../auth/talent-score.service.js";
 /** How long roast results live in Redis (7 days in seconds) */
 const CACHE_TTL = 60 * 60 * 24 * 7;
 
+/**
+ * Trims a roast down to the fields the UI actually renders: the score and the
+ * five verdict bars.
+ *
+ * `roastText` is deliberately withheld. No screen displays it — it survives in
+ * the model contract as the critique the model writes while scoring, which is
+ * what keeps the numbers discriminating (there's no separate reasoning channel
+ * when the response is forced to JSON). It's still hashed and persisted for the
+ * owner's record; it just has no business crossing the wire to a client that
+ * will throw it away.
+ */
+function toClientRoast(roast: RoastResult) {
+  return { score: roast.score, verdictBars: roast.verdictBars };
+}
+
 /** Cap fetched PDF byte size before parsing to avoid memory blow-ups. */
 const MAX_PDF_BYTES = 10 * 1024 * 1024;
 /** Cap extracted text fed to the model to keep prompt size bounded. */
@@ -105,7 +120,7 @@ export const analyzeResume = async (req: Request, res: Response, next: NextFunct
     const cached = await redis.get<RoastResult>(cacheKey);
     if (cached) {
       const norm = normalizeRoastResult(cached);
-      return ApiResponse.ok(res, "Roast fetched (cached)", { cached: true, ...norm });
+      return ApiResponse.ok(res, "Roast fetched (cached)", { cached: true, ...toClientRoast(norm) });
     }
 
     // 4. Cache miss — call Gemini AI
@@ -122,7 +137,7 @@ export const analyzeResume = async (req: Request, res: Response, next: NextFunct
     // Fresh AI score → recompute owner's composite talent score (non-blocking).
     safeRecalcTalentScore(resume.userId.toString());
 
-    return ApiResponse.ok(res, "Roast generated", { cached: false, ...roastResult });
+    return ApiResponse.ok(res, "Roast generated", { cached: false, ...toClientRoast(roastResult) });
   } catch (error) {
     next(error);
   }
@@ -140,4 +155,32 @@ export const detectPii = async (req: Request, res: Response) => {
   const text = req.body.text as string;
   const result = await detectPersonalInfo(text);
   return ApiResponse.ok(res, "Personal info detected", result);
+};
+
+/**
+ * Public trial roast — lets a visitor try the product without an account.
+ *
+ * Nothing is stored. The PDF never leaves the visitor's browser: text is
+ * extracted client-side and only that text is posted here, so there is no file
+ * upload, no Cloudinary object, no Resume document, no User row, and therefore
+ * nothing to clean up later or leak into the public gallery.
+ *
+ * Abuse controls live in the route definition (origin check, per-IP burst and
+ * daily limits, global daily budget) rather than here, so this handler stays a
+ * thin wrapper over the same model call signed-in users get. The Gemini key
+ * stays server-side; the browser only ever receives the finished roast.
+ *
+ * Results are intentionally not written to the Redis roast cache. That cache is
+ * keyed per resume id for owners, and anonymous text has no stable identity
+ * worth caching — writing to it would let unauthenticated traffic grow a
+ * store we never read.
+ */
+export const tryRoast = async (req: Request, res: Response) => {
+  // Bounds and shape are already enforced by TryRoastDto; the slice is belt and
+  // braces so this can never outgrow the signed-in prompt budget.
+  const text = (req.body.text as string).slice(0, MAX_RESUME_TEXT_CHARS);
+
+  const roastResult = await generateResumeRoast(text);
+
+  return ApiResponse.ok(res, "Roast generated", { cached: false, ...toClientRoast(roastResult) });
 };

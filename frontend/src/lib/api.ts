@@ -4,6 +4,23 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
 export type ApiResult<T = unknown> = { success: boolean; message: string; data?: T };
 
+/**
+ * Thrown for every non-2xx response, carrying the status alongside the message.
+ *
+ * Callers that only need the text keep working unchanged (`err.message`), but
+ * screens that should react differently to, say, a 429 quota wall versus a real
+ * failure can now branch on `status` instead of pattern-matching prose.
+ */
+export class ApiRequestError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiRequestError";
+    this.status = status;
+  }
+}
+
 // Joins the API base URL with a path, tolerating missing/trailing slashes.
 function joinUrl(base: string, path: string): string {
   const b = base.replace(/\/+$/, "");
@@ -91,7 +108,7 @@ export async function apiFetch<T = unknown>(
         return apiFetch<T>(path, { ...options, _retry: true });
       }
     }
-    throw new Error(json.message || res.statusText || `HTTP ${res.status}`);
+    throw new ApiRequestError(json.message || res.statusText || `HTTP ${res.status}`, res.status);
   }
   return json;
 }
@@ -179,9 +196,13 @@ export const authApi = {
 // ─── Resumes ─────────────────────────────────────────────────────────────────
 export type VerdictBar = { id: string; label: string; score: number };
 
+/**
+ * The rendered half of a roast. The model also writes a prose critique while
+ * scoring, but the API withholds it — nothing displays it, so it isn't part of
+ * the client contract.
+ */
 export type AiRoast = {
   score: number;
-  roastText: string;
   verdictBars: VerdictBar[];
 };
 
@@ -270,7 +291,6 @@ export const resumeApi = {
 export type RoastData = {
   cached: boolean;
   score: number;
-  roastText: string;
   verdictBars: VerdictBar[];
 };
 
@@ -280,6 +300,18 @@ export const analysisApi = {
   detectPii: (text: string) =>
     apiFetch<PersonalInfo>("/api/analysis/detect-pii", {
       method: "POST",
+      body: JSON.stringify({ text }),
+    }),
+  /**
+   * No-account trial roast. `auth: false` is deliberate: the endpoint is public,
+   * and sending a stale token would only trigger a pointless refresh attempt.
+   * Text is extracted in the browser by `pdf-text.ts` — the PDF itself is never
+   * uploaded, so nothing is stored server-side.
+   */
+  tryRoast: (text: string) =>
+    apiFetch<RoastData>("/api/analysis/try", {
+      method: "POST",
+      auth: false,
       body: JSON.stringify({ text }),
     }),
 };

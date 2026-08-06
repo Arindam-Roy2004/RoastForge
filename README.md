@@ -214,7 +214,7 @@ Stores resume posts, file links, custom avatar configurations, engagement counte
 | `commentsCount` | `Number` | Default `0` | Total comments count |
 | `roastHash` | `String` | Default `null` | SHA-256 hash of resume text for caching |
 | `aiRoast.score` | `Number` | Range 0–100 | Overall AI evaluation score |
-| `aiRoast.roastText` | `String` | Full text | Formatted AI roast markdown |
+| `aiRoast.roastText` | `String` | Full text | Model's written critique. Stored, but never returned by the API — it is the reasoning that keeps scores discriminating, not UI copy |
 | `aiRoast.verdictBars` | `Array<Object>` | `[{ id, label, score (1-5) }]` | Dimensional score breakdown |
 | `createdAt` | `Date` | Timestamp, indexed (-1) | Creation date |
 | `updatedAt` | `Date` | Timestamp | Last modified date |
