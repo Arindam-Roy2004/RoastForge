@@ -116,51 +116,51 @@
   --shadow-2xl: 0 44px 88px hsl(220 18% 12% / 0.15);
 }
 
-/* Dark: original deep midnight-slate base, lifted cards, warm mist text,
-   glowing brand teal. Colors unchanged; borders softened. */
+/* Dark: here.now dark charcoal base (#131316), elevated surfaces (#1B1B1F),
+   clean off-white text, subtle borders (#28282E), and glowing brand teal. */
 .dark {
-  --background: 222 24% 8%;
-  --foreground: 40 28% 95%;
+  --background: 240 7% 8%;
+  --foreground: 240 5% 96%;
 
   /* Dark mode inverts the same logic: the card is *lighter* than the page and
      the border is a lifted slate line, so edges stay legible without glowing. */
-  --border: 222 20% 20%;
-  --input: 222 20% 18%;
+  --border: 240 6% 18%;
+  --input: 240 6% 14%;
   --ring: 182 60% 48%;
 
-  --card: 222 20% 12%;
-  --card-foreground: 40 28% 95%;
-  --card-border: 222 20% 22%;
+  --card: 240 6% 11.5%;
+  --card-foreground: 240 5% 96%;
+  --card-border: 240 6% 18%;
 
-  --popover: 222 20% 11%;
-  --popover-foreground: 40 28% 95%;
-  --popover-border: 222 20% 20%;
+  --popover: 240 6% 11%;
+  --popover-foreground: 240 5% 96%;
+  --popover-border: 240 6% 18%;
 
   --primary: 182 60% 46%;
-  --primary-foreground: 222 24% 8%;
+  --primary-foreground: 240 7% 8%;
   /* Dark mode inverts: on a near-black surface the text-safe step is lighter. */
   --primary-strong: 182 58% 62%;
 
-  --secondary: 222 18% 15%;
-  --secondary-foreground: 40 26% 95%;
+  --secondary: 240 6% 14%;
+  --secondary-foreground: 240 5% 96%;
 
-  --muted: 222 18% 14%;
-  --muted-foreground: 218 16% 65%;
+  --muted: 240 6% 14%;
+  --muted-foreground: 240 5% 65%;
 
-  --accent: 182 45% 16%;
-  --accent-foreground: 40 28% 95%;
+  --accent: 240 6% 16%;
+  --accent-foreground: 240 5% 96%;
 
   --destructive: 0 75% 55%;
-  --destructive-foreground: 40 20% 98%;
+  --destructive-foreground: 240 5% 98%;
 
-  --shadow-2xs: 0 1px 2px hsl(222 24% 3% / 0.3);
-  --shadow-xs: 0 2px 6px hsl(222 24% 3% / 0.34);
-  --shadow-sm: 0 8px 20px hsl(222 24% 3% / 0.38);
-  --shadow: 0 12px 28px hsl(222 24% 3% / 0.42);
-  --shadow-md: 0 20px 44px hsl(222 24% 3% / 0.46);
-  --shadow-lg: 0 28px 60px hsl(222 24% 3% / 0.5);
-  --shadow-xl: 0 40px 80px hsl(222 24% 3% / 0.54);
-  --shadow-2xl: 0 52px 104px hsl(222 24% 3% / 0.58);
+  --shadow-2xs: 0 1px 2px hsl(240 10% 3% / 0.3);
+  --shadow-xs: 0 2px 6px hsl(240 10% 3% / 0.34);
+  --shadow-sm: 0 8px 20px hsl(240 10% 3% / 0.38);
+  --shadow: 0 12px 28px hsl(240 10% 3% / 0.42);
+  --shadow-md: 0 20px 44px hsl(240 10% 3% / 0.46);
+  --shadow-lg: 0 28px 60px hsl(240 10% 3% / 0.5);
+  --shadow-xl: 0 40px 80px hsl(240 10% 3% / 0.54);
+  --shadow-2xl: 0 52px 104px hsl(240 10% 3% / 0.58);
 }
 
 @layer base {

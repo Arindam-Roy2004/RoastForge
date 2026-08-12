@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": {
+    "github-actions": {
+      "source": "bobmatnyc/claude-mpm-skills",
+      "sourceType": "github",
+      "skillPath": "toolchains/universal/infrastructure/github-actions/SKILL.md",
+      "computedHash": "26815ec672bc9d6465d2916f55292c735879dbc7a5104b8c51144bc945994c53"
+    },
+    "multi-stage-dockerfile": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/multi-stage-dockerfile/SKILL.md",
+      "computedHash": "698bf93a84dae18fd7bd0b1d35c21427307fde78fbdf4624be9726f5f98189ca"
+    },
+    "nginx-configuration": {
+      "source": "aj-geddes/useful-ai-prompts",
+      "sourceType": "github",
+      "skillPath": "skills/nginx-configuration/SKILL.md",
+      "computedHash": "30535fb54fb19ddcbad3697da291fbd22ea60f0c245d55be41ae9043f68bfd4a"
+    },
+    "vps": {
+      "source": "hostinger/hostinger-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/vps/SKILL.md",
+      "computedHash": "e778d1966568d59839e0c0ac72b682bda17e927f68120a94b07cc712b3583e31"
+    }
+  }
+}
