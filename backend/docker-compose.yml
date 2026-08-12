@@ -1,0 +1,11 @@
+services:
+  api:
+    build: .
+    container_name: roasthub-api
+    restart: unless-stopped
+    ports:
+      - "5050:5000"
+    env_file:
+      - .env
+    environment:
+      - PORT=5000
