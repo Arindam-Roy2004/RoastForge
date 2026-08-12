@@ -12,6 +12,7 @@ import recruiterRoute from "./modules/recruiter/recruiter.routes.js";
 import { errorHandler } from "./common/middleware/error.middleware.js";
 import { sanitizeBody } from "./common/middleware/security.middleware.js";
 import { isAllowedBrowserOrigin } from "./common/config/origins.js";
+import ApiError from "./common/utils/api-error.js";
 
 /**
  * Resolves `trust proxy` from env. Defaults to 1 (Vercel / single proxy).
@@ -48,7 +49,14 @@ app.use(
         callback(null, true);
         return;
       }
-      callback(new Error(`CORS blocked origin: ${origin}`));
+      // An untrusted origin is a rejected client, not a server fault. Surfacing
+      // it as an ApiError keeps the response a clean 403 and stops every drive-by
+      // probe from being logged as an unhandled 500.
+      if (process.env.NODE_ENV !== "production") {
+        // eslint-disable-next-line no-console
+        console.warn(`CORS blocked origin: ${origin}`);
+      }
+      callback(ApiError.forbidden("Origin not allowed"));
     },
     credentials: true,
   }),
