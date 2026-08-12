@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon --watch src --watch server.ts --ext ts --exec \"tsx\" server.ts",
-    "build": "npx tsc && mkdir -p dist/modules/analysis && cp src/modules/analysis/roast-system-prompt.txt dist/modules/analysis/",
+    "build": "npx tsc && mkdir -p dist/src/modules/analysis && cp src/modules/analysis/roast-system-prompt.txt dist/src/modules/analysis/",
     "start": "node dist/server.js"
   },
   "keywords": [],
