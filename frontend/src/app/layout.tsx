@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { body, display, mono } from "@/lib/fonts";
 import { Providers } from "@/components/providers";
 import { themeInitScript } from "@/store/theme";
@@ -30,6 +31,7 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+        <Analytics />
       </body>
     </html>
   );
