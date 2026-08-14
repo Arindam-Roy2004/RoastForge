@@ -37,6 +37,14 @@
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
 
+  /* Chart ramp for shadcn/recharts. Anchored on the brand teal so data viz
+     reads as part of the platform rather than a bolted-on dashboard. */
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
   --font-sans: var(--font-geist), sans-serif;
   --font-heading: var(--font-heming), sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
@@ -102,6 +110,14 @@
   --destructive: 0 72% 48%;
   --destructive-foreground: 0 0% 98%;
 
+  /* Brand teal first, then a deep teal, pale teal, amber and red so a
+     multi-series chart still degrades to recognisable platform colours. */
+  --chart-1: 182 40% 44%;
+  --chart-2: 184 42% 27%;
+  --chart-3: 186 38% 62%;
+  --chart-4: 38 88% 50%;
+  --chart-5: 0 72% 48%;
+
   /* Restrained radius scale (Autosend-style): 8px is the workhorse, 12px for
      large surfaces. Large pill radii read as toy-like at this density. */
   --radius: 0.5rem;
@@ -152,6 +168,13 @@
 
   --destructive: 0 75% 55%;
   --destructive-foreground: 240 5% 98%;
+
+  /* Lifted a step on the near-black surface so fills stay legible. */
+  --chart-1: 182 60% 50%;
+  --chart-2: 182 58% 66%;
+  --chart-3: 186 45% 40%;
+  --chart-4: 38 92% 58%;
+  --chart-5: 0 75% 60%;
 
   --shadow-2xs: 0 1px 2px hsl(240 10% 3% / 0.3);
   --shadow-xs: 0 2px 6px hsl(240 10% 3% / 0.34);

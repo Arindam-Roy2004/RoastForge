@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { AlertTriangle, ArrowRight, FileText, UploadCloud, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import FlameIcon from "@/components/icons/flame-icon";
-import { RoastScoreDial, RoastVerdictBars } from "@/components/roast-verdict";
+import { RoastScoreDial, RoastVerdictRadar } from "@/components/roast-verdict";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { analysisApi, ApiRequestError, type RoastData } from "@/lib/api";
@@ -314,9 +314,9 @@ export default function TryPage() {
                   transition={{ type: "spring", stiffness: 200 }}
                   className="scrollbar-thin min-h-0 flex-1 space-y-3.5 overflow-y-auto p-4"
                 >
-                  <RoastScoreDial score={roast.score} />
+                  <RoastScoreDial score={roast.score} bars={roast.verdictBars} />
 
-                  <RoastVerdictBars bars={roast.verdictBars} />
+                  <RoastVerdictRadar bars={roast.verdictBars} />
 
                   <Link href="/register" className="block">
                     <Button
