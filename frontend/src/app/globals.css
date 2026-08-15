@@ -272,6 +272,72 @@
     color: hsl(var(--primary-strong));
   }
 
+  /* Shared field surface for plain <textarea>/<input> elements that don't go
+     through the Input component. `comment-thread.tsx` already referenced this
+     class for its three textareas, but it was never defined — so those fields
+     rendered completely unstyled. Mirrors the Input component's look so
+     single- and multi-line fields match. */
+  .input {
+    width: 100%;
+    min-width: 0;
+    border-radius: var(--radius-md);
+    border: 2px solid hsl(var(--input));
+    background-color: hsl(var(--background));
+    padding: 0.5rem 0.75rem;
+    color: hsl(var(--foreground));
+    font-weight: 500;
+    transition-property: box-shadow, border-color, background-color, color;
+    transition-duration: 200ms;
+    outline: none;
+  }
+  .input::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
+  /* Neutral focus cue: a slightly stronger version of the resting border,
+     not a colored ring. A saturated primary-colored halo here read as a
+     generic "AI-generated form" tell rather than something intentional. */
+  .input:focus-visible {
+    border-color: hsl(var(--foreground) / 0.4);
+  }
+  .input:disabled {
+    cursor: not-allowed;
+    background-color: hsl(var(--muted));
+    opacity: 0.5;
+  }
+
+  /* Diagonal pinstripe screen backdrop (easter.chat's auth surface). The
+     reference hardcodes near-black steps; here the stripes are tinted with the
+     ink color at low alpha so the same texture reads correctly on both the
+     warm off-white page and the near-black dark surface. */
+  .auth-backdrop {
+    background-color: hsl(var(--background));
+    background-image: repeating-linear-gradient(
+      45deg,
+      transparent 0px,
+      hsl(var(--foreground) / 0.035) 2px,
+      transparent 4px,
+      hsl(var(--foreground) / 0.06) 6px
+    );
+  }
+
+  /* Soft outer lift + hairline ring, the reference's `shadow-input`. */
+  .shadow-input {
+    box-shadow:
+      0 2px 3px -1px hsl(220 18% 12% / 0.1),
+      0 1px 0 0 hsl(220 18% 12% / 0.02),
+      0 0 0 1px hsl(220 18% 12% / 0.08);
+  }
+
+  /* Hairline rule that fades out at both ends. */
+  .divider-gradient {
+    background-image: linear-gradient(
+      to right,
+      transparent,
+      hsl(var(--border)),
+      transparent
+    );
+  }
+
   /* The Heming display font (loaded as `--font-heading`) ships with sparse kerning
      tables — several uppercase pairs (notably D·A and A·S in "DASHBOARD") have
      no pair data, which is why those letters drift apart once `uppercase` and

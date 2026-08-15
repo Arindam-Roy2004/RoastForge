@@ -697,7 +697,7 @@ export default function ResumeDetail() {
                                 placeholder={isOwner ? "Add a comment..." : "Write your roast / feedback..."}
                                 rows={2}
                                 aria-label={isOwner ? "Add a comment" : "Write your roast or feedback"}
-                                className="w-full min-h-16 p-2.5 border border-border rounded-lg shadow-[var(--shadow-sm)] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background resize-none text-sm font-medium bg-background leading-relaxed"
+                                className="w-full min-h-16 p-2.5 border border-border rounded-lg shadow-[var(--shadow-sm)] focus:outline-none focus-visible:border-foreground/40 resize-none text-sm font-medium bg-background leading-relaxed"
                                 required
                               />
                               <div className="flex justify-end pt-0.5">

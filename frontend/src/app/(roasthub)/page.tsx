@@ -290,7 +290,7 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mx-auto flex max-w-xl items-stretch gap-0 overflow-hidden rounded-lg border-2 border-border bg-background transition-colors focus-within:border-primary"
+          className="mx-auto flex max-w-xl items-stretch gap-0 overflow-hidden rounded-lg border-2 border-border bg-background transition-colors focus-within:border-foreground/40"
         >
           <div className="flex items-center pl-4 pr-2 text-muted-foreground shrink-0">
             <Search className="w-5 h-5" />
