@@ -241,19 +241,19 @@ export default function ProfilePage() {
     >
       {/* User Header */}
       <motion.div variants={itemVariants}>
-        <Card className="shrink-0 border border-border rounded-lg overflow-hidden shadow-[var(--shadow-md)] bg-card">
-          <div className="flex flex-col items-center gap-6 border-b-2 border-border bg-accent p-6 md:flex-row md:p-10">
-            <div className="w-24 h-24 rounded-full border border-border bg-background shadow-[var(--shadow-sm)] flex items-center justify-center text-4xl font-mono font-semibold shrink-0">
+        <Card className="shrink-0 border border-border rounded-lg overflow-hidden shadow-[var(--shadow-sm)] bg-card">
+          <div className="flex flex-col items-center gap-6 p-6 md:flex-row md:p-10">
+            <div className="w-24 h-24 rounded-full border border-border bg-muted shadow-[var(--shadow-2xs)] flex items-center justify-center text-4xl font-mono font-semibold shrink-0">
               {displayUser.name.charAt(0).toUpperCase() || "?"}
             </div>
-            <div className="min-w-0 flex-1 space-y-2 text-center text-accent-foreground md:text-left">
-              <h1 className="text-3xl md:text-4xl font-mono font-semibold tracking-normal text-balance break-words leading-snug text-accent-foreground">
+            <div className="min-w-0 flex-1 space-y-2 text-center md:text-left">
+              <h1 className="text-3xl md:text-4xl font-mono font-semibold tracking-normal text-balance break-words leading-snug">
                 {displayUser.name}
               </h1>
-              <p className="break-all font-sans font-medium text-accent-foreground/80">{displayUser.email}</p>
+              <p className="break-all font-sans font-medium text-muted-foreground">{displayUser.email}</p>
               <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start mt-1">
                 {displayUser.anonymousPublicId && (
-                  <span className="font-mono text-xs tracking-normal text-accent-foreground/70">u/{displayUser.anonymousPublicId}</span>
+                  <span className="font-mono text-xs tracking-normal text-muted-foreground">u/{displayUser.anonymousPublicId}</span>
                 )}
                 {/* Talent score is candidate-only; recruiters never receive talentMetrics from the API. */}
                 {!isRecruiter && displayUser.talentMetrics && (
@@ -271,14 +271,14 @@ export default function ProfilePage() {
             <div className="flex flex-col gap-3 w-full md:w-auto mt-4 md:mt-0">
               {/* Resume count badge is meaningless for recruiters (they can't upload). */}
               {!isRecruiter && (
-                <Badge variant="outline" className="flex items-center justify-center gap-2 rounded-md border-2 border-border bg-card px-4 py-1.5 text-sm text-foreground md:justify-start">
+                <Badge variant="outline" className="flex items-center justify-center gap-2 rounded-md border border-border bg-card px-4 py-1.5 text-sm text-foreground md:justify-start">
                   <FileText className="w-4 h-4" /> {resumes.length} Resume{resumes.length !== 1 ? "s" : ""}
                 </Badge>
               )}
               <Button
                 variant="outline"
                 onClick={async () => { await logout(); router.push("/"); }}
-                className="w-full cursor-pointer rounded-md border-2 border-border bg-card text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
+                className="w-full cursor-pointer rounded-md border border-border bg-card text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
               >
                 <LogOut className="w-4 h-4 mr-2" /> Sign Out
               </Button>
