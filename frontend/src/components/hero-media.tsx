@@ -43,8 +43,8 @@ export function HeroShowcase({
   const [armed, setArmed] = useState(false);
 
   const isDark = mounted && theme === "dark";
-  const poster = isDark ? "/night_img.png" : "/day_img.png";
-  const clip = isDark ? "/night_video.mp4" : "/day_video.mp4";
+  const poster = isDark ? "/hero-night.png" : "/hero-day.png";
+  const clip = isDark ? "/hero-night.mp4" : "/hero-day.mp4";
 
   const active = (hovering || focused) && allowMotion;
 
