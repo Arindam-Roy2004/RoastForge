@@ -4,8 +4,8 @@ import User from "../auth/auth.model.js";
 import Project from "../project/project.model.js";
 import ApiError from "../../common/utils/api-error.js";
 
-/** Escape characters that have special meaning in a RegExp so user input is safe to embed. */
-function escapeRegex(input: string): string {
+/** Escape RegExp metacharacters so user input is safe to embed in a `$regex`. */
+export function escapeRegex(input: string): string {
   return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 

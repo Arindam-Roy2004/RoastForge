@@ -5,3 +5,10 @@ dist
 .git
 *.log
 npm-debug.log*
+
+# Tests run in CI, not in the image
+tests
+tsconfig.test.json
+
+# Local-only; the deploy uses docker run
+docker-compose.yml

@@ -4,14 +4,28 @@ import { createRateLimiter } from "./rate-limit.js";
 import { createDailyBudgetGuard } from "./daily-budget.js";
 
 /**
- * Recursively strips keys that start with `$` or contain `.` from an object.
- * Prevents NoSQL operator injection via `req.body` (e.g. `{ email: { $ne: "" } }`).
- * Only mutates `req.body` since Express 5 makes `req.query` / `req.params` read-only accessors.
+ * Recursively strips keys starting with `$` or containing `.` to block NoSQL
+ * operator injection via `req.body` (e.g. `{ email: { $ne: "" } }` matches any
+ * document).
+ *
+ * Not using express-mongo-sanitize: it sanitizes by reassigning `req.query`,
+ * which Express 5 made a getter, so it throws or silently no-ops. It's also
+ * unmaintained.
+ *
+ * Body-only is sufficient — `req.query`/`req.params` are read-only accessors in
+ * Express 5, and its default `simple` query parser yields the literal key
+ * `email[$ne]` rather than a nested object.
+ *
+ * Defence in depth; Joi DTO validation is the primary control. `seen` prevents
+ * unbounded recursion on a self-referential object.
  */
-function scrubKeys(value: unknown): unknown {
+function scrubKeys(value: unknown, seen: WeakSet<object> = new WeakSet()): unknown {
   if (value === null || typeof value !== "object") return value;
+  if (seen.has(value)) return value;
+  seen.add(value);
+
   if (Array.isArray(value)) {
-    value.forEach((v, i) => (value[i] = scrubKeys(v)));
+    value.forEach((v, i) => (value[i] = scrubKeys(v, seen)));
     return value;
   }
   const obj = value as Record<string, unknown>;
@@ -19,7 +33,7 @@ function scrubKeys(value: unknown): unknown {
     if (key.startsWith("$") || key.includes(".")) {
       delete obj[key];
     } else {
-      obj[key] = scrubKeys(obj[key]);
+      obj[key] = scrubKeys(obj[key], seen);
     }
   }
   return obj;

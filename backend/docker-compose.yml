@@ -1,3 +1,12 @@
+# Local development only. The deploy pulls a prebuilt image and runs it with
+# `docker run` (see .github/workflows/deploy-backend.yml), so nothing here runs
+# in production.
+#
+# No Redis service: the app talks to Upstash over HTTPS REST, not the Redis wire
+# protocol, so a local redis container wouldn't be reachable. Without Upstash
+# credentials the rate limiter falls back to an in-process store and the cache
+# no-ops, so local dev doesn't need one.
+
 services:
   api:
     build: .
@@ -9,3 +18,32 @@ services:
       - .env
     environment:
       - PORT=5000
+      # Overrides .env, which points at localhost for bare-metal `npm run dev`.
+      # Inside a container localhost is the container itself.
+      - MONGODB_URI=mongodb://mongo:27017/roasthub
+      # The image defaults to production; local work wants the dev error surface.
+      - NODE_ENV=development
+    depends_on:
+      mongo:
+        # Not service_started — the API connects during boot and would lose the race.
+        condition: service_healthy
+
+  mongo:
+    image: mongo:7
+    container_name: roasthub-mongo
+    restart: unless-stopped
+    # Loopback only: runs without auth, so don't expose it on a shared network.
+    # Published at all just so Compass can attach.
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  mongo-data:

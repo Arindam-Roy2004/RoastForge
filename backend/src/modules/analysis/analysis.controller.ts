@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import Resume from "../resume/resume.model.js";
 import { generateContentHash } from "../../common/utils/hash.js";
 import { generateResumeRoast, normalizeRoastResult, detectPersonalInfo, type RoastResult } from "./analysis.service.js";
-import redis from "../../common/config/redis.js";
+import { cacheGet, cacheSet } from "../../common/config/redis.js";
 import ApiResponse from "../../common/utils/api-response.js";
 import ApiError from "../../common/utils/api-error.js";
 import { safeRecalcTalentScore } from "../auth/talent-score.service.js";
@@ -116,8 +116,8 @@ export const analyzeResume = async (req: Request, res: Response, next: NextFunct
     const contentHash = generateContentHash(resumeText);
     const cacheKey = `roast:${id}:${contentHash}`;
 
-    // 3. Check Redis cache
-    const cached = await redis.get<RoastResult>(cacheKey);
+    // 3. Check Redis cache (degrades to a miss if Upstash is down)
+    const cached = await cacheGet<RoastResult>(cacheKey);
     if (cached) {
       const norm = normalizeRoastResult(cached);
       return ApiResponse.ok(res, "Roast fetched (cached)", { cached: true, ...toClientRoast(norm) });
@@ -127,7 +127,7 @@ export const analyzeResume = async (req: Request, res: Response, next: NextFunct
     const roastResult = await generateResumeRoast(resumeText);
 
     // 5. Store in Redis with TTL
-    await redis.set(cacheKey, roastResult, { ex: CACHE_TTL });
+    await cacheSet(cacheKey, roastResult, CACHE_TTL);
 
     // 6. Also persist on the Resume document for quick reads
     resume.roastHash = contentHash;

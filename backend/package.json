@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "nodemon --watch src --watch server.ts --ext ts --exec \"tsx\" server.ts",
     "build": "npx tsc && mkdir -p dist/src/modules/analysis && cp src/modules/analysis/roast-system-prompt.txt dist/src/modules/analysis/",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "typecheck": "tsc -p tsconfig.test.json",
+    "test": "node --import tsx --test tests/*.test.ts"
   },
   "keywords": [],
   "author": "",

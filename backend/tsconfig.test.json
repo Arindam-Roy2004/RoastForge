@@ -1,0 +1,10 @@
+{
+  // Typechecks tests without emitting them. The build config leaves tests/ out of
+  // `include` so nothing test-shaped lands in dist/, which would otherwise leave
+  // the suite untypechecked.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src/**/*", "api/**/*", "server.ts", "tests/**/*"]
+}

@@ -17,6 +17,10 @@ const start = async () => {
     console.error((err as Error).message);
     process.exit(1);
   }
+  // Connect before binding the port: fail fast rather than accept traffic we
+  // can't serve. Means a cold DB failure shows the deploy gate a refused
+  // connection instead of a 503 — either way the readiness poll fails and it
+  // rolls back. /health/ready covers the other case: a disconnect after boot.
   await connectDB();
 
   const httpServer = http.createServer(app);
