@@ -41,8 +41,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    outputs:
-      image: ${{ steps.meta.outputs.image }}
     steps:
       - uses: actions/checkout@v4
 
@@ -57,13 +55,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Resolve image tags
-        id: meta
-        run: |
-          repo="${{ secrets.DOCKERHUB_USERNAME }}/roasthub-backend"
-          echo "repo=$repo" >> "$GITHUB_OUTPUT"
-          echo "image=$repo:${{ github.sha }}" >> "$GITHUB_OUTPUT"
-
       - name: Build and push image
         uses: docker/build-push-action@v5
         with:
@@ -71,8 +62,8 @@ jobs:
           push: true
           # SHA tag alongside latest, so a rollback has something to point at.
           tags: |
-            ${{ steps.meta.outputs.repo }}:latest
-            ${{ steps.meta.outputs.repo }}:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/roasthub-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/roasthub-backend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -83,7 +74,10 @@ jobs:
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
         env:
-          IMAGE: ${{ needs.build-and-push.outputs.image }}
+          # Derived from github.sha rather than passed as a job output. Job
+          # outputs come back empty when only the failed jobs are re-run, which
+          # made this deploy `docker pull ""` and abort.
+          IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/roasthub-backend:${{ github.sha }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
@@ -94,6 +88,12 @@ jobs:
 
             CONTAINER=roasthub-api
             ENV_FILE=/root/app/backend/.env
+
+            # Refuse to continue on a half-resolved image reference. Without this
+            # the failure surfaced as a bare "invalid reference format".
+            case "${IMAGE:-}" in
+              ""|*:) echo "::error::IMAGE is not set or has no tag: '${IMAGE:-}'"; exit 1 ;;
+            esac
 
             # By image ID, not tag — :latest already points at the new build.
             PREVIOUS_IMAGE="$(docker inspect --format='{{.Image}}' "$CONTAINER" 2>/dev/null || echo '')"
