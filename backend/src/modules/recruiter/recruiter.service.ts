@@ -108,7 +108,14 @@ export const searchCandidates = async (opts: {
     };
   };
 
-  const rows = await Resume.aggregate<AggRow>(pipeline);
+  // allowDiskUse: the $sort above runs before $group, so it orders the entire
+  // matched set, not the 50 rows this returns. Without it, crossing the 100MB
+  // in-memory sort limit fails the whole request instead of spilling to disk and
+  // merely getting slower. The { "aiRoast.score": -1, createdAt: -1 } index on
+  // Resume lets the planner serve that sort directly in the common case; this is
+  // the backstop for the filtered case, where a `userId: { $in: [...] }` match
+  // may lead the planner to a different index.
+  const rows = await Resume.aggregate<AggRow>(pipeline).allowDiskUse(true);
 
   return rows.map((r) => {
     const user = r.user;

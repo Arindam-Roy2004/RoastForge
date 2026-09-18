@@ -71,8 +71,36 @@ const resumeSchema = new Schema<IResume>(
   { timestamps: true },
 );
 
+// Every index below exists to serve a specific sort this app issues. MongoDB can
+// only use an index for a sort when the sort keys are a prefix of the index keys
+// in the same order and direction; the moment they diverge it falls back to a
+// blocking in-memory sort, which gets worse as `skip` grows down the feed. So the
+// key order here has to track the sort specs in the services verbatim — if you
+// change a sort, change its index with it.
+
+// resume.service.ts listResumes — sort: "new" → { createdAt: -1 }
 resumeSchema.index({ createdAt: -1 });
-resumeSchema.index({ likesCount: -1, dislikesCount: 1, commentsCount: -1 });
+
+// resume.service.ts listResumes — sort: "hot" → { likesCount: -1, commentsCount: -1, createdAt: -1 }
+resumeSchema.index({ likesCount: -1, commentsCount: -1, createdAt: -1 });
+
+// resume.service.ts listResumes — sort: "top" → { likesCount: -1, createdAt: -1 }.
+// The "hot" index above cannot serve this: createdAt is its third key, so
+// { likesCount, createdAt } is not a prefix of it.
+resumeSchema.index({ likesCount: -1, createdAt: -1 });
+
+// recruiter.service.ts searchCandidates — covers both the `aiRoast.score: { $gte }`
+// match and the { "aiRoast.score": -1, createdAt: -1 } sort that runs ahead of the
+// $group, i.e. over the whole matched set rather than the 50 rows finally returned.
+resumeSchema.index({ "aiRoast.score": -1, createdAt: -1 });
+
+// resume.service.ts listResumes — the $text search branch, with title weighted
+// above blurb for relevance ranking.
 resumeSchema.index({ title: "text", blurb: "text" }, { weights: { title: 10, blurb: 3 } });
+
+// Removed: { likesCount: -1, dislikesCount: 1, commentsCount: -1 }. No query
+// sorts or filters on dislikesCount — it is only ever read as a field — so that
+// index cost write amplification on every reaction and served nothing. Existing
+// deployments keep it until it is dropped explicitly; see the note in the PR.
 
 export default mongoose.model<IResume>("Resume", resumeSchema);
