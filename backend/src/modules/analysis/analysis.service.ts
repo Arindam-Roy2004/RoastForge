@@ -6,6 +6,11 @@ import { VERDICT_DIMENSIONS, type VerdictBar } from "./verdict-dimensions.js";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_KEY! });
 
+// Free-tier model. The 2.5 Flash family is what's available without billing
+// (15 RPM / 1000 req-day for flash-lite); higher/newer tiers 503 on free keys.
+// One constant so the roast and PII calls can't drift to different models.
+const GEMINI_MODEL = "gemini-2.5-flash-lite";
+
 const analysisDir = dirname(fileURLToPath(import.meta.url));
 
 function loadSystemInstruction(): string {
@@ -90,7 +95,7 @@ ${sanitized}
   let response: Awaited<ReturnType<typeof ai.models.generateContent>>;
   try {
     response = await ai.models.generateContent({
-      model: "gemini-3.1-flash-lite",
+      model: GEMINI_MODEL,
       contents: userPrompt,
       config: {
         responseMimeType: "application/json",
@@ -186,7 +191,7 @@ ${sanitized}
   let response: Awaited<ReturnType<typeof ai.models.generateContent>>;
   try {
     response = await ai.models.generateContent({
-      model: "gemini-3.1-flash-lite",
+      model: GEMINI_MODEL,
       contents: userPrompt,
       config: {
         responseMimeType: "application/json",
