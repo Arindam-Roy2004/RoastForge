@@ -10,6 +10,7 @@ import { resumeApi, type Resume, type ResumeListResult, RESUME_GALLERY_PAGE_SIZE
 import { enqueueResumeReaction, flushQueuedResumeReactions } from "@/lib/resume-reaction-sync";
 import { ResumeReactionControls } from "@/components/resume-reaction-controls";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,6 +23,18 @@ import { useAuth } from "@/store/auth";
 import { toast } from "sonner";
 
 type SortTab = "new" | "hot" | "top";
+
+/**
+ * Shared shape for the small controls in a card footer ("View Roast",
+ * "Portfolio") and the pagination buttons.
+ *
+ * `rounded-md` (6px) against the card's `rounded-lg` (8px), `text-xs
+ * font-medium` in the body sans, and a hairline border — the shadcn small-button
+ * idiom. Replaces the previous 10px display-face chips with wide tracking, which
+ * read as labels rather than things you could press.
+ */
+const CARD_ACTION =
+  "inline-flex h-7 shrink-0 items-center justify-center rounded-md border border-border bg-background px-2.5 text-xs font-medium transition-colors";
 
 function HallPagination({
   page,
@@ -37,29 +50,42 @@ function HallPagination({
   className?: string;
 }) {
   return (
-    <nav className={cn("flex items-center justify-center gap-2 flex-wrap", className)} aria-label="Pagination">
+    // Flat, quiet pagination in the shadcn idiom: uniform 36px squares, body
+    // sans with `tabular-nums` so the digits don't jitter between pages, and
+    // colour-only hover. Previously each button carried a shadow plus a
+    // `-translate-y-0.5` lift, so a row of six of them shimmered on mouse-over.
+    <nav className={cn("flex flex-wrap items-center justify-center gap-1.5", className)} aria-label="Pagination">
       <Button
         variant="outline"
         size="sm"
         disabled={page <= 1}
+        aria-label="Previous page"
         onClick={() => setPage((p) => Math.max(1, p - 1))}
-        className="border border-border rounded-lg shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all h-9 px-3"
+        className="size-9 rounded-md border border-border px-0 !shadow-none transition-colors hover:translate-y-0 hover:bg-muted"
       >
-        <ChevronLeft className="w-4 h-4" />
+        <ChevronLeft aria-hidden className="size-4" />
       </Button>
       {pageRange().map((item, idx) =>
         item === "..." ? (
-          <span key={`dots-${idx}`} className="px-1 text-muted-foreground font-bold select-none">&hellip;</span>
+          <span
+            key={`dots-${idx}`}
+            aria-hidden
+            className="w-9 text-center text-sm text-muted-foreground select-none"
+          >
+            &hellip;
+          </span>
         ) : (
           <Button
             key={item}
             variant={page === item ? "default" : "outline"}
+            aria-label={`Page ${item}`}
+            aria-current={page === item ? "page" : undefined}
             onClick={() => setPage(item as number)}
             className={cn(
-              "w-9 h-9 border border-border rounded-lg shadow-[var(--shadow-xs)] transition-all font-heading",
+              "size-9 rounded-md border border-border px-0 font-sans text-sm font-medium tabular-nums !shadow-none transition-colors hover:translate-y-0",
               page === item
-                ? "bg-primary text-primary-foreground shadow-none"
-                : "hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5",
+                ? "bg-primary text-primary-foreground"
+                : "hover:bg-muted hover:text-foreground",
             )}
           >
             {item}
@@ -70,10 +96,11 @@ function HallPagination({
         variant="outline"
         size="sm"
         disabled={page >= pages}
+        aria-label="Next page"
         onClick={() => setPage((p) => Math.min(pages, p + 1))}
-        className="border border-border rounded-lg shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all h-9 px-3"
+        className="size-9 rounded-md border border-border px-0 !shadow-none transition-colors hover:translate-y-0 hover:bg-muted"
       >
-        <ChevronRight className="w-4 h-4" />
+        <ChevronRight aria-hidden className="size-4" />
       </Button>
     </nav>
   );
@@ -359,48 +386,87 @@ export default function HomePage() {
           scroll-mt clears the sticky h-16 navbar so the heading isn't hidden
           under it when jumped to. */}
       <section id="hall-of-shame" aria-labelledby="hall-of-shame-heading" className="w-full scroll-mt-24">
-        {/* Header row: title + sort + pagination */}
-        <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-3">
+        {/* Header row: title + count + sort.
+            Same orientation as before — titled block left, sort control right —
+            but retuned so it reads as one system with the rest of the app:
+
+            - The heading and its sub use the reference's section-header type
+              scale rather than the display face: sans, `font-medium`,
+              `tracking-tight`, stepping 2xl/3xl/4xl, with the sub a quiet
+              `text-sm lg:text-base` beneath it. That template never sets a
+              heading bold — the hierarchy comes from the size jump between the
+              large heading and the small muted line under it, which is why the
+              pairing reads as calm at any width.
+            - The count is the shared <Badge>, which is what every other page
+              uses for a count or label, rather than a one-off square chip.
+            - Sort becomes a segmented control — the shadcn/Vercel pattern for
+              picking one of a few options — instead of underlined text, which
+              read as three links and gave no sense of a single active choice. */}
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-2.5">
+              {/* `font-sans` is explicit because the base layer sets
+                  `font-heading` on every h1–h6; this heading deliberately opts
+                  out of the display face. */}
               <h2
                 id="hall-of-shame-heading"
-                className="text-3xl md:text-4xl font-heading font-bold tracking-tighter text-foreground"
+                className="font-sans text-2xl font-medium tracking-tight text-foreground md:text-3xl lg:text-4xl"
               >
                 Hall of Shame
               </h2>
               {!loading && total > 0 && (
-                <span className="text-xs text-muted-foreground font-bold tabular-nums border border-border px-2 py-0.5">
+                <Badge variant="secondary" className="tabular-nums" data-testid="badge-resume-total">
                   {total}
-                </span>
+                </Badge>
               )}
             </div>
-            <p className="text-sm text-muted-foreground font-medium">
+            <p className="text-sm font-medium tracking-tight text-muted-foreground lg:text-base">
               The most roasted resumes on the internet. Proceed with caution.
             </p>
           </div>
-          <div className="flex items-center gap-1 text-sm">
-            <span className="text-muted-foreground font-medium mr-2 hidden sm:inline">Sort by:</span>
-            {(
-              [
-                { id: "new", label: "newest" },
-                { id: "hot", label: "hottest" },
-                { id: "top", label: "top" },
-              ] as const
-            ).map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => changeSort(tab.id)}
-                className={cn(
-                  "px-3 py-1.5 font-heading text-sm transition-all",
-                  sort === tab.id
-                    ? "text-foreground underline underline-offset-4 decoration-2 decoration-primary font-bold"
-                    : "text-muted-foreground hover:text-foreground hover:underline hover:decoration-2 hover:decoration-border hover:underline-offset-4"
-                )}
-              >
-                {tab.label}
-              </button>
-            ))}
+
+          <div className="flex items-center gap-2.5">
+            <span className="hidden text-sm text-muted-foreground sm:inline">Sort by</span>
+            {/* `role="group"` with `aria-pressed` buttons, matching how Radix and
+                shadcn build a single-select ToggleGroup. Deliberately not a
+                `tablist` — there are no tab panels here, only a re-sorted list —
+                and not a `radiogroup`, which would promise arrow-key roving
+                focus this control doesn't implement.
+
+                Radii nest: 8px outer (`rounded-lg`) minus the 4px `p-1` gap
+                gives the 4px inner pill (`rounded-sm`). */}
+            <div
+              role="group"
+              aria-label="Sort resumes"
+              className="inline-flex items-center gap-1 rounded-lg border border-border bg-muted p-1"
+            >
+              {(
+                [
+                  { id: "new", label: "Newest" },
+                  { id: "hot", label: "Hottest" },
+                  { id: "top", label: "Top" },
+                ] as const
+              ).map((tab) => {
+                const selected = sort === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => changeSort(tab.id)}
+                    aria-pressed={selected}
+                    data-testid={`button-sort-${tab.id}`}
+                    className={cn(
+                      "cursor-pointer rounded-sm px-2.5 py-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45",
+                      selected
+                        ? "bg-background text-foreground shadow-[var(--shadow-2xs)]"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -478,40 +544,50 @@ export default function HomePage() {
                           />
                         </div>
 
-                        {/* Card info */}
-                        <div className="flex flex-1 flex-col gap-1.5 p-3.5">
-                          <h3 className="font-heading text-[13px] leading-snug line-clamp-2">
+                        {/* Card info.
+
+                            Typography follows the section header: sans,
+                            `font-medium`, `tracking-tight`, on the standard
+                            text-sm / text-xs steps rather than the one-off
+                            13px/11px/10px sizes this used before. Three
+                            different bespoke sizes inside a 90px block is what
+                            made the card feel unresolved.
+
+                            The stats row's own `border-t` is gone. With the
+                            footer's separator sitting ~30px below it, the card
+                            had two horizontal rules stacked in a very short
+                            space; `mt-auto` alone still pins the row to the
+                            bottom, so the layout is unchanged. */}
+                        <div className="flex flex-1 flex-col gap-1 p-3.5">
+                          {/* `font-sans` is explicit: the base layer puts the
+                              display face on every h1–h6. */}
+                          <h3 className="line-clamp-2 font-sans text-sm leading-snug font-medium tracking-tight text-foreground">
                             {resume.title || "Untitled Resume"}
                           </h3>
 
-                          <p className="text-[11px] text-muted-foreground font-mono truncate">
+                          <p className="truncate text-xs text-muted-foreground">
                             u/{username}
                           </p>
 
                           {/* Stats row */}
-                          <div className="mt-auto pt-1.5 flex items-center justify-between text-[11px] text-muted-foreground border-t border-border">
-                            <span className="flex items-center gap-1">
-                              <MessageSquare className="w-3 h-3" />
+                          <div className="mt-auto flex items-center justify-between pt-2 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1.5">
+                              <MessageSquare aria-hidden className="size-3.5 shrink-0" />
                               {resume.commentsCount ?? 0} {(resume.commentsCount ?? 0) === 1 ? "comment" : "comments"}
                             </span>
-                            <span className="text-[10px] tabular-nums">
+                            <span className="tabular-nums">
                               {new Date(resume.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                             </span>
                           </div>
                         </div>
 
-                        {/* Footer */}
-                        <div className="border-t border-border px-3 py-2 bg-muted/40 flex items-center justify-end gap-2">
-                          {user?.role === "recruiter" && ownerId ? (
-                            <span
-                              onClick={(e) => e.stopPropagation()}
-                              className="font-heading text-[10px] tracking-wider px-2 py-0.5 border border-border bg-card shadow-[var(--shadow-2xs)] hover:shadow-[var(--shadow-sm)] transition-all cursor-pointer"
-                            >
-                              <Link href={`/recruiter/candidate/${ownerId}`} data-testid={`link-candidate-${ownerId}`}>
-                                Portfolio
-                              </Link>
-                            </span>
-                          ) : null}
+                        {/* Footer: reactions left, actions right.
+
+                            Reactions now come first in the DOM as well as
+                            visually — `mr-auto` only pushes what follows it, so
+                            with Portfolio rendered first the two ended up
+                            sharing the left edge. */}
+                        <div className="flex items-center justify-end gap-2 border-t border-border bg-muted/40 px-3 py-2">
                           <ResumeReactionControls
                             className="mr-auto"
                             likesCount={resume.likesCount ?? 0}
@@ -522,7 +598,37 @@ export default function HomePage() {
                             stopNavigation
                             onReact={(reaction) => void reactOnCard(resume._id, reaction)}
                           />
-                          <span className="font-heading text-[10px] tracking-wider border border-border px-2.5 py-0.5 bg-background hover:bg-primary hover:text-primary-foreground transition-colors">
+
+                          {/* A button, not a Link. The whole card is already an
+                              <a>, and an anchor nested inside an anchor is
+                              invalid HTML — browsers close the outer one early,
+                              which broke both links unpredictably. Navigating
+                              imperatively keeps one anchor per card. */}
+                          {user?.role === "recruiter" && ownerId ? (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                router.push(`/recruiter/candidate/${ownerId}`);
+                              }}
+                              data-testid={`link-candidate-${ownerId}`}
+                              className={cn(CARD_ACTION, "cursor-pointer hover:bg-muted")}
+                            >
+                              Portfolio
+                            </button>
+                          ) : null}
+
+                          {/* Not interactive itself — the card is the link — so
+                              it highlights on `group-hover` from the card rather
+                              than on its own hover, which never fired when you
+                              were anywhere else on the card. */}
+                          <span
+                            className={cn(
+                              CARD_ACTION,
+                              "group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground",
+                            )}
+                          >
                             View Roast
                           </span>
                         </div>

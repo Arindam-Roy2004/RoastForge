@@ -287,6 +287,39 @@
     );
   }
 
+  /* Structural hairline, for rules that divide *regions* of the page — the
+     navbar's bottom edge, the footer's top edge, the footer's bottom bar.
+
+     This deliberately does NOT use `--border`. In this design `--border` is the
+     full charcoal ink (222 16% 20%, ~#2B303B) because components want hard
+     neobrutalist edges — but a near-black rule spanning the full width of the
+     page reads as a heavy slab rather than chrome. The reference separates the
+     two roles: ink for component edges, a much quieter "divide" for structural
+     rules. This is that divide, at the reference's own values. */
+  .hairline {
+    border-color: #d1d5dc;
+  }
+  .dark .hairline {
+    border-color: #262626;
+  }
+
+  /* The pill's edge: a hairline ring plus a 3px lift on light. On dark a soft
+     shadow is invisible against a near-black page, so the top and bottom edges
+     are drawn as 2px rules instead — that pair of lines is what reads as the
+     floating "glass" edge once `backdrop-blur` sits behind it. */
+  .nav-glass {
+    box-shadow:
+      0 2px 3px -1px hsl(220 18% 12% / 0.1),
+      0 1px 0 0 hsl(220 18% 12% / 0.02),
+      0 0 0 1px #d1d5dc;
+  }
+  .dark .nav-glass {
+    box-shadow:
+      0 2px 0 0 #262626,
+      0 -2px 0 0 #262626,
+      0 0 0 1px #262626;
+  }
+
   /* Soft outer lift + hairline ring, the reference's `shadow-input`. */
   .shadow-input {
     box-shadow:
