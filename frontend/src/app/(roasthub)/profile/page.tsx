@@ -73,6 +73,14 @@ const CARD = "rounded-xl border border-border bg-card shadow-[var(--shadow-xs)]"
 const CARD_HEAD =
   "flex flex-row items-start justify-between gap-4 space-y-0 border-b border-border px-5 py-4";
 
+/**
+ * Sentence-case sans buttons. The shared `ui/button` is uppercase mono for the
+ * product chrome, which clashed with the sentence-case labels in these cards.
+ * Same treatment as the upload composer and the navbar.
+ */
+const BTN =
+  "cursor-pointer rounded-lg font-sans text-sm font-medium tracking-normal normal-case !shadow-none hover:translate-y-0";
+
 /** Roughly two wrapped rows of chips in a one-third column. */
 const SKILL_PREVIEW_LIMIT = 8;
 
@@ -124,21 +132,35 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-/** Labelled form control with optional helper text. */
+/**
+ * Labelled form control with optional helper text.
+ *
+ * `htmlFor` ties the label to the control (the child must carry the same `id`),
+ * so clicking the label focuses the field and screen readers announce its name.
+ * The hint is linked with `aria-describedby` from the control.
+ */
 function FormField({
+  id,
   label,
   hint,
   children,
 }: {
+  id: string;
   label: string;
   hint?: string;
   children: ReactNode;
 }) {
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-foreground">{label}</label>
+      <label htmlFor={id} className="text-sm font-medium text-foreground">
+        {label}
+      </label>
       {children}
-      {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+      {hint ? (
+        <p id={`${id}-hint`} className="text-xs text-muted-foreground">
+          {hint}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -208,6 +230,20 @@ export default function ProfilePage() {
   // let the reader ask for the rest.
   const [showAllSkills, setShowAllSkills] = useState(false);
 
+  const [saving, setSaving] = useState(false);
+
+  // Loads the edit form from the saved profile. Used on load *and* on Cancel —
+  // Cancel used to only close the form, so reopening it showed the abandoned
+  // edits instead of what was actually saved.
+  const fillForm = useCallback((p: User["publicProfile"]) => {
+    setDisplayName(p?.displayName || "");
+    setLinkedIn(p?.linkedInUrl || "");
+    setGithub(p?.githubUrl || "");
+    setShare(p?.shareIdentityWithRecruiters || false);
+    setTargetRole(p?.targetRole || "");
+    setSkillsInput((p?.skills || []).join(", "));
+  }, []);
+
   const loadDetails = useCallback(async () => {
     if (!authUser) return;
     setDetailLoading(true);
@@ -224,14 +260,7 @@ export default function ProfilePage() {
           }
         : profileRowFromAuth(authUser);
       setUser(row);
-      if (row.publicProfile) {
-        setDisplayName(row.publicProfile.displayName || "");
-        setLinkedIn(row.publicProfile.linkedInUrl || "");
-        setGithub(row.publicProfile.githubUrl || "");
-        setShare(row.publicProfile.shareIdentityWithRecruiters || false);
-        setTargetRole(row.publicProfile.targetRole || "");
-        setSkillsInput((row.publicProfile.skills || []).join(", "));
-      }
+      fillForm(row.publicProfile);
       if (authUser.role !== "recruiter") {
         const r = await apiFetch<Resume[]>("/api/resumes/my");
         setResumes(r.data || []);
@@ -243,7 +272,7 @@ export default function ProfilePage() {
     } finally {
       setDetailLoading(false);
     }
-  }, [authUser]);
+  }, [authUser, fillForm]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -276,7 +305,15 @@ export default function ProfilePage() {
     }
   }
 
+  function cancelEdit() {
+    fillForm(user?.publicProfile);
+    setEditMode(false);
+  }
+
   async function saveProfile() {
+    // Guards a double submit (Enter pressed twice, or Enter then a click).
+    if (saving) return;
+    setSaving(true);
     try {
       // Recruiters don't own candidate search fields; only send what applies to them.
       // The backend enforces this too, but filtering here keeps payloads clean.
@@ -303,11 +340,13 @@ export default function ProfilePage() {
         method: "PATCH",
         body: JSON.stringify(body),
       });
-      toast.success("Profile updated!");
+      toast.success("Profile updated");
       setEditMode(false);
       void loadDetails();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Update failed");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -426,104 +465,22 @@ export default function ProfilePage() {
                   {isRecruiter ? "Shown on your account." : "What recruiters can see."}
                 </CardDescription>
               </div>
+              {/* Opens the edit dialog. Editing used to happen inline, which
+                  swapped this card's ~250px of values for a ~430px form and
+                  stretched the resume list beside it to match; in a dialog the
+                  page doesn't move at all. */}
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setEditMode(!editMode)}
-                className="shrink-0 cursor-pointer rounded-lg !shadow-none hover:translate-y-0"
+                onClick={() => setEditMode(true)}
+                className={cn(BTN, "shrink-0")}
+                data-testid="button-edit-profile"
               >
-                {editMode ? "Cancel" : (<><Pencil className="size-3.5" /> Edit</>)}
+                <Pencil className="size-3.5" /> Edit
               </Button>
             </CardHeader>
 
             <CardContent className="p-5">
-              {editMode ? (
-                <div className="space-y-5">
-                  <FormField label="Display name">
-                    <Input
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      placeholder="Display name"
-                    />
-                  </FormField>
-                  <FormField label="LinkedIn URL">
-                    <Input
-                      value={linkedIn}
-                      onChange={(e) => setLinkedIn(e.target.value)}
-                      placeholder="https://linkedin.com/in/…"
-                    />
-                  </FormField>
-                  <FormField label="GitHub URL">
-                    <Input
-                      value={github}
-                      onChange={(e) => setGithub(e.target.value)}
-                      placeholder="https://github.com/…"
-                    />
-                  </FormField>
-
-                  {/* Target Role, Skills, and share-identity are candidate-only —
-                      they power the recruiter search. Recruiters don't appear in that
-                      search so these fields would just be noise on their profile. */}
-                  {!isRecruiter && (
-                    <>
-                      <FormField label="Target role">
-                        <Input
-                          value={targetRole}
-                          onChange={(e) => setTargetRole(e.target.value)}
-                          placeholder="e.g. Backend Engineer"
-                          maxLength={80}
-                        />
-                      </FormField>
-                      <FormField
-                        label="Skills"
-                        hint="Comma-separated, up to 25. Used by recruiter search."
-                      >
-                        <Input
-                          value={skillsInput}
-                          onChange={(e) => setSkillsInput(e.target.value)}
-                          placeholder="react, python, aws…"
-                        />
-                      </FormField>
-
-                      {/* Toggle row: title over description, control on the
-                          right — the shadcn settings pattern. Was a bordered
-                          grey bar with an uppercase bold label. */}
-                      <label className="flex cursor-pointer items-start justify-between gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-muted/50">
-                        <span className="space-y-1">
-                          <span className="block text-sm font-medium text-foreground">
-                            Share identity with recruiters
-                          </span>
-                          <span className="block text-xs text-muted-foreground">
-                            Off means recruiters only ever see your anonymous alias.
-                          </span>
-                        </span>
-                        <input
-                          type="checkbox"
-                          checked={share}
-                          onChange={() => setShare(!share)}
-                          className="mt-0.5 size-4 shrink-0 cursor-pointer accent-primary"
-                        />
-                      </label>
-                    </>
-                  )}
-
-                  <div className="flex items-center gap-2 border-t border-border pt-4">
-                    <Button
-                      onClick={saveProfile}
-                      className="flex-1 cursor-pointer rounded-lg !shadow-none hover:translate-y-0"
-                    >
-                      Save changes
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setEditMode(false)}
-                      className="cursor-pointer rounded-lg !shadow-none hover:translate-y-0"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              ) : (
                 <dl className="space-y-4">
                   <Field label="Display name">{profile?.displayName || "—"}</Field>
                   <Field label="LinkedIn">
@@ -580,7 +537,6 @@ export default function ProfilePage() {
                     </>
                   )}
                 </dl>
-              )}
             </CardContent>
           </Card>
 
@@ -620,7 +576,7 @@ export default function ProfilePage() {
                       Recruiters search candidates from the dashboard.
                     </p>
                     <Link href="/recruiter">
-                      <Button className="cursor-pointer rounded-lg !shadow-none hover:translate-y-0">
+                      <Button className={BTN}>
                         Open recruiter dashboard
                       </Button>
                     </Link>
@@ -637,7 +593,7 @@ export default function ProfilePage() {
                   <FileText className="size-8 text-muted-foreground/60" aria-hidden />
                   <p className="text-sm text-muted-foreground">No resumes yet.</p>
                   <Link href="/upload">
-                    <Button className="cursor-pointer rounded-lg !shadow-none hover:translate-y-0">
+                    <Button className={BTN}>
                       Upload resume
                     </Button>
                   </Link>
@@ -695,12 +651,14 @@ export default function ProfilePage() {
           than the resume list again, which is the imbalance we just removed. */}
       <motion.div variants={itemVariants} className="grid gap-6 lg:grid-cols-3">
         <Card className={cn(CARD, "border-destructive/40")}>
-          <div className="flex flex-col gap-3 p-4">
-            <div className="min-w-0">
-              <h2 className="font-sans text-sm font-medium tracking-tight text-foreground">
+          {/* Same `p-5` inset and title style as the cards above, so its text and
+              button edges line up with Public profile's. */}
+          <div className="flex flex-col gap-4 p-5">
+            <div className="min-w-0 space-y-1">
+              <h2 className="font-sans text-base font-semibold tracking-tight text-foreground">
                 Delete account
               </h2>
-              <p className="mt-0.5 text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Permanently removes your profile, resumes, projects, comments, likes and votes.
               </p>
             </div>
@@ -711,7 +669,10 @@ export default function ProfilePage() {
                 setDeleteConfirm("");
                 setDeleteOpen(true);
               }}
-              className="w-full cursor-pointer rounded-lg border-destructive/60 text-destructive !shadow-none hover:translate-y-0 hover:bg-destructive hover:text-destructive-foreground"
+              className={cn(
+                BTN,
+                "w-full border-destructive/60 text-destructive hover:bg-destructive hover:text-destructive-foreground",
+              )}
               data-testid="button-open-delete-account"
             >
               <Trash2 className="size-4" /> Delete account
@@ -719,6 +680,133 @@ export default function ProfilePage() {
           </div>
         </Card>
       </motion.div>
+
+      {/* Edit public profile. A dialog, not an inline form, so the cards
+          behind it keep their size. Closing it any way (Esc, the overlay,
+          the ✕) is a Cancel: the fields reset to what's saved. */}
+      <Dialog
+        open={editMode}
+        onOpenChange={(open) => {
+          if (open) setEditMode(true);
+          else if (!saving) cancelEdit();
+        }}
+      >
+        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-xl border border-border bg-card shadow-[var(--shadow-lg)] sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-sans text-base font-semibold tracking-tight">
+              Edit public profile
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              {isRecruiter ? "Shown on your account." : "What recruiters can see."}
+            </DialogDescription>
+          </DialogHeader>
+          {/* A real <form>, so Enter in any field saves. `noValidate`: the
+              server owns URL validation and reports problems via the toast. */}
+          <form
+            noValidate
+            onSubmit={(e) => {
+              e.preventDefault();
+              void saveProfile();
+            }}
+            className="space-y-5"
+          >
+            <FormField id="profile-display-name" label="Display name">
+              <Input
+                id="profile-display-name"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Display name"
+                autoFocus
+              />
+            </FormField>
+            <FormField id="profile-linkedin" label="LinkedIn URL">
+              <Input
+                id="profile-linkedin"
+                type="url"
+                inputMode="url"
+                value={linkedIn}
+                onChange={(e) => setLinkedIn(e.target.value)}
+                placeholder="https://linkedin.com/in/…"
+              />
+            </FormField>
+            <FormField id="profile-github" label="GitHub URL">
+              <Input
+                id="profile-github"
+                type="url"
+                inputMode="url"
+                value={github}
+                onChange={(e) => setGithub(e.target.value)}
+                placeholder="https://github.com/…"
+              />
+            </FormField>
+
+            {/* Target Role, Skills, and share-identity are candidate-only —
+                they power the recruiter search. Recruiters don't appear in that
+                search so these fields would just be noise on their profile. */}
+            {!isRecruiter && (
+              <>
+                <FormField id="profile-target-role" label="Target role">
+                  <Input
+                    id="profile-target-role"
+                    value={targetRole}
+                    onChange={(e) => setTargetRole(e.target.value)}
+                    placeholder="e.g. Backend Engineer"
+                    maxLength={80}
+                  />
+                </FormField>
+                <FormField
+                  id="profile-skills"
+                  label="Skills"
+                  hint="Comma-separated, up to 25. Used by recruiter search."
+                >
+                  <Input
+                    id="profile-skills"
+                    aria-describedby="profile-skills-hint"
+                    value={skillsInput}
+                    onChange={(e) => setSkillsInput(e.target.value)}
+                    placeholder="react, python, aws…"
+                  />
+                </FormField>
+
+                {/* Toggle row: title over description, control on the
+                    right — the shadcn settings pattern. Was a bordered
+                    grey bar with an uppercase bold label. */}
+                <label className="flex cursor-pointer items-start justify-between gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-muted/50">
+                  <span className="space-y-1">
+                    <span className="block text-sm font-medium text-foreground">
+                      Share identity with recruiters
+                    </span>
+                    <span className="block text-xs text-muted-foreground">
+                      Off means recruiters only ever see your anonymous alias.
+                    </span>
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={share}
+                    onChange={() => setShare(!share)}
+                    className="mt-0.5 size-4 shrink-0 cursor-pointer accent-primary"
+                  />
+                </label>
+              </>
+            )}
+
+            <DialogFooter className="mx-0 mb-0 rounded-b-none border-t border-border bg-transparent px-0 pt-4 pb-0">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={cancelEdit}
+                disabled={saving}
+                className={BTN}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={saving} aria-busy={saving} className={BTN}>
+                {saving ? "Saving…" : "Save changes"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="rounded-xl border border-destructive bg-card shadow-[var(--shadow-lg)] sm:max-w-md">
@@ -744,7 +832,7 @@ export default function ProfilePage() {
             <Button
               variant="outline"
               onClick={() => setDeleteOpen(false)}
-              className="cursor-pointer rounded-lg !shadow-none hover:translate-y-0"
+              className={BTN}
             >
               Cancel
             </Button>
@@ -756,7 +844,7 @@ export default function ProfilePage() {
                 deleteConfirm.trim().toLowerCase() !== authUser.email.toLowerCase()
               }
               onClick={confirmDeleteAccount}
-              className="cursor-pointer rounded-lg !shadow-none hover:translate-y-0"
+              className={BTN}
               data-testid="button-confirm-delete-account"
             >
               {deleting ? "Deleting..." : "Delete forever"}
