@@ -305,10 +305,10 @@ export default function UploadPage() {
   // ── Form view: one composer, card style alongside ─────────────────────────
   return (
     <div className="flex w-full flex-col gap-6">
-      {/* Masthead, same shape as the profile page's. */}
-      <header className="border-b border-border pb-6">
-        <h1 className="font-sans text-2xl font-semibold tracking-tight">Create a post</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+      {/* Centred over the two cards, as it was originally. */}
+      <header className="text-center">
+        <h1 className="font-sans text-2xl font-semibold tracking-tight sm:text-3xl">Create a post</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           Share your resume and tell people what you want roasted.
         </p>
       </header>
@@ -519,38 +519,25 @@ export default function UploadPage() {
           </CardHeader>
 
           <CardContent className="space-y-4 p-5">
-            {/* Mirrors the gallery card's markup so what you see here is what
-                gets posted: same background, same avatar, same text styles. */}
-            <div aria-hidden className="overflow-hidden rounded-lg border border-border">
-              <div className={cn("relative aspect-[5/4] border-b border-border", getPostCardBg(cardColor, seed))}>
-                <Image
-                  key={style}
-                  src={getDiceBearUrl(seed, style, 176, { backgroundColor: AVATAR_BG })}
-                  alt=""
-                  width={176}
-                  height={176}
-                  unoptimized
-                  className="h-full w-full object-contain p-5"
-                />
-              </div>
-              <div className="space-y-1 p-3.5">
-                <p
-                  className={cn(
-                    "line-clamp-2 text-sm leading-snug font-medium tracking-tight",
-                    title.trim() ? "text-foreground" : "text-muted-foreground",
-                  )}
-                >
-                  {title.trim() || "Your post title"}
-                </p>
-                {body.trim() && (
-                  <p className="line-clamp-2 whitespace-pre-line break-words text-xs text-muted-foreground">
-                    {body.trim()}
-                  </p>
-                )}
-                {user.anonymousUsername && (
-                  <p className="truncate text-xs text-muted-foreground">u/{user.anonymousUsername}</p>
-                )}
-              </div>
+            {/* Avatar only, at a fixed aspect ratio. It used to repeat the title
+                and body as you typed, so this card grew line by line and dragged
+                the picker below it down. The composer already shows that text. */}
+            <div
+              aria-hidden
+              className={cn(
+                "aspect-[5/4] overflow-hidden rounded-lg border border-border",
+                getPostCardBg(cardColor, seed),
+              )}
+            >
+              <Image
+                key={style}
+                src={getDiceBearUrl(seed, style, 176, { backgroundColor: AVATAR_BG })}
+                alt=""
+                width={176}
+                height={176}
+                unoptimized
+                className="h-full w-full object-contain p-5"
+              />
             </div>
 
             <div

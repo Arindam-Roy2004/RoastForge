@@ -6,9 +6,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { toast } from "sonner";
-import { Code, ExternalLink, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Code, ExternalLink, Plus, Trash2 } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -21,7 +21,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { motion, AnimatePresence } from "motion/react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type Project = {
@@ -32,15 +31,16 @@ type Project = {
   githubUrl?: string;
   liveDemo?: string;
   aiStatus?: "pending" | "processing" | "done" | "failed";
-  aiEvaluation?: { codeQuality: number; complexity: number; summary: string; extractedSkills?: string[] };
 };
 
 /** Must match the backend project model / DTO. */
 const PROJECT_TITLE_MAX = 200;
 const PROJECT_DESC_MAX = 2000;
 
-/** Same card shell as the profile and upload pages. */
+/** Same card shell and header bar as the profile page. */
 const CARD = "rounded-xl border border-border bg-card shadow-[var(--shadow-xs)]";
+const CARD_HEAD =
+  "flex flex-row items-center justify-between gap-4 space-y-0 border-b border-border px-5 py-4";
 
 /**
  * Sentence-case sans buttons. The shared `ui/button` is uppercase mono for the
@@ -50,10 +50,14 @@ const CARD = "rounded-xl border border-border bg-card shadow-[var(--shadow-xs)]"
 const BTN =
   "cursor-pointer rounded-lg font-sans text-sm font-medium tracking-normal normal-case !shadow-none hover:translate-y-0";
 
+/** Square icon action in a row (repo, live demo, delete). */
+const ROW_ACTION =
+  "size-8 shrink-0 rounded-md px-0 text-muted-foreground !shadow-none hover:translate-y-0 hover:bg-muted hover:text-foreground";
+
 /**
- * Only http(s) links are rendered as links. The server now rejects anything
- * else, but projects saved before that check could still hold a `javascript:`
- * URL, and this page must never turn stored text into a script link.
+ * Only http(s) links are rendered as links. The server rejects anything else,
+ * but projects saved before that check could still hold a `javascript:` URL,
+ * and this page must never turn stored text into a script link.
  */
 function safeExternalUrl(raw?: string): string | null {
   if (!raw) return null;
@@ -66,26 +70,15 @@ function safeExternalUrl(raw?: string): string | null {
 }
 
 /**
- * Status badge, shown only for states that mean something to the reader.
- * `pending` is hidden: nothing evaluates projects yet, so every project would
- * otherwise wear a permanent "Pending" badge that never resolves.
+ * Status, shown only when it means something. `pending` is hidden: nothing
+ * evaluates projects yet, so every project would otherwise carry a permanent
+ * "Pending" that never resolves.
  */
 const STATUS: Record<string, { label: string; dot: string } | undefined> = {
   processing: { label: "Analyzing", dot: "bg-amber-500" },
   done: { label: "Evaluated", dot: "bg-emerald-500" },
   failed: { label: "Evaluation failed", dot: "bg-destructive" },
 };
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.05 } },
-} as const;
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } },
-  exit: { opacity: 0, scale: 0.97, transition: { duration: 0.15 } },
-} as const;
 
 /** Label tied to its control by `htmlFor`, with optional right-aligned meta. */
 function FormField({
@@ -122,6 +115,84 @@ function FormField({
   );
 }
 
+/**
+ * One project as a list row — the same anatomy as "Your resumes" on the
+ * profile page: tinted icon tile, name, then muted one-line details. Every text
+ * line truncates, so a long description or a big tech stack can't make one row
+ * taller than the rest.
+ */
+function ProjectRow({ project, onDelete }: { project: Project; onDelete: () => void }) {
+  const repo = safeExternalUrl(project.githubUrl);
+  const live = safeExternalUrl(project.liveDemo);
+  const status = project.aiStatus ? STATUS[project.aiStatus] : undefined;
+  const stack = project.techStack?.filter(Boolean) ?? [];
+
+  return (
+    <div className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/60">
+      <div className="shrink-0 self-start rounded-lg bg-primary/10 p-2">
+        <Code aria-hidden className="size-5 text-primary-strong" />
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-foreground">{project.title}</p>
+        {project.description && (
+          <p className="mt-0.5 truncate text-xs text-muted-foreground">{project.description}</p>
+        )}
+        {(stack.length > 0 || status) && (
+          <p className="mt-1 flex min-w-0 items-center gap-3 text-xs text-muted-foreground">
+            {stack.length > 0 && <span className="truncate">{stack.join(" · ")}</span>}
+            {status && (
+              <span className="inline-flex shrink-0 items-center gap-1.5">
+                <span aria-hidden className={cn("size-1.5 rounded-full", status.dot)} />
+                {status.label}
+              </span>
+            )}
+          </p>
+        )}
+      </div>
+
+      {/* Links are real anchors styled as buttons — never a <button> inside an
+          <a>, which is invalid HTML and doubles the tab stops. */}
+      <div className="flex shrink-0 items-center gap-0.5">
+        {repo && (
+          <a
+            href={repo}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${project.title} repository`}
+            title="Repository"
+            className={cn(buttonVariants({ variant: "ghost", size: "icon-sm" }), ROW_ACTION)}
+          >
+            <FaGithub aria-hidden className="size-4" />
+          </a>
+        )}
+        {live && (
+          <a
+            href={live}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${project.title} live demo`}
+            title="Live demo"
+            className={cn(buttonVariants({ variant: "ghost", size: "icon-sm" }), ROW_ACTION)}
+          >
+            <ExternalLink aria-hidden className="size-4" />
+          </a>
+        )}
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={onDelete}
+          aria-label={`Delete ${project.title}`}
+          title="Delete project"
+          className={cn(ROW_ACTION, "hover:bg-destructive/10 hover:text-destructive")}
+        >
+          <Trash2 className="size-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function ProjectsPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useRequireAuth();
@@ -136,8 +207,7 @@ export default function ProjectsPage() {
   const [demo, setDemo] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Delete goes through a confirmation. It used to fire on the first click of
-  // an unlabelled trash icon, with no way back.
+  // Delete goes through a confirmation instead of firing on the first click.
   const [pendingDelete, setPendingDelete] = useState<Project | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -194,7 +264,6 @@ export default function ProjectsPage() {
           liveDemo: demo.trim() || undefined,
         }),
       });
-      // Only says what actually happened: no evaluation job exists yet.
       toast.success("Project added");
       setOpen(false);
       resetForm();
@@ -249,170 +318,84 @@ export default function ProjectsPage() {
   const isEmpty = !loading && list.length === 0;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
-      className="flex w-full flex-col gap-6 py-8"
-    >
-      {/* Masthead, same shape as Profile and Create a post. */}
-      <header className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="font-sans text-2xl font-semibold tracking-tight">Projects</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Work you want recruiters to see alongside your resume.
-            {!loading && list.length > 0 && (
-              <span className="tabular-nums">
-                {" "}
-                · {list.length} {list.length === 1 ? "project" : "projects"}
-              </span>
-            )}
-          </p>
-        </div>
-        {/* Hidden while empty: the empty state carries the only "add" action
-            then, rather than two identical buttons on one screen. */}
-        {!isEmpty && (
-          <Button onClick={() => setOpen(true)} className={cn(BTN, "w-full sm:w-auto")}>
-            <Plus className="size-4" /> New project
-          </Button>
-        )}
+    // Narrower than the page container: a list of short rows stretched across
+    // 80rem left most of every row empty.
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+      <header className="text-center">
+        <h1 className="font-sans text-2xl font-semibold tracking-tight sm:text-3xl">Projects</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Work you want recruiters to see alongside your resume.
+        </p>
       </header>
 
-      {/* Cards flow with the page. They used to sit in a tinted, fixed-height
-          scroll box, so the page scrolled inside a box inside the page. */}
-      {loading ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="h-48 w-full rounded-xl border border-border" />
-          ))}
-        </div>
-      ) : isEmpty ? (
-        <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border px-6 py-16 text-center">
-          <span className="flex size-12 items-center justify-center rounded-full border border-border bg-muted">
-            <Code aria-hidden className="size-5 text-muted-foreground" />
-          </span>
-          <div className="space-y-1">
-            <h2 className="font-sans text-base font-semibold tracking-tight">No projects yet</h2>
-            <p className="text-sm text-muted-foreground">
-              Add something you&apos;ve built to strengthen your profile.
-            </p>
+      {/* One bounded card, like "Your resumes" on the profile page. The list
+          scrolls inside it, so adding projects never makes the page longer. */}
+      <Card className={CARD}>
+        <CardHeader className={CARD_HEAD}>
+          <div className="flex items-center gap-2">
+            <CardTitle className="font-sans text-base font-semibold tracking-tight">Your projects</CardTitle>
+            {!loading && list.length > 0 && (
+              <Badge variant="secondary" className="font-normal tabular-nums">
+                {list.length}
+              </Badge>
+            )}
           </div>
-          <Button onClick={() => setOpen(true)} className={BTN}>
-            <Plus className="size-4" /> Add a project
-          </Button>
-        </div>
-      ) : (
-        <motion.ul
-          className="grid gap-4 md:grid-cols-2"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          aria-label="Your projects"
-        >
-          <AnimatePresence>
-            {list.map((project) => {
-              const repo = safeExternalUrl(project.githubUrl);
-              const live = safeExternalUrl(project.liveDemo);
-              const status = project.aiStatus ? STATUS[project.aiStatus] : undefined;
+          {/* Hidden while empty: the empty state holds the only "add" action
+              then, rather than two identical buttons in one card. */}
+          {!loading && !isEmpty && (
+            <Button size="sm" onClick={() => setOpen(true)} className={BTN}>
+              <Plus className="size-4" /> New project
+            </Button>
+          )}
+        </CardHeader>
 
-              return (
-                <motion.li key={project._id} variants={itemVariants} exit="exit" layout className="h-full">
-                  <Card className={cn(CARD, "flex h-full flex-col")}>
-                    {/* Title row: no header bar or tinted strip, just the title,
-                        the status when there is one, and the delete action. */}
-                    <div className="flex items-start justify-between gap-3 p-5 pb-0">
-                      <div className="min-w-0 space-y-1.5">
-                        <h3 className="font-sans text-base leading-snug font-semibold tracking-tight break-words text-foreground">
-                          {project.title}
-                        </h3>
-                        {status && (
-                          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <span aria-hidden className={cn("size-1.5 rounded-full", status.dot)} />
-                            {status.label}
-                          </span>
-                        )}
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => setPendingDelete(project)}
-                        aria-label={`Delete ${project.title}`}
-                        title="Delete project"
-                        className="-mt-1 -mr-2 shrink-0 rounded-md text-muted-foreground !shadow-none hover:translate-y-0 hover:bg-destructive/10 hover:text-destructive"
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
+        <CardContent className="p-5">
+          {loading ? (
+            <div className="space-y-3">
+              <Skeleton className="h-16 w-full rounded-lg" />
+              <Skeleton className="h-16 w-full rounded-lg" />
+              <Skeleton className="h-16 w-full rounded-lg" />
+            </div>
+          ) : isEmpty ? (
+            // shadcn's Empty pattern: a small icon tile, a title, one line of
+            // description and a single action, held to a narrow column. Sized
+            // to its content rather than stretched into a tall dashed box.
+            <div className="mx-auto flex max-w-sm flex-col items-center gap-4 py-8 text-center">
+              <span className="flex size-10 items-center justify-center rounded-lg bg-muted">
+                <Code aria-hidden className="size-5 text-foreground" />
+              </span>
+              <div className="space-y-1">
+                <h2 className="font-sans text-base font-medium tracking-tight">No projects yet</h2>
+                <p className="text-sm text-muted-foreground">
+                  Add something you&apos;ve built to strengthen your profile.
+                </p>
+              </div>
+              <Button size="sm" onClick={() => setOpen(true)} className={BTN}>
+                <Plus className="size-4" /> Add a project
+              </Button>
+            </div>
+          ) : (
+            /* Scrolls past about five rows. `scrollbar-gutter:stable` reserves
+               the bar's width so rows don't shift when the list crosses the cap,
+               and `pr-1` keeps the row actions off the bar. */
+            <ul
+              aria-label="Your projects"
+              className="max-h-[420px] space-y-3 overflow-y-auto overscroll-y-contain pr-1 [scrollbar-gutter:stable]"
+            >
+              {list.map((project, index) => (
+                <li
+                  key={project._id}
+                  className={cn(index < list.length - 1 && "border-b border-border/50 pb-3")}
+                >
+                  <ProjectRow project={project} onDelete={() => setPendingDelete(project)} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
 
-                    <div className="flex-1 space-y-4 p-5">
-                      {project.description && (
-                        <p className="line-clamp-4 text-sm leading-relaxed whitespace-pre-line break-words text-muted-foreground">
-                          {project.description}
-                        </p>
-                      )}
-
-                      {project.techStack?.length > 0 && (
-                        <ul className="flex flex-wrap gap-1.5" aria-label="Tech stack">
-                          {project.techStack.map((tech) => (
-                            <li key={tech}>
-                              <Badge variant="secondary" className="font-normal">
-                                {tech}
-                              </Badge>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-
-                      {project.aiEvaluation?.summary && (
-                        <div className="rounded-lg bg-muted/50 p-3">
-                          <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-foreground">
-                            <Sparkles aria-hidden className="size-3.5 text-primary-strong" />
-                            AI evaluation
-                          </p>
-                          <p className="text-sm leading-relaxed text-muted-foreground">
-                            {project.aiEvaluation.summary}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Links are real anchors styled as buttons. They used to be
-                        a <button> inside an <a>, which is invalid HTML and gives
-                        keyboard users two tab stops for one link. */}
-                    {(repo || live) && (
-                      <div className="flex gap-2 border-t border-border px-5 py-3">
-                        {repo && (
-                          <a
-                            href={repo}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={cn(buttonVariants({ variant: "outline", size: "sm" }), BTN, "flex-1")}
-                          >
-                            <FaGithub aria-hidden className="size-4" /> Repository
-                          </a>
-                        )}
-                        {live && (
-                          <a
-                            href={live}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={cn(buttonVariants({ variant: "outline", size: "sm" }), BTN, "flex-1")}
-                          >
-                            <ExternalLink aria-hidden className="size-4" /> Live demo
-                          </a>
-                        )}
-                      </div>
-                    )}
-                  </Card>
-                </motion.li>
-              );
-            })}
-          </AnimatePresence>
-        </motion.ul>
-      )}
-
-      {/* New project. One close path in the footer (no ✕ as well), and closing
-          discards the draft. */}
+      {/* New project. One close path in the footer, and closing discards the draft. */}
       <Dialog open={open} onOpenChange={setDialogOpen}>
         <DialogContent
           showCloseButton={false}
@@ -420,9 +403,7 @@ export default function ProjectsPage() {
         >
           <DialogHeader>
             <DialogTitle className="font-sans text-base font-semibold tracking-tight">New project</DialogTitle>
-            <DialogDescription className="text-xs">
-              Shown on your profile and to recruiters.
-            </DialogDescription>
+            <DialogDescription className="text-xs">Shown on your profile and to recruiters.</DialogDescription>
           </DialogHeader>
 
           <form onSubmit={create} className="space-y-5">
@@ -446,8 +427,6 @@ export default function ProjectsPage() {
               />
             </FormField>
 
-            {/* A textarea: the field holds up to 2,000 characters, which a
-                single-line input made impossible to review. */}
             <FormField
               id="project-description"
               label="Description"
@@ -558,6 +537,6 @@ export default function ProjectsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </motion.div>
+    </div>
   );
 }
