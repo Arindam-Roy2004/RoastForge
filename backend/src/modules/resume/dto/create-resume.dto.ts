@@ -18,7 +18,7 @@ export default class CreateResumeDto extends BaseDto {
     static schema = Joi.object({
         title: Joi.string().max(200).required(),
         name: Joi.string().max(120).required(),
-        blurb: Joi.string().max(500).allow("").optional(),
+        blurb: Joi.string().max(2000).allow("").optional(),
         fileUrl: Joi.string().uri({ scheme: ["https"] }).pattern(cloudinaryUrl).required()
             .messages({ "string.pattern.base": "fileUrl must be a Cloudinary URL" }),
         fileType: Joi.string().valid("pdf", "image").required(),

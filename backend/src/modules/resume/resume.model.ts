@@ -42,7 +42,8 @@ const resumeSchema = new Schema<IResume>(
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     title: { type: String, required: true, trim: true, maxlength: 200 },
     name: { type: String, required: true, trim: true, maxlength: 120 },
-    blurb: { type: String, default: "", trim: true, maxlength: 500 },
+    // Post body. Plain text, optional; limit must match both resume DTOs.
+    blurb: { type: String, default: "", trim: true, maxlength: 2000 },
     fileUrl: { type: String, required: true },
     fileType: { type: String, enum: ["pdf", "image"], required: true },
     avatarStyle: { type: String, enum: AVATAR_STYLES, default: null },

@@ -5,6 +5,6 @@ export default class UpdateResumeDto extends BaseDto {
     static schema = Joi.object({
         title: Joi.string().max(200).optional(),
         name: Joi.string().max(120).optional(),
-        blurb: Joi.string().max(500).allow("").optional(),
+        blurb: Joi.string().max(2000).allow("").optional(),
     });
 }
