@@ -6,13 +6,21 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { toast } from "sonner";
-import { Plus, Trash2, ExternalLink, Code, Sparkles } from "lucide-react";
+import { Code, ExternalLink, Plus, Sparkles, Trash2 } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
-import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "motion/react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -23,20 +31,96 @@ type Project = {
   techStack: string[];
   githubUrl?: string;
   liveDemo?: string;
-  aiStatus?: string;
+  aiStatus?: "pending" | "processing" | "done" | "failed";
   aiEvaluation?: { codeQuality: number; complexity: number; summary: string; extractedSkills?: string[] };
+};
+
+/** Must match the backend project model / DTO. */
+const PROJECT_TITLE_MAX = 200;
+const PROJECT_DESC_MAX = 2000;
+
+/** Same card shell as the profile and upload pages. */
+const CARD = "rounded-xl border border-border bg-card shadow-[var(--shadow-xs)]";
+
+/**
+ * Sentence-case sans buttons. The shared `ui/button` is uppercase mono for the
+ * product chrome, which reads as a different design beside sentence-case
+ * labels. Same treatment as the profile and upload pages.
+ */
+const BTN =
+  "cursor-pointer rounded-lg font-sans text-sm font-medium tracking-normal normal-case !shadow-none hover:translate-y-0";
+
+/**
+ * Only http(s) links are rendered as links. The server now rejects anything
+ * else, but projects saved before that check could still hold a `javascript:`
+ * URL, and this page must never turn stored text into a script link.
+ */
+function safeExternalUrl(raw?: string): string | null {
+  if (!raw) return null;
+  try {
+    const url = new URL(raw);
+    return url.protocol === "http:" || url.protocol === "https:" ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Status badge, shown only for states that mean something to the reader.
+ * `pending` is hidden: nothing evaluates projects yet, so every project would
+ * otherwise wear a permanent "Pending" badge that never resolves.
+ */
+const STATUS: Record<string, { label: string; dot: string } | undefined> = {
+  processing: { label: "Analyzing", dot: "bg-amber-500" },
+  done: { label: "Evaluated", dot: "bg-emerald-500" },
+  failed: { label: "Evaluation failed", dot: "bg-destructive" },
 };
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.06 } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.05 } },
 } as const;
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 15 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
-  exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } },
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } },
+  exit: { opacity: 0, scale: 0.97, transition: { duration: 0.15 } },
 } as const;
+
+/** Label tied to its control by `htmlFor`, with optional right-aligned meta. */
+function FormField({
+  id,
+  label,
+  optional,
+  hint,
+  meta,
+  children,
+}: {
+  id: string;
+  label: string;
+  optional?: boolean;
+  hint?: string;
+  meta?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-baseline justify-between gap-3">
+        <label htmlFor={id} className="text-sm font-medium text-foreground">
+          {label}
+          {optional && <span className="font-normal text-muted-foreground"> (optional)</span>}
+        </label>
+        {meta}
+      </div>
+      {children}
+      {hint ? (
+        <p id={`${id}-hint`} className="text-xs text-muted-foreground">
+          {hint}
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 export default function ProjectsPage() {
   const router = useRouter();
@@ -44,7 +128,7 @@ export default function ProjectsPage() {
   const [list, setList] = useState<Project[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  
+
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [stack, setStack] = useState("");
@@ -52,16 +136,25 @@ export default function ProjectsPage() {
   const [demo, setDemo] = useState("");
   const [saving, setSaving] = useState(false);
 
+  // Delete goes through a confirmation. It used to fire on the first click of
+  // an unlabelled trash icon, with no way back.
+  const [pendingDelete, setPendingDelete] = useState<Project | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   const load = useCallback(async () => {
     try {
       const res = await apiFetch<Project[]>("/api/project");
       setList(res.data || []);
-    } catch { /* not logged in */ } finally {
+    } catch {
+      /* not logged in */
+    } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -70,47 +163,76 @@ export default function ProjectsPage() {
     }
   }, [authLoading, user?.role, router]);
 
-  if (authLoading) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center py-16">
-        <p className="label-mono text-xs text-muted-foreground">Loading…</p>
-      </div>
-    );
+  function resetForm() {
+    setTitle("");
+    setDesc("");
+    setStack("");
+    setGh("");
+    setDemo("");
+  }
+
+  // Closing the dialog any way (Esc, overlay, Cancel) discards the draft, so
+  // reopening it never shows a half-finished project from last time.
+  function setDialogOpen(next: boolean) {
+    if (!next && saving) return;
+    setOpen(next);
+    if (!next) resetForm();
   }
 
   async function create(e: React.FormEvent) {
     e.preventDefault();
+    if (saving) return;
     setSaving(true);
     try {
       await apiFetch("/api/project", {
         method: "POST",
-        body: JSON.stringify({ title, description: desc, techStack: stack.split(",").map((s) => s.trim()).filter(Boolean), githubUrl: gh || undefined, liveDemo: demo || undefined }),
+        body: JSON.stringify({
+          title: title.trim(),
+          description: desc.trim(),
+          techStack: Array.from(new Set(stack.split(",").map((s) => s.trim()).filter(Boolean))),
+          githubUrl: gh.trim() || undefined,
+          liveDemo: demo.trim() || undefined,
+        }),
       });
-      toast.success("Project created — AI job queued!");
-      setTitle(""); setDesc(""); setStack(""); setGh(""); setDemo("");
+      // Only says what actually happened: no evaluation job exists yet.
+      toast.success("Project added");
       setOpen(false);
+      resetForm();
       load();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed");
+      toast.error(err instanceof Error ? err.message : "Could not add project");
     } finally {
       setSaving(false);
     }
   }
 
-  async function handleDelete(id: string) {
+  async function confirmDelete() {
+    if (!pendingDelete) return;
+    setDeleting(true);
     try {
-      await apiFetch(`/api/project/${id}`, { method: "DELETE" });
-      toast.success("Project removed.");
+      await apiFetch(`/api/project/${pendingDelete._id}`, { method: "DELETE" });
+      toast.success("Project deleted");
+      setPendingDelete(null);
       load();
-    } catch (err) {
-      toast.error("Failed to delete project");
+    } catch {
+      toast.error("Could not delete project");
+    } finally {
+      setDeleting(false);
     }
+  }
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center py-16">
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      </div>
+    );
   }
 
   if (user?.role === "recruiter") {
     return (
       <div className="flex items-center justify-center py-24">
-        <p className="label-mono text-xs text-muted-foreground">Redirecting…</p>
+        <p className="text-sm text-muted-foreground">Redirecting…</p>
       </div>
     );
   }
@@ -119,150 +241,323 @@ export default function ProjectsPage() {
   if (!user) {
     return (
       <div className="flex items-center justify-center py-24">
-        <p className="label-mono text-xs text-muted-foreground">Redirecting to sign in…</p>
+        <p className="text-sm text-muted-foreground">Redirecting to sign in…</p>
       </div>
     );
   }
 
+  const isEmpty = !loading && list.length === 0;
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="w-full"
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="flex w-full flex-col gap-6 py-8"
     >
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+      {/* Masthead, same shape as Profile and Create a post. */}
+      <header className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="eyebrow">Portfolio</p>
-          <h1 className="mt-2 text-3xl sm:text-4xl">Projects</h1>
+          <h1 className="font-sans text-2xl font-semibold tracking-tight">Projects</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Work you want recruiters to see alongside your resume.
+            {!loading && list.length > 0 && (
+              <span className="tabular-nums">
+                {" "}
+                · {list.length} {list.length === 1 ? "project" : "projects"}
+              </span>
+            )}
+          </p>
         </div>
+        {/* Hidden while empty: the empty state carries the only "add" action
+            then, rather than two identical buttons on one screen. */}
+        {!isEmpty && (
+          <Button onClick={() => setOpen(true)} className={cn(BTN, "w-full sm:w-auto")}>
+            <Plus className="size-4" /> New project
+          </Button>
+        )}
+      </header>
 
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger render={<Button className="border border-border rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all font-heading tracking-wide w-full sm:w-auto h-11 px-6 cursor-pointer"><Plus className="w-4 h-4 mr-2" /> Add Project</Button>} />
-          <DialogContent className="border border-border rounded-lg shadow-[var(--shadow-lg)] max-w-md p-6 bg-card">
-            <DialogHeader>
-              <DialogTitle className="font-heading text-xl tracking-wide">New Project</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={create} className="space-y-4 pt-2">
-              <div className="space-y-1.5">
-                <label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Project Name</label>
-                <Input value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="My awesome project" className="border border-border rounded-lg bg-background shadow-none focus-visible:ring-2 focus-visible:ring-ring/40 transition-all focus:shadow-[var(--shadow-2xs)] h-10" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Description</label>
-                <Input value={desc} onChange={(e) => setDesc(e.target.value)} required placeholder="What does it do?" className="border border-border rounded-lg bg-background shadow-none focus-visible:ring-2 focus-visible:ring-ring/40 transition-all focus:shadow-[var(--shadow-2xs)] h-10" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Tech Stack</label>
-                <Input value={stack} onChange={(e) => setStack(e.target.value)} placeholder="React, Node.js (comma separated)" className="border border-border rounded-lg bg-background shadow-none focus-visible:ring-2 focus-visible:ring-ring/40 transition-all focus:shadow-[var(--shadow-2xs)] h-10" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">GitHub URL</label>
-                <Input value={gh} onChange={(e) => setGh(e.target.value)} placeholder="https://github.com/..." className="border border-border rounded-lg bg-background shadow-none focus-visible:ring-2 focus-visible:ring-ring/40 transition-all focus:shadow-[var(--shadow-2xs)] h-10" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Live Demo URL</label>
-                <Input value={demo} onChange={(e) => setDemo(e.target.value)} placeholder="https://myproject.com" className="border border-border rounded-lg bg-background shadow-none focus-visible:ring-2 focus-visible:ring-ring/40 transition-all focus:shadow-[var(--shadow-2xs)] h-10" />
-              </div>
-              <div className="flex gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1 border border-border rounded-lg font-heading tracking-wide h-10 cursor-pointer">
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={saving} className="flex-1 border border-border rounded-lg shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all font-heading tracking-wide h-10 cursor-pointer">
-                  {saving ? "Adding..." : "Add Project"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div
-        className="min-h-0 max-h-[min(40rem,calc(100vh-12rem))] overflow-y-auto overscroll-y-contain rounded-lg border border-border bg-muted/20 p-4 sm:p-6 [scrollbar-gutter:stable]"
-        aria-label="Your projects"
-      >
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-56 w-full border border-border rounded-lg" />
-            ))}
+      {/* Cards flow with the page. They used to sit in a tinted, fixed-height
+          scroll box, so the page scrolled inside a box inside the page. */}
+      {loading ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-48 w-full rounded-xl border border-border" />
+          ))}
+        </div>
+      ) : isEmpty ? (
+        <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border px-6 py-16 text-center">
+          <span className="flex size-12 items-center justify-center rounded-full border border-border bg-muted">
+            <Code aria-hidden className="size-5 text-muted-foreground" />
+          </span>
+          <div className="space-y-1">
+            <h2 className="font-sans text-base font-semibold tracking-tight">No projects yet</h2>
+            <p className="text-sm text-muted-foreground">
+              Add something you&apos;ve built to strengthen your profile.
+            </p>
           </div>
-        ) : list.length === 0 ? (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="border border-border border-dashed bg-muted/30 rounded-lg text-center p-12 flex flex-col items-center justify-center shadow-none hover:shadow-[var(--shadow-sm)] hover:translate-y-0 active:translate-y-0 transition-colors">
-              <Code className="w-12 h-12 text-muted-foreground mb-4 opacity-50" />
-              <h3 className="font-heading text-xl tracking-wide mb-1">No projects yet</h3>
-              <p className="text-muted-foreground text-sm mb-6">Add your projects to strengthen your profile.</p>
-              <Button onClick={() => setOpen(true)} className="border border-border rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all font-heading tracking-wide h-11 px-6 cursor-pointer">
-                <Plus className="w-4 h-4 mr-2" /> Add Your First Project
-              </Button>
-            </Card>
-          </motion.div>
-        ) : (
-          <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-6" variants={containerVariants} initial="hidden" animate="visible">
-            <AnimatePresence>
-              {list.map((project: Project) => (
-                <motion.div key={project._id} variants={itemVariants} exit="exit" layout className="h-full">
-                  <Card className="h-full flex flex-col border border-border rounded-lg shadow-[var(--shadow-sm)] bg-card">
-                    <CardHeader className="border-b border-border bg-muted/40 px-5 py-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <h3 className="font-heading text-lg leading-tight tracking-wide">{project.title}</h3>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span className={cn("rounded-lg border border-border px-2 py-0.5 text-[10px] font-bold uppercase shadow-[var(--shadow-2xs)]", project.aiStatus === "READY" ? "bg-emerald-300 text-emerald-950" : project.aiStatus === "FAILED" ? "bg-rose-300 text-rose-950" : "bg-primary text-primary-foreground")}>
-                            {project.aiStatus || "—"}
+          <Button onClick={() => setOpen(true)} className={BTN}>
+            <Plus className="size-4" /> Add a project
+          </Button>
+        </div>
+      ) : (
+        <motion.ul
+          className="grid gap-4 md:grid-cols-2"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          aria-label="Your projects"
+        >
+          <AnimatePresence>
+            {list.map((project) => {
+              const repo = safeExternalUrl(project.githubUrl);
+              const live = safeExternalUrl(project.liveDemo);
+              const status = project.aiStatus ? STATUS[project.aiStatus] : undefined;
+
+              return (
+                <motion.li key={project._id} variants={itemVariants} exit="exit" layout className="h-full">
+                  <Card className={cn(CARD, "flex h-full flex-col")}>
+                    {/* Title row: no header bar or tinted strip, just the title,
+                        the status when there is one, and the delete action. */}
+                    <div className="flex items-start justify-between gap-3 p-5 pb-0">
+                      <div className="min-w-0 space-y-1.5">
+                        <h3 className="font-sans text-base leading-snug font-semibold tracking-tight break-words text-foreground">
+                          {project.title}
+                        </h3>
+                        {status && (
+                          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <span aria-hidden className={cn("size-1.5 rounded-full", status.dot)} />
+                            {status.label}
                           </span>
-                          <Button variant="ghost" size="icon" className="w-7 h-7 border border-border rounded-lg text-foreground hover:text-destructive-foreground hover:bg-destructive hover:no-underline shadow-[var(--shadow-2xs)] transition-all p-0 cursor-pointer" onClick={() => handleDelete(project._id)}>
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
+                        )}
                       </div>
-                    </CardHeader>
-                    <CardContent className="flex-1 p-5 space-y-4">
-                      <p className="text-sm text-foreground/80 leading-relaxed font-medium">{project.description}</p>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => setPendingDelete(project)}
+                        aria-label={`Delete ${project.title}`}
+                        title="Delete project"
+                        className="-mt-1 -mr-2 shrink-0 rounded-md text-muted-foreground !shadow-none hover:translate-y-0 hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+
+                    <div className="flex-1 space-y-4 p-5">
+                      {project.description && (
+                        <p className="line-clamp-4 text-sm leading-relaxed whitespace-pre-line break-words text-muted-foreground">
+                          {project.description}
+                        </p>
+                      )}
+
                       {project.techStack?.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {project.techStack.map((tech: string, i: number) => (
-                            <Badge key={i} variant="secondary" className="border border-border rounded-md text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 shadow-[var(--shadow-2xs)] bg-card">
-                              {tech}
-                            </Badge>
+                        <ul className="flex flex-wrap gap-1.5" aria-label="Tech stack">
+                          {project.techStack.map((tech) => (
+                            <li key={tech}>
+                              <Badge variant="secondary" className="font-normal">
+                                {tech}
+                              </Badge>
+                            </li>
                           ))}
-                        </div>
+                        </ul>
                       )}
+
                       {project.aiEvaluation?.summary && (
-                        <div className="border border-dashed border-border bg-muted/20 p-4">
-                          <div className="flex items-center gap-1.5 text-[10px] label-mono text-muted-foreground mb-2">
-                            <Sparkles className="w-3.5 h-3.5 text-primary-strong animate-pulse" />
-                            AI Evaluation
-                          </div>
-                          <p className="text-sm text-muted-foreground leading-relaxed">{project.aiEvaluation.summary}</p>
+                        <div className="rounded-lg bg-muted/50 p-3">
+                          <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-foreground">
+                            <Sparkles aria-hidden className="size-3.5 text-primary-strong" />
+                            AI evaluation
+                          </p>
+                          <p className="text-sm leading-relaxed text-muted-foreground">
+                            {project.aiEvaluation.summary}
+                          </p>
                         </div>
                       )}
-                    </CardContent>
-                    {(project.githubUrl || project.liveDemo) && (
-                      <CardFooter className="border-t border-border px-5 py-4 gap-3 bg-muted/20 mt-auto">
-                        {project.githubUrl && (
-                          <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-                            <Button variant="outline" size="sm" className="w-full border border-border rounded-lg shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all text-xs font-heading h-9 cursor-pointer">
-                              <FaGithub className="w-4 h-4 mr-2" /> Repo
-                            </Button>
+                    </div>
+
+                    {/* Links are real anchors styled as buttons. They used to be
+                        a <button> inside an <a>, which is invalid HTML and gives
+                        keyboard users two tab stops for one link. */}
+                    {(repo || live) && (
+                      <div className="flex gap-2 border-t border-border px-5 py-3">
+                        {repo && (
+                          <a
+                            href={repo}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={cn(buttonVariants({ variant: "outline", size: "sm" }), BTN, "flex-1")}
+                          >
+                            <FaGithub aria-hidden className="size-4" /> Repository
                           </a>
                         )}
-                        {project.liveDemo && (
-                          <a href={project.liveDemo} target="_blank" rel="noopener noreferrer" className="flex-1">
-                            <Button size="sm" className="w-full border border-border rounded-lg shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all text-xs font-heading h-9 cursor-pointer">
-                              <ExternalLink className="w-4 h-4 mr-2" /> Live
-                            </Button>
+                        {live && (
+                          <a
+                            href={live}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={cn(buttonVariants({ variant: "outline", size: "sm" }), BTN, "flex-1")}
+                          >
+                            <ExternalLink aria-hidden className="size-4" /> Live demo
                           </a>
                         )}
-                      </CardFooter>
+                      </div>
                     )}
                   </Card>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        )}
-      </div>
+                </motion.li>
+              );
+            })}
+          </AnimatePresence>
+        </motion.ul>
+      )}
+
+      {/* New project. One close path in the footer (no ✕ as well), and closing
+          discards the draft. */}
+      <Dialog open={open} onOpenChange={setDialogOpen}>
+        <DialogContent
+          showCloseButton={false}
+          className="max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-xl border border-border bg-card shadow-[var(--shadow-lg)] sm:max-w-lg"
+        >
+          <DialogHeader>
+            <DialogTitle className="font-sans text-base font-semibold tracking-tight">New project</DialogTitle>
+            <DialogDescription className="text-xs">
+              Shown on your profile and to recruiters.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={create} className="space-y-5">
+            <FormField
+              id="project-title"
+              label="Name"
+              meta={
+                <span className="text-xs tabular-nums text-muted-foreground">
+                  {title.length}/{PROJECT_TITLE_MAX}
+                </span>
+              }
+            >
+              <Input
+                id="project-title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                maxLength={PROJECT_TITLE_MAX}
+                placeholder="e.g. RoastForge"
+                autoFocus
+              />
+            </FormField>
+
+            {/* A textarea: the field holds up to 2,000 characters, which a
+                single-line input made impossible to review. */}
+            <FormField
+              id="project-description"
+              label="Description"
+              optional
+              meta={
+                <span
+                  className={cn(
+                    "text-xs tabular-nums text-muted-foreground",
+                    PROJECT_DESC_MAX - desc.length <= 100 && "text-destructive",
+                  )}
+                >
+                  {desc.length}/{PROJECT_DESC_MAX}
+                </span>
+              }
+            >
+              <Textarea
+                id="project-description"
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+                maxLength={PROJECT_DESC_MAX}
+                placeholder="What does it do, and what was hard about building it?"
+              />
+            </FormField>
+
+            <FormField id="project-stack" label="Tech stack" optional hint="Comma-separated, e.g. React, Node.js, MongoDB.">
+              <Input
+                id="project-stack"
+                value={stack}
+                onChange={(e) => setStack(e.target.value)}
+                aria-describedby="project-stack-hint"
+                placeholder="React, Node.js"
+              />
+            </FormField>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <FormField id="project-github" label="Repository URL" optional>
+                <Input
+                  id="project-github"
+                  type="url"
+                  inputMode="url"
+                  value={gh}
+                  onChange={(e) => setGh(e.target.value)}
+                  placeholder="https://github.com/…"
+                />
+              </FormField>
+              <FormField id="project-demo" label="Live demo URL" optional>
+                <Input
+                  id="project-demo"
+                  type="url"
+                  inputMode="url"
+                  value={demo}
+                  onChange={(e) => setDemo(e.target.value)}
+                  placeholder="https://…"
+                />
+              </FormField>
+            </div>
+
+            <DialogFooter className="mx-0 mb-0 border-t border-border bg-transparent px-0 pt-4 pb-0">
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} disabled={saving} className={BTN}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={saving || !title.trim()} aria-busy={saving} className={BTN}>
+                {saving ? "Adding…" : "Add project"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete confirmation. */}
+      <Dialog
+        open={pendingDelete !== null}
+        onOpenChange={(next) => {
+          if (!next && !deleting) setPendingDelete(null);
+        }}
+      >
+        <DialogContent
+          showCloseButton={false}
+          className="rounded-xl border border-border bg-card shadow-[var(--shadow-lg)] sm:max-w-md"
+        >
+          <DialogHeader>
+            <DialogTitle className="font-sans text-base font-semibold tracking-tight">Delete project?</DialogTitle>
+            <DialogDescription>
+              <span className="font-medium text-foreground">{pendingDelete?.title}</span> will be removed
+              from your profile. This can&apos;t be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mx-0 mb-0 border-t border-border bg-transparent px-0 pt-4 pb-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setPendingDelete(null)}
+              disabled={deleting}
+              className={BTN}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => void confirmDelete()}
+              disabled={deleting}
+              aria-busy={deleting}
+              className={BTN}
+            >
+              {deleting ? "Deleting…" : "Delete project"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

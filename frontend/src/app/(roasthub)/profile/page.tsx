@@ -691,7 +691,7 @@ export default function ProfilePage() {
           else if (!saving) cancelEdit();
         }}
       >
-        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-xl border border-border bg-card shadow-[var(--shadow-lg)] sm:max-w-lg">
+        <DialogContent showCloseButton={false} className="max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-xl border border-border bg-card shadow-[var(--shadow-lg)] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-sans text-base font-semibold tracking-tight">
               Edit public profile
@@ -809,7 +809,7 @@ export default function ProfilePage() {
       </Dialog>
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent className="rounded-xl border border-destructive bg-card shadow-[var(--shadow-lg)] sm:max-w-md">
+        <DialogContent showCloseButton={false} className="rounded-xl border border-destructive bg-card shadow-[var(--shadow-lg)] sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-sans text-base font-semibold tracking-tight text-destructive">
               Delete account?
