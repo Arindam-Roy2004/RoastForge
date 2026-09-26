@@ -3,14 +3,14 @@
 import { EnhancedComment } from "@/components/enhanced-comment";
 import { ResumeReactionControls } from "@/components/resume-reaction-controls";
 import { cn } from "@/lib/utils";
-import { resumeApi, commentApi, analysisApi, type Resume, type Comment, type RoastData } from "@/lib/api";
+import { resumeApi, commentApi, analysisApi, POST_BODY_MAX, type Resume, type Comment, type RoastData } from "@/lib/api";
 import { enqueueResumeReaction, flushQueuedResumeReactions } from "@/lib/resume-reaction-sync";
 import { coalesceVerdictBars, isCompleteRoastPayload } from "@/lib/verdict-dimensions";
 import { RoastScoreDial, RoastVerdictRadar } from "@/components/roast-verdict";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { FileText, ArrowLeft, RefreshCw, Zap, Trash2, Sparkles, AlertTriangle, Briefcase, Maximize2, Minimize2 } from "lucide-react";
+import { FileText, ArrowLeft, RefreshCw, Zap, Trash2, Sparkles, AlertTriangle, Briefcase, Maximize2, Minimize2, Pencil } from "lucide-react";
 import FlameIcon from "@/components/icons/flame-icon";
 import { useAuth } from "@/store/auth";
 import Link from "next/link";
@@ -18,6 +18,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+
+/** Sentence-case sans buttons for the body editor, matching the upload composer. */
+const BODY_BTN = "rounded-lg font-sans text-sm font-medium tracking-normal normal-case !shadow-none hover:translate-y-0";
 import { motion, AnimatePresence, LayoutGroup } from "motion/react";
 
 export default function ResumeDetail() {
@@ -65,6 +69,41 @@ export default function ResumeDetail() {
   const isOwner = Boolean(
     resume && (resume.isOwner === true || (user && user.id === resume.userId?._id)),
   );
+
+  // Post body (stored as `blurb`). Owners can edit it after posting; the title
+  // stays fixed, as on Reddit.
+  const [bodyEditing, setBodyEditing] = useState(false);
+  const [bodyDraft, setBodyDraft] = useState("");
+  const [bodySaving, setBodySaving] = useState(false);
+
+  const startBodyEdit = () => {
+    setBodyDraft(resume?.blurb ?? "");
+    setBodyEditing(true);
+  };
+
+  // Optimistic: the page shows the new body immediately, and rolls back if the
+  // save fails. The editor stays open on failure so the draft isn't lost.
+  const saveBody = async () => {
+    if (!resume) return;
+    const next = bodyDraft.trim();
+    const prev = resume.blurb ?? "";
+    if (next === prev) {
+      setBodyEditing(false);
+      return;
+    }
+    setBodySaving(true);
+    setResume((r) => (r ? { ...r, blurb: next } : r));
+    try {
+      await resumeApi.update(id, { blurb: next });
+      setBodyEditing(false);
+      toast.success(next ? "Description saved" : "Description removed");
+    } catch (err) {
+      setResume((r) => (r ? { ...r, blurb: prev } : r));
+      toast.error(err instanceof Error ? err.message : "Could not save description");
+    } finally {
+      setBodySaving(false);
+    }
+  };
 
   const inferReaction = useCallback((r: Resume | null): "like" | "dislike" | null => {
     if (!r) return null;
@@ -289,7 +328,9 @@ export default function ResumeDetail() {
       {/* Header */}
       <div className="space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="space-y-4">
+          {/* min-w-0 + flex-1 so a long body wraps inside this column instead of
+              widening it and pushing the reaction/actions group off the row. */}
+          <div className="min-w-0 space-y-4 md:flex-1">
             <Button variant="outline" onClick={() => router.back()} className="border border-border shadow-[var(--shadow-2xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading text-xs h-8 px-3">
               <ArrowLeft className="w-3 h-3 mr-1.5" /> Back
             </Button>
@@ -303,6 +344,81 @@ export default function ResumeDetail() {
                 <span className="text-border">&middot;</span>
                 <span className="font-mono text-xs font-bold text-foreground">v{resume.version || 1}</span>
               </p>
+
+              {/* Post body, directly under the title as on Reddit. Plain text
+                  rendered as a React child (so it's escaped), with the author's
+                  line breaks kept. Posts without a body render nothing here —
+                  no empty gap for older posts. */}
+              {bodyEditing ? (
+                <div className="mt-4 max-w-3xl space-y-2">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <label htmlFor="post-body-edit" className="text-sm font-medium text-foreground">
+                      Description
+                    </label>
+                    <span
+                      id="post-body-edit-count"
+                      className={cn(
+                        "text-xs tabular-nums text-muted-foreground",
+                        POST_BODY_MAX - bodyDraft.length <= 100 && "text-destructive",
+                      )}
+                    >
+                      {bodyDraft.length}/{POST_BODY_MAX}
+                    </span>
+                  </div>
+                  <Textarea
+                    id="post-body-edit"
+                    value={bodyDraft}
+                    onChange={(e) => setBodyDraft(e.target.value)}
+                    maxLength={POST_BODY_MAX}
+                    placeholder="What should people focus on?"
+                    aria-describedby="post-body-edit-count"
+                    autoFocus
+                  />
+                  <div className="flex items-center justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setBodyEditing(false)}
+                      disabled={bodySaving}
+                      className={BODY_BTN}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => void saveBody()}
+                      disabled={bodySaving || bodyDraft.trim() === (resume.blurb ?? "")}
+                      aria-busy={bodySaving}
+                      className={BODY_BTN}
+                    >
+                      {bodySaving ? "Saving…" : "Save"}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {resume.blurb && (
+                    <p className="mt-3 max-w-3xl whitespace-pre-line break-words text-sm leading-relaxed text-foreground/90 md:text-base">
+                      {resume.blurb}
+                    </p>
+                  )}
+                  {isOwner && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={startBodyEdit}
+                      className={cn(BODY_BTN, "mt-2 -ml-3 text-muted-foreground")}
+                      data-testid="button-edit-post-body"
+                    >
+                      <Pencil className="size-3.5" />
+                      {resume.blurb ? "Edit description" : "Add a description"}
+                    </Button>
+                  )}
+                </>
+              )}
             </div>
           </div>
 
@@ -1077,18 +1193,6 @@ export default function ResumeDetail() {
         )}
       </div>
 
-      {resume.blurb && (
-        <Card className="border border-border rounded-lg shadow-[var(--shadow-md)] bg-yellow/10">
-          <CardHeader className="py-4 border-b border-border bg-yellow/20">
-            <CardTitle className="font-heading text-base tracking-wide flex items-center gap-2">
-              <FileText className="w-4 h-4" /> Author&apos;s Note
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4">
-            <p className="text-sm font-medium leading-relaxed">{resume.blurb}</p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

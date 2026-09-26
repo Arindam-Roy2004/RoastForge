@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { getCardBg, getDiceBearUrl } from "@/lib/avatar";
+import { getDiceBearUrl, getPostCardBg } from "@/lib/avatar";
 import { resumeApi, type Resume, type ResumeListResult, RESUME_GALLERY_PAGE_SIZE } from "@/lib/api";
 import { enqueueResumeReaction, flushQueuedResumeReactions } from "@/lib/resume-reaction-sync";
 import { ResumeReactionControls } from "@/components/resume-reaction-controls";
@@ -511,7 +511,11 @@ export default function HomePage() {
                 // so the avatar stays visually stable even when the owner rerolls their
                 // anonymous username. New resumes store avatarSeed explicitly.
                 const avatarSeed = resume.avatarSeed || resume._id;
-                const cardBg = getCardBg(avatarSeed);
+                // One colour fills the whole avatar area. New posts store their
+                // own; older ones fall back to a colour keyed on the post id (not
+                // the seed, which is the owner's id), so every post differs even
+                // when one person posted several.
+                const cardBg = getPostCardBg(resume.avatarBackgroundColor, resume._id);
 
                 return (
                   <motion.div
@@ -530,7 +534,10 @@ export default function HomePage() {
                         <div className={cn("relative aspect-[5/4] overflow-hidden border-b border-border", cardBg)}>
                           <Image
                             src={getDiceBearUrl(avatarSeed, resume.avatarStyle ?? undefined, 176, {
-                              backgroundColor: resume.avatarBackgroundColor ?? null,
+                              // Transparent so the card colour shows through. A
+                              // coloured avatar background drew a second square
+                              // inside the card.
+                              backgroundColor: "transparent",
                               flip: Boolean(resume.avatarFlip),
                               rotate: resume.avatarRotate ?? 0,
                               radius: resume.avatarRadius ?? 0,
@@ -564,6 +571,15 @@ export default function HomePage() {
                           <h3 className="line-clamp-2 font-sans text-sm leading-snug font-medium tracking-tight text-foreground">
                             {resume.title || "Untitled Resume"}
                           </h3>
+
+                          {/* Post body preview. Posts without a body render
+                              nothing, so older cards are unchanged; `mt-auto` on
+                              the stats row keeps rows level either way. */}
+                          {resume.blurb ? (
+                            <p className="line-clamp-2 whitespace-pre-line break-words text-xs text-muted-foreground">
+                              {resume.blurb}
+                            </p>
+                          ) : null}
 
                           <p className="truncate text-xs text-muted-foreground">
                             u/{username}

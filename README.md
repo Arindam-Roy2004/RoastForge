@@ -199,7 +199,7 @@ Stores resume posts, file links, custom avatar configurations, engagement counte
 | `userId` | `ObjectId` | Required, ref: `User`, indexed | ID of the owner user |
 | `title` | `String` | Required, trim, max 200 chars | Public post title |
 | `name` | `String` | Required, trim, max 120 chars | Original filename |
-| `blurb` | `String` | Trim, max 500 chars, default `""` | Post description / roast prompt |
+| `blurb` | `String` | Trim, max 2000 chars, default `""` | Post description / roast prompt |
 | `fileUrl` | `String` | Required | Cloudinary hosted file URL |
 | `fileType` | `String` | Enum `["pdf", "image"]`, required | Upload file type |
 | `avatarStyle` | `String` | Enum (`AVATAR_STYLES`), default `null` | Per-resume avatar style |

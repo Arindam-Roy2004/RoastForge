@@ -247,6 +247,12 @@ export type ResumeListResult = {
 /** Must match `PAGE_SIZE` in backend `resume.service.ts`. */
 export const RESUME_GALLERY_PAGE_SIZE = 3;
 
+/** Must match `title` maxlength in backend `resume.model.ts` and the resume DTOs. */
+export const POST_TITLE_MAX = 200;
+
+/** Post body (stored as `blurb`). Must match backend `resume.model.ts` and the resume DTOs. */
+export const POST_BODY_MAX = 2000;
+
 export const resumeApi = {
   list: (params: { page?: number; sort?: string; search?: string } = {}) => {
     const q = new URLSearchParams();

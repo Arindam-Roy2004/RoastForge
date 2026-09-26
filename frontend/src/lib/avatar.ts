@@ -68,6 +68,39 @@ export function getCardBg(seed: string): string {
   return BG_COLORS[sumSeed(seed) % BG_COLORS.length];
 }
 
+/**
+ * Card colours a post can store, as the hex that goes in `avatarBackgroundColor`
+ * and the class that paints it. Same palette as `BG_COLORS`, in the same order,
+ * so a stored colour and a derived one look identical.
+ */
+const CARD_COLORS: { hex: string; className: (typeof BG_COLORS)[number] }[] = [
+  { hex: "fbcfe8", className: "bg-pink-200" },
+  { hex: "fef08a", className: "bg-yellow-200" },
+  { hex: "bfdbfe", className: "bg-blue-200" },
+  { hex: "bbf7d0", className: "bg-green-200" },
+  { hex: "e9d5ff", className: "bg-purple-200" },
+  { hex: "fed7aa", className: "bg-orange-200" },
+  { hex: "99f6e4", className: "bg-teal-200" },
+  { hex: "fecdd3", className: "bg-rose-200" },
+];
+
+/** A card colour for a new post. Stored per post, so each post gets its own. */
+export function randomCardColorHex(): string {
+  return CARD_COLORS[Math.floor(Math.random() * CARD_COLORS.length)].hex;
+}
+
+/**
+ * The class that fills a post's card.
+ *
+ * A post that stored a palette colour uses it. Anything older (no colour, or the
+ * lavender that used to be baked into every avatar) falls back to the colour
+ * derived from its seed, which is what those cards have always shown.
+ */
+export function getPostCardBg(storedHex: string | null | undefined, seed: string): string {
+  const match = CARD_COLORS.find((c) => c.hex === storedHex?.toLowerCase());
+  return match ? match.className : getCardBg(seed);
+}
+
 export function randomAvatarSeed(): string {
   const part = () => Math.random().toString(36).slice(2, 10);
   return `${part()}${part()}`.slice(0, 120);
