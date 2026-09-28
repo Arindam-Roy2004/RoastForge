@@ -102,16 +102,24 @@ export default function Footer() {
           <p className="text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} RoastForge
           </p>
-          <a
-            href="https://docs.google.com/forms/d/e/1FAIpQLSdIqU2QCmm7VMje1JWvpOm39tDHXv4QcwDvGzI9j1U54vcGYA/viewform?usp=publish-editor"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(linkCls, "inline-flex items-center gap-1.5")}
-            data-testid="footer-link-report-bug"
-          >
-            <BugIcon size={14} strokeWidth={2.25} className="shrink-0" aria-hidden />
-            Report Bug
-          </a>
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+            <Link href="/privacy" className={linkCls} data-testid="footer-link-privacy">
+              Privacy
+            </Link>
+            <Link href="/terms" className={linkCls} data-testid="footer-link-terms">
+              Terms
+            </Link>
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLSdIqU2QCmm7VMje1JWvpOm39tDHXv4QcwDvGzI9j1U54vcGYA/viewform?usp=publish-editor"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(linkCls, "inline-flex items-center gap-1.5")}
+              data-testid="footer-link-report-bug"
+            >
+              <BugIcon size={14} strokeWidth={2.25} className="shrink-0" aria-hidden />
+              Report Bug
+            </a>
+          </div>
         </div>
       </div>
     </footer>
