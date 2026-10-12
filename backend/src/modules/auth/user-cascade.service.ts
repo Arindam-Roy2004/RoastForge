@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Project from "../project/project.model.js";
 import Resume from "../resume/resume.model.js";
+import Notification from "../notification/notification.model.js";
 import Like from "../resume/like.model.js";
 import Comment, { TOMBSTONE_TEXT } from "../comment/comment.model.js";
 import CommentVote from "../comment/comment-vote.model.js";
@@ -14,6 +15,9 @@ export async function purgeUserData(userId: string): Promise<void> {
   const uid = new mongoose.Types.ObjectId(userId);
 
   await Project.deleteMany({ userId: uid });
+
+  // Their inbox, and anything they triggered in other people's.
+  await Notification.deleteMany({ $or: [{ recipientId: uid }, { actorId: uid }] });
 
   await CommentVote.deleteMany({ userId: uid });
   await Like.deleteMany({ userId: uid });
@@ -29,6 +33,7 @@ export async function purgeUserData(userId: string): Promise<void> {
     }
     await Comment.deleteMany({ resumeId: { $in: myResumeIds } });
     await Like.deleteMany({ resumeId: { $in: myResumeIds } });
+    await Notification.deleteMany({ resumeId: { $in: myResumeIds } });
     await Resume.deleteMany({ userId: uid });
   }
 

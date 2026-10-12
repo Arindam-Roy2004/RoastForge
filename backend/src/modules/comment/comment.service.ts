@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Comment, { TOMBSTONE_TEXT } from "./comment.model.js";
 import CommentVote from "./comment-vote.model.js";
 import Resume from "../resume/resume.model.js";
+import Notification from "../notification/notification.model.js";
 import ApiError from "../../common/utils/api-error.js";
 import { collectCommentSubtreeIds, subtreeContainsOtherAuthor } from "./comment-tree.util.js";
 
@@ -90,6 +91,7 @@ export const deleteComment = async (commentId: string, userId: string) => {
   if (subtreeIds.length > 0) {
     await CommentVote.deleteMany({ commentId: { $in: subtreeIds } });
     await Comment.deleteMany({ _id: { $in: subtreeIds } });
+    await Notification.deleteMany({ commentId: { $in: subtreeIds } });
   }
 
   // Only top-level removals decrement the resume's visible comment count;

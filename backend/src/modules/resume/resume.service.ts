@@ -1,4 +1,5 @@
 import Resume from "./resume.model.js";
+import Notification from "../notification/notification.model.js";
 import Like, { type ResumeReactionType } from "./like.model.js";
 import Comment from "../comment/comment.model.js";
 import CommentVote from "../comment/comment-vote.model.js";
@@ -313,6 +314,7 @@ export const deleteResume = async (id: string, userId: string) => {
     await Comment.deleteMany({ _id: { $in: ids } });
   }
   await Like.deleteMany({ resumeId: id });
+  await Notification.deleteMany({ resumeId: id });
   // Removed resume changed the owner's AI average / reaction totals — recompute.
   safeRecalcTalentScore(userId);
   return resume;
