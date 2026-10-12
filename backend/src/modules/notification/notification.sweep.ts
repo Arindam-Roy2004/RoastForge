@@ -131,6 +131,8 @@ async function upsertAggregate(n: Aggregate): Promise<void> {
         count: { $literal: Math.max(1, n.count) },
         actorId: { $cond: [{ $gte: [n.at, { $ifNull: ["$lastEventAt", EPOCH] }] }, n.actorId, "$actorId"] },
         readAt: { $cond: [{ $gt: [n.at, { $ifNull: ["$readAt", EPOCH] }] }, null, "$readAt"] },
+        // Same rule as readAt: only activity after a dismissal brings the row back.
+        dismissedAt: { $cond: [{ $gt: [n.at, { $ifNull: ["$dismissedAt", EPOCH] }] }, null, "$dismissedAt"] },
         lastEventAt: { $max: [n.at, { $ifNull: ["$lastEventAt", EPOCH] }] },
       },
     },
@@ -248,6 +250,7 @@ async function handleComments(comments: Doc[]): Promise<void> {
             commentId: c._id,
             count: 1,
             readAt: null,
+            dismissedAt: null,
             lastEventAt: c.createdAt,
           },
         },

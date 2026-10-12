@@ -30,6 +30,12 @@ export interface INotification extends Document {
   count: number;
   /** Null while unread. Cleared again when new activity arrives after it. */
   readAt: Date | null;
+  /**
+   * Set when the user dismisses it. A tombstone rather than a delete: the sweep
+   * re-reads recent events every run, and a row that was actually deleted would
+   * be recreated by the next one. Cleared only by activity newer than this.
+   */
+  dismissedAt: Date | null;
   /** Time of the latest source event. Sort key and TTL anchor. */
   lastEventAt: Date;
 }
@@ -44,6 +50,7 @@ const notificationSchema = new Schema<INotification>({
   commentId: { type: Schema.Types.ObjectId, ref: "Comment", default: null },
   count: { type: Number, default: 1, min: 1 },
   readAt: { type: Date, default: null },
+  dismissedAt: { type: Date, default: null },
   lastEventAt: { type: Date, required: true },
 });
 

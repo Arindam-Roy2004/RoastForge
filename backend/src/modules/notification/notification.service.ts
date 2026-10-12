@@ -39,7 +39,7 @@ export async function listNotifications(
   userId: string,
   opts: { cursor?: string; limit: number; unreadOnly: boolean },
 ) {
-  const filter: Record<string, unknown> = { recipientId: userId };
+  const filter: Record<string, unknown> = { recipientId: userId, dismissedAt: null };
   if (opts.unreadOnly) filter.readAt = null;
   if (opts.cursor) {
     const { at, id } = decodeCursor(opts.cursor);
@@ -88,7 +88,10 @@ export async function listNotifications(
 
 /** Unread badge value, capped so the query stays bounded for a user with a huge backlog. */
 export async function getUnreadCount(userId: string): Promise<number> {
-  return Notification.countDocuments({ recipientId: userId, readAt: null }, { limit: UNREAD_CAP });
+  return Notification.countDocuments(
+    { recipientId: userId, readAt: null, dismissedAt: null },
+    { limit: UNREAD_CAP },
+  );
 }
 
 // ─── Writes ──────────────────────────────────────────────────────────────────
@@ -110,6 +113,10 @@ export async function markAllRead(userId: string): Promise<void> {
 }
 
 export async function deleteNotification(userId: string, id: string): Promise<void> {
-  const res = await Notification.deleteOne({ _id: id, recipientId: userId });
-  if (res.deletedCount === 0) throw ApiError.notfound("Notification not found");
+  // Dismiss, don't delete — see `dismissedAt` on the model.
+  const res = await Notification.updateOne(
+    { _id: id, recipientId: userId, dismissedAt: null },
+    { $set: { dismissedAt: new Date() } },
+  );
+  if (res.matchedCount === 0) throw ApiError.notfound("Notification not found");
 }

@@ -3,7 +3,7 @@ import test, { after, before, beforeEach, describe } from "node:test";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import Notification from "../src/modules/notification/notification.model.js";
-import { listNotifications } from "../src/modules/notification/notification.service.js";
+import { deleteNotification, getUnreadCount, listNotifications } from "../src/modules/notification/notification.service.js";
 import { runSweep, SweepState } from "../src/modules/notification/notification.sweep.js";
 import Like from "../src/modules/resume/like.model.js";
 import Resume from "../src/modules/resume/resume.model.js";
@@ -241,5 +241,39 @@ describe("notification sweep", () => {
     assert.equal(previews[1]?.endsWith("…"), true);
     assert.ok((previews[1] ?? "").length <= 141);
     assert.equal(previews[0], null);
+  });
+
+  test("a deleted notification stays deleted across later sweeps", async () => {
+    const resumeId = await addResume({ likesCount: 1 });
+    await addLike(resumeId, alice, at(5));
+    await runSweep();
+    const [row] = await rowsFor(owner);
+
+    await deleteNotification(String(owner), String(row._id));
+    await runSweep();
+    await runSweep();
+
+    const { items } = await listNotifications(String(owner), { limit: 10, unreadOnly: false });
+    assert.equal(items.length, 0);
+    assert.equal(await getUnreadCount(String(owner)), 0);
+  });
+
+  test("a dismissed notification returns only on newer activity", async () => {
+    const resumeId = await addResume({ likesCount: 1 });
+    await addLike(resumeId, alice, at(5));
+    await runSweep();
+    const [row] = await rowsFor(owner);
+    await deleteNotification(String(owner), String(row._id));
+    // The test's events live on a synthetic clock; put the dismissal on it too.
+    await Notification.updateOne({ _id: row._id }, { $set: { dismissedAt: at(20) } });
+
+    await Resume.updateOne({ _id: resumeId }, { $set: { likesCount: 2 } });
+    await addLike(resumeId, bob, at(60));
+    await runSweep();
+
+    const { items } = await listNotifications(String(owner), { limit: 10, unreadOnly: false });
+    assert.equal(items.length, 1);
+    assert.equal(items[0].count, 2);
+    assert.equal(await getUnreadCount(String(owner)), 1);
   });
 });
