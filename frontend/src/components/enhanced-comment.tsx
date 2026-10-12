@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { GradientAvatar } from "@/components/gradient-avatar";
 import { commentApi, type Comment } from "@/lib/api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -78,9 +79,7 @@ export function EnhancedComment({
       isTombstoned && "opacity-60",
     )}>
       <div className="flex items-start gap-3">
-        <div className="w-7 h-7 rounded-full border border-border bg-primary/20 flex items-center justify-center text-xs font-mono font-bold uppercase shrink-0">
-          {alias.charAt(0)}
-        </div>
+        <GradientAvatar seed={comment.userId?._id ?? alias} initial={alias.charAt(0)} className="size-7 text-xs" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <span className={cn(

@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { GradientAvatar } from "@/components/gradient-avatar";
 
 type CandidateRow = {
   resumeId: string;
@@ -166,9 +167,11 @@ export default function RecruiterPage() {
               <Card key={r.resumeId} className="border border-border rounded-lg shadow-[var(--shadow-sm)] bg-card flex flex-col h-full min-h-104">
                 <CardHeader className="border-b border-border bg-muted/40 py-4 px-5">
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-primary/20 border border-border rounded-full flex items-center justify-center font-mono text-sm font-bold uppercase shrink-0">
-                      {(r.userId?.anonymousUsername || r.candidateAlias)?.charAt(0)?.toUpperCase() || "?"}
-                    </div>
+                    <GradientAvatar
+                      seed={r.candidateUserId ?? r.resumeId}
+                      initial={(r.userId?.anonymousUsername || r.candidateAlias)?.charAt(0)?.toUpperCase() || "?"}
+                      className="size-10 text-sm"
+                    />
                     <div className="min-w-0">
                       <CardTitle className="font-mono text-sm font-bold tracking-tight truncate mb-1">
                         u/{r.userId?.anonymousUsername || r.candidateAlias || "Anonymous"}

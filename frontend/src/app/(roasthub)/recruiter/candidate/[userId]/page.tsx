@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { recruiterApi, type RecruiterCandidateProfile } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { GradientAvatar } from "@/components/gradient-avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -130,18 +131,11 @@ export default function RecruiterCandidateProfilePage() {
         <Card className="border border-border rounded-lg shadow-[var(--shadow-md)] overflow-hidden bg-card">
           <CardHeader className="border-b border-border bg-muted/50 p-6 md:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-              <div
-                className={cn(
-                  "size-20 shrink-0 rounded-full border border-border flex items-center justify-center text-3xl font-heading shadow-[var(--shadow-sm)]",
-                  data.avatar ? "bg-muted overflow-hidden p-0" : "bg-primary/25",
-                )}
-              >
-                {data.avatar ? (
-                  <img src={data.avatar} alt="" className="size-full object-cover" />
-                ) : (
-                  initial
-                )}
-              </div>
+              <GradientAvatar
+                seed={userId}
+                initial={initial}
+                className="size-20 text-3xl shadow-[var(--shadow-sm)]"
+              />
               <div className="min-w-0 flex-1 space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <UserRound className="w-5 h-5 text-primary-strong shrink-0" />

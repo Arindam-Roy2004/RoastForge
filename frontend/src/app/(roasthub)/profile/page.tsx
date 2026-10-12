@@ -23,6 +23,7 @@ import { ResumeRow } from "@/components/resume-row";
 import { useAuth } from "@/store/auth";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { cn } from "@/lib/utils";
+import { GradientAvatar } from "@/components/gradient-avatar";
 import { motion } from "motion/react";
 
 /**
@@ -400,9 +401,11 @@ export default function ProfilePage() {
         className="flex flex-col gap-5 border-b border-border pb-6 md:flex-row md:items-center md:justify-between"
       >
         <div className="flex min-w-0 items-center gap-4">
-          <div className="flex size-14 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-lg font-medium text-foreground">
-            {displayUser.name.charAt(0).toUpperCase() || "?"}
-          </div>
+          <GradientAvatar
+            seed={displayUser._id}
+            initial={displayUser.name.charAt(0).toUpperCase() || "?"}
+            className="size-14 text-lg"
+          />
           <div className="min-w-0">
             <h1 className="truncate font-sans text-2xl font-semibold tracking-tight text-foreground">
               {displayUser.name}
