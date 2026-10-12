@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { TbMenu2, TbMoonFilled, TbSunFilled, TbX } from "react-icons/tb";
 import FlameIcon from "@/components/icons/flame-icon";
+import NotificationBell from "@/components/notification-bell";
 import { useAuth } from "@/store/auth";
 import { useTheme } from "@/store/theme";
 import { cn } from "@/lib/utils";
@@ -291,6 +292,7 @@ function NavRow({
   const actions = (
     <div className="flex shrink-0 items-center gap-2">
       <ThemeToggle />
+      <NotificationBell />
       <div className="hidden items-center gap-2 md:flex">
         <AccountActions />
       </div>
