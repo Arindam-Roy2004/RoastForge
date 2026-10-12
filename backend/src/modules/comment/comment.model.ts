@@ -35,5 +35,7 @@ const commentSchema = new Schema<IComment>(
 
 commentSchema.index({ resumeId: 1, createdAt: -1 });
 commentSchema.index({ parentId: 1 });
+// Notification sweep scans by (createdAt, _id) — createdAt so an edit isn't a new comment.
+commentSchema.index({ createdAt: 1, _id: 1 });
 
 export default mongoose.model<IComment>("Comment", commentSchema);

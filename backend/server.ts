@@ -3,6 +3,7 @@ import http from "http";
 import app from "./src/app.js";
 import connectDB from "./src/common/config/db.js";
 import { assertEnv } from "./src/common/config/env.js";
+import { startNotificationSweep } from "./src/modules/notification/notification.sweep.js";
 
 const PORT = process.env.PORT || 5000;
 
@@ -22,6 +23,10 @@ const start = async () => {
   // connection instead of a 503 — either way the readiness poll fails and it
   // rolls back. /health/ready covers the other case: a disconnect after boot.
   await connectDB();
+
+  // Long-running entry only. The serverless entry (api/index.ts) has no process
+  // to keep a timer alive in, and production runs this one.
+  startNotificationSweep();
 
   const httpServer = http.createServer(app);
   httpServer.listen(PORT, () => {

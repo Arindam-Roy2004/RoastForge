@@ -10,5 +10,7 @@ const commentVoteSchema = new Schema(
 );
 
 commentVoteSchema.index({ commentId: 1, userId: 1 }, { unique: true });
+// Notification sweep scans by (updatedAt, _id) from its watermark.
+commentVoteSchema.index({ updatedAt: 1, _id: 1 });
 
 export default mongoose.model("CommentVote", commentVoteSchema);

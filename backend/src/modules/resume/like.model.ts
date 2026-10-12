@@ -14,5 +14,7 @@ const likeSchema = new Schema(
 likeSchema.index({ resumeId: 1, userId: 1 }, { unique: true });
 likeSchema.index({ userId: 1, createdAt: -1 });
 likeSchema.index({ resumeId: 1, reaction: 1 });
+// Notification sweep scans by (updatedAt, _id) from its watermark.
+likeSchema.index({ updatedAt: 1, _id: 1 });
 
 export default mongoose.model("Like", likeSchema);
