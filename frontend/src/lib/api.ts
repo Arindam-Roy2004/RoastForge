@@ -347,6 +347,41 @@ export type Comment = {
   replies?: Comment[];
 };
 
+// ─── Notifications ───────────────────────────────────────────────────────────
+export type NotificationType = "comment" | "reply" | "like" | "comment_like";
+
+export type AppNotification = {
+  _id: string;
+  type: NotificationType;
+  actor: { _id: string; anonymousUsername: string } | null;
+  resumeId: string | null;
+  resumeTitle: string;
+  commentId: string | null;
+  /** Short quote of the comment this is about. Null for likes, or if it was deleted. */
+  preview: string | null;
+  /** Events folded into this row ("Alex and 4 others"). */
+  count: number;
+  readAt: string | null;
+  lastEventAt: string;
+};
+
+export const notificationApi = {
+  list: (params: { cursor?: string | null; unread?: boolean; limit?: number } = {}) => {
+    const q = new URLSearchParams();
+    if (params.cursor) q.set("cursor", params.cursor);
+    if (params.unread) q.set("unread", "true");
+    if (params.limit) q.set("limit", String(params.limit));
+    const qs = q.toString();
+    return apiFetch<{ items: AppNotification[]; nextCursor: string | null }>(
+      `/api/notifications${qs ? `?${qs}` : ""}`,
+    );
+  },
+  unreadCount: () => apiFetch<{ count: number }>("/api/notifications/unread-count"),
+  markRead: (id: string) => apiFetch(`/api/notifications/${id}/read`, { method: "POST" }),
+  markAllRead: () => apiFetch("/api/notifications/read-all", { method: "POST" }),
+  remove: (id: string) => apiFetch(`/api/notifications/${id}`, { method: "DELETE" }),
+};
+
 export const commentApi = {
   list: (resumeId: string) => apiFetch<Comment[]>(`/api/comments/resume/${resumeId}`),
   add: (resumeId: string, body: { text: string; parentId?: string | null }) =>
