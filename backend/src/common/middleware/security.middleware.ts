@@ -98,6 +98,16 @@ export const reactionRateLimiter = createRateLimiter({
   message: "Too many reactions. Slow down.",
 });
 
+// The bell polls unread-count about twice a minute per open tab, so this is
+// sized for several tabs plus list fetches, not for abuse resistance alone.
+export const notificationRateLimiter = createRateLimiter({
+  prefix: "rl:notification",
+  tokens: 120,
+  window: "60 s",
+  keyFn: userOrIp,
+  message: "Too many requests. Slow down.",
+});
+
 export const recruiterRateLimiter = createRateLimiter({
   prefix: "rl:recruiter",
   tokens: 30,

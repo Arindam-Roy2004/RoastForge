@@ -10,6 +10,7 @@ import uploadRoute from "./modules/upload/upload.routes.js";
 import analysisRoute from "./modules/analysis/analysis.routes.js";
 import projectRoute from "./modules/project/project.routes.js";
 import recruiterRoute from "./modules/recruiter/recruiter.routes.js";
+import notificationRoute from "./modules/notification/notification.routes.js";
 import { errorHandler } from "./common/middleware/error.middleware.js";
 import { sanitizeBody } from "./common/middleware/security.middleware.js";
 import { isAllowedBrowserOrigin } from "./common/config/origins.js";
@@ -91,6 +92,7 @@ app.use("/api/upload", uploadRoute);
 app.use("/api/analysis", analysisRoute);
 app.use("/api/project", projectRoute);
 app.use("/api/recruiter", recruiterRoute);
+app.use("/api/notifications", notificationRoute);
 
 app.use(errorHandler);
 
