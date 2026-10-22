@@ -24,7 +24,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
@@ -60,6 +60,8 @@ jobs:
         with:
           context: ./backend
           push: true
+          # Re-resolve the base image tag every build, so Node security patches land.
+          pull: true
           # SHA tag alongside latest, so a rollback has something to point at.
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/roasthub-backend:latest

@@ -1,5 +1,5 @@
 # ─── Build stage ───
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 
 # Deps first for layer caching — only re-runs if package files change
@@ -10,7 +10,7 @@ COPY . .
 RUN npm run build
 
 # ─── Production stage ───
-FROM node:20-alpine
+FROM node:22-alpine
 WORKDIR /app
 
 # Pinned here, not left to the runtime .env. NODE_ENV gates the refresh cookie's
