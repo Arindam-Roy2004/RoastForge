@@ -6,5 +6,5 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["src/**/*", "api/**/*", "server.ts", "tests/**/*"]
+  "include": ["src/**/*", "api/**/*", "server.ts", "tests/**/*", "scripts/**/*"]
 }
