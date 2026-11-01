@@ -77,6 +77,8 @@ export const loginWithGoogle = async (idToken: string) => {
     }
   }
 
+  if (user?.suspendedAt) throw ApiError.forbidden("Account suspended");
+
   if (!user) {
     user = await User.create({
       name,
@@ -102,6 +104,7 @@ export const loginWithGoogle = async (idToken: string) => {
       avatar: user.avatar,
       anonymousUsername: user.anonymousUsername,
       role: user.role,
+      isAdmin: user.isAdmin === true,
       ...pickAvatarPrefs(user),
       onboardingCompleted: user.onboardingCompleted,
     },
