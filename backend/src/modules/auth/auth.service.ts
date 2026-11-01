@@ -54,6 +54,7 @@ export const refresh = async (token: string) => {
   }
   const user = await User.findById(decoded.id).select("+refreshToken");
   if (!user) throw ApiError.unauthorized("Invalid refresh token");
+  if (user.suspendedAt) throw ApiError.forbidden("Account suspended");
 
   // Reuse detection: a presented token whose hash doesn't match the stored one
   // means either it was revoked or stolen and replayed. Wipe the stored hash so
@@ -86,6 +87,7 @@ export const getMe = async (userId: string) => {
   return {
     id: user._id, name: user.name, email: user.email, avatar: user.avatar,
     anonymousUsername: user.anonymousUsername, role: user.role,
+    isAdmin: user.isAdmin === true,
     ...pickAvatarPrefs(user),
     publicProfile: user.publicProfile,
     // Onboarding flag drives the post-Google role-picker redirect on the client.
@@ -206,6 +208,7 @@ export const completeOnboarding = async (userId: string, role: "user" | "recruit
   return {
     id: user._id, name: user.name, email: user.email, avatar: user.avatar,
     anonymousUsername: user.anonymousUsername, role: user.role,
+    isAdmin: user.isAdmin === true,
     ...pickAvatarPrefs(user),
     onboardingCompleted: user.onboardingCompleted,
   };
