@@ -15,6 +15,7 @@ export interface AuthenticatedUser {
   email: string;
   avatar: string;
   role: string;
+  isAdmin: boolean;
 }
 
 /**
@@ -29,7 +30,7 @@ export interface AuthenticatedUser {
  * means a future sensitive field is excluded by default rather than by
  * remembering to opt it out.
  */
-const AUTH_PROJECTION = "name email avatar role";
+const AUTH_PROJECTION = "name email avatar role isAdmin suspendedAt";
 
 /**
  * Outcome of resolving an Authorization header, kept as a tagged union so each
@@ -44,6 +45,7 @@ const AUTH_PROJECTION = "name email avatar role";
 type BearerResolution =
   | { status: "absent" }
   | { status: "deleted" }
+  | { status: "suspended" }
   | { status: "ok"; user: AuthenticatedUser };
 
 /**
@@ -70,6 +72,9 @@ async function resolveBearerUser(header: unknown): Promise<BearerResolution> {
   // so Mongoose hydration would be pure overhead on the hottest query path.
   const user = await User.findById(id).select(AUTH_PROJECTION).lean();
   if (!user) return { status: "deleted" };
+  // Checked here, on the per-request lookup, so a suspension bites on the very
+  // next call instead of whenever the current access token expires.
+  if (user.suspendedAt) return { status: "suspended" };
 
   return {
     status: "ok",
@@ -79,6 +84,7 @@ async function resolveBearerUser(header: unknown): Promise<BearerResolution> {
       email: user.email ?? "",
       avatar: user.avatar ?? "",
       role: user.role ?? "user",
+      isAdmin: user.isAdmin === true,
     },
   };
 }
@@ -91,11 +97,23 @@ export const requireCandidate = (req: any, res: any, next: any) => {
   next();
 };
 
+/**
+ * Must run after `authenticate`. Reads the flag `authenticate` just loaded from
+ * the database, never a token claim, so revoking admin takes effect at once.
+ */
+export const requireAdmin = (req: any, _res: any, next: any) => {
+  if (req.user?.isAdmin !== true) {
+    return next(ApiError.forbidden("Admin access required"));
+  }
+  next();
+};
+
 export const authenticate = async (req: any, res: any, next: any) => {
   try {
     const resolved = await resolveBearerUser(req.headers.authorization);
     if (resolved.status === "absent") throw ApiError.unauthorized("Not authenticated");
     if (resolved.status === "deleted") throw ApiError.unauthorized("User no longer exists");
+    if (resolved.status === "suspended") throw ApiError.forbidden("Account suspended");
     req.user = resolved.user;
     next();
   } catch (e) {
