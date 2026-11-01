@@ -121,6 +121,8 @@ export type User = {
   avatar: string;
   anonymousUsername?: string;
   role?: string;
+  /** Shows the admin panel. The server re-checks it on every admin request. */
+  isAdmin?: boolean;
   preferredAvatarStyle?: AvatarStyle | null;
   preferredAvatarBackgroundColor?: string | null;
   preferredAvatarFlip?: boolean;
@@ -191,6 +193,122 @@ export const authApi = {
    */
   deleteAccount: (confirmEmail: string) =>
     apiFetch("/api/auth/account", { method: "DELETE", body: JSON.stringify({ confirmEmail }) }),
+};
+
+// ─── Admin ───────────────────────────────────────────────────────────────────
+export type AdminPage<T> = { items: T[]; total: number; page: number; pages: number };
+
+export type AdminUserFilter = "all" | "candidates" | "recruiters" | "admins" | "suspended";
+
+export type AdminPerson = { id: string; name: string; email: string; anonymousUsername: string };
+
+export type AdminUser = AdminPerson & {
+  role: "user" | "recruiter";
+  isAdmin: boolean;
+  suspendedAt: string | null;
+  createdAt: string | null;
+  talentComposite: number;
+};
+
+export type AdminUserDetail = AdminUser & {
+  counts: { resumes: number; comments: number; projects: number };
+};
+
+export type AdminResume = {
+  id: string;
+  title: string;
+  fileUrl: string;
+  likesCount: number;
+  dislikesCount: number;
+  commentsCount: number;
+  aiScore: number | null;
+  createdAt: string;
+  /** Null only if the owner row vanished mid-cascade. */
+  owner: AdminPerson | null;
+};
+
+export type AdminComment = {
+  id: string;
+  text: string;
+  isReply: boolean;
+  upvotesCount: number;
+  downvotesCount: number;
+  createdAt: string;
+  author: AdminPerson | null;
+  resume: { id: string; title: string } | null;
+};
+
+export type AdminAction =
+  | "user.role"
+  | "user.suspend"
+  | "user.reinstate"
+  | "user.delete"
+  | "resume.delete"
+  | "comment.delete";
+
+export type AdminActivity = {
+  id: string;
+  action: AdminAction;
+  targetType: "user" | "resume" | "comment";
+  targetLabel: string;
+  detail: string;
+  createdAt: string;
+  /** Null when the acting admin has since deleted their account. */
+  actor: AdminPerson | null;
+};
+
+export type AdminWeekly = { current: number; previous: number };
+
+export type AdminOverview = {
+  counts: {
+    users: number;
+    candidates: number;
+    recruiters: number;
+    admins: number;
+    suspended: number;
+    resumes: number;
+    comments: number;
+    projects: number;
+  };
+  /** Last 7 days against the 7 before, from the same buckets as `series`. */
+  weekly: { users: AdminWeekly; resumes: AdminWeekly; comments: AdminWeekly };
+  /** 14 UTC days, oldest first, today last. */
+  series: Array<{ date: string; users: number; resumes: number; comments: number }>;
+  activity: AdminActivity[];
+};
+
+function adminListQuery(params: Record<string, string | number | undefined>) {
+  const q = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== "") q.set(key, String(value));
+  }
+  const qs = q.toString();
+  return qs ? `?${qs}` : "";
+}
+
+export const adminApi = {
+  overview: () => apiFetch<AdminOverview>("/api/admin/overview"),
+  users: (params: { page: number; search: string; filter: AdminUserFilter }) =>
+    apiFetch<AdminPage<AdminUser>>(`/api/admin/users${adminListQuery(params)}`),
+  user: (id: string) => apiFetch<AdminUserDetail>(`/api/admin/users/${encodeURIComponent(id)}`),
+  updateUser: (id: string, change: { role: "user" | "recruiter" } | { suspended: boolean }) =>
+    apiFetch<AdminUser>(`/api/admin/users/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify(change),
+    }),
+  deleteUser: (id: string, confirmEmail: string) =>
+    apiFetch(`/api/admin/users/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      body: JSON.stringify({ confirmEmail }),
+    }),
+  resumes: (params: { page: number; search: string }) =>
+    apiFetch<AdminPage<AdminResume>>(`/api/admin/resumes${adminListQuery(params)}`),
+  deleteResume: (id: string) =>
+    apiFetch(`/api/admin/resumes/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  comments: (params: { page: number; search: string }) =>
+    apiFetch<AdminPage<AdminComment>>(`/api/admin/comments${adminListQuery(params)}`),
+  deleteComment: (id: string) =>
+    apiFetch(`/api/admin/comments/${encodeURIComponent(id)}`, { method: "DELETE" }),
 };
 
 // ─── Resumes ─────────────────────────────────────────────────────────────────
