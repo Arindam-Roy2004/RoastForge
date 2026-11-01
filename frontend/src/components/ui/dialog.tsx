@@ -80,6 +80,31 @@ function DialogContent({
   )
 }
 
+/**
+ * Right-hand panel for inspecting one record without leaving the list. Uses
+ * base-ui's starting/ending styles, so it slides out as well as in.
+ */
+function SheetContent({ className, children, ...props }: DialogPrimitive.Popup.Props) {
+  return (
+    <DialogPortal>
+      <DialogPrimitive.Backdrop
+        data-slot="sheet-overlay"
+        className="fixed inset-0 isolate z-50 bg-black/40 transition-opacity duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0 supports-backdrop-filter:backdrop-blur-[2px]"
+      />
+      <DialogPrimitive.Popup
+        data-slot="sheet-content"
+        className={cn(
+          "fixed inset-y-0 right-0 z-50 flex h-dvh w-full flex-col border-l border-popover-border bg-popover text-sm text-popover-foreground shadow-[var(--shadow-2xl)] outline-none transition-transform duration-250 ease-[cubic-bezier(0.32,0.72,0,1)] data-ending-style:translate-x-full data-starting-style:translate-x-full sm:max-w-[480px]",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </DialogPrimitive.Popup>
+    </DialogPortal>
+  )
+}
+
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -157,4 +182,5 @@ export {
   DialogPortal,
   DialogTitle,
   DialogTrigger,
+  SheetContent,
 }
