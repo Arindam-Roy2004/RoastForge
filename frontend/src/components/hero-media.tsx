@@ -124,7 +124,7 @@ export function HeroShowcase({
       onFocusCapture={focusIn}
       onBlurCapture={focusOut}
       className={cn(
-        "relative isolate mb-14 grid w-full place-items-center overflow-hidden rounded-xl border-2 border-border md:mb-18",
+        "relative isolate mb-14 grid w-full place-items-center overflow-hidden rounded-xl border-2 border-border shadow-[var(--shadow-sm)] md:mb-18",
         "md:aspect-[16/9]",
         className,
       )}
