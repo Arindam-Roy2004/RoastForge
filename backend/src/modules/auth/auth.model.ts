@@ -21,6 +21,13 @@ const userSchema = new mongoose.Schema(
     preferredAvatarRadius: { type: Number, default: 0, min: 0, max: 50 },
     preferredAvatarScale: { type: Number, default: 100, min: 0, max: 200 },
     role: { type: String, enum: ["user", "recruiter"], default: "user" },
+    // Orthogonal to `role`: an admin is still a candidate or recruiter for every
+    // other screen. Granted only by `npm run admin` against the database, so no
+    // HTTP route can mint one.
+    isAdmin: { type: Boolean, default: false },
+    // Set by an admin. A non-null value blocks sign-in, refresh and every
+    // authenticated request; the date doubles as the audit timestamp.
+    suspendedAt: { type: Date, default: null },
     anonymousUsername: { type: String, unique: true },
     refreshToken: { type: String, select: false },
     // Default true so anyone created before this field existed skips onboarding.
@@ -52,6 +59,8 @@ const userSchema = new mongoose.Schema(
 // Indexes for recruiter candidate search. Sparse-friendly since most users start blank.
 userSchema.index({ "publicProfile.targetRole": 1 });
 userSchema.index({ "publicProfile.skills": 1 });
+// Admin user list: newest first.
+userSchema.index({ createdAt: -1 });
 
 userSchema.pre("save", async function () {
   // Password is optional now (Google-only signups have none) — nothing to hash
