@@ -116,6 +116,15 @@ export const recruiterRateLimiter = createRateLimiter({
   message: "Too many search requests. Slow down.",
 });
 
+// Mounted after `authenticate`, so it buckets per admin rather than per IP.
+export const adminRateLimiter = createRateLimiter({
+  prefix: "rl:admin",
+  tokens: 60,
+  window: "60 s",
+  keyFn: userOrIp,
+  message: "Too many admin requests. Slow down.",
+});
+
 export const publicReadRateLimiter = createRateLimiter({
   prefix: "rl:public-read",
   tokens: 120,
