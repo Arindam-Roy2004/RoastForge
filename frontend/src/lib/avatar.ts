@@ -45,15 +45,18 @@ export function formatStyleLabel(style: AvatarStyle): string {
     .join(" ");
 }
 
+// Muted, slightly earthy tints (dusty rose, straw, mist, sage, heather, clay,
+// celadon, blush) so the avatar tiles sit on the linen page like printed
+// cards instead of candy swatches.
 const BG_COLORS = [
-  "bg-pink-200",
-  "bg-yellow-200",
-  "bg-blue-200",
-  "bg-green-200",
-  "bg-purple-200",
-  "bg-orange-200",
-  "bg-teal-200",
-  "bg-rose-200",
+  "bg-[#ecd6cf]",
+  "bg-[#efe3c2]",
+  "bg-[#d3dee3]",
+  "bg-[#d6e2cf]",
+  "bg-[#ddd8e4]",
+  "bg-[#eed7c2]",
+  "bg-[#cfe2db]",
+  "bg-[#ead3d3]",
 ] as const;
 
 function sumSeed(seed: string): number {
@@ -71,17 +74,19 @@ export function getCardBg(seed: string): string {
 /**
  * Card colours a post can store, as the hex that goes in `avatarBackgroundColor`
  * and the class that paints it. Same palette as `BG_COLORS`, in the same order,
- * so a stored colour and a derived one look identical.
+ * so a stored colour and a derived one look identical. The hex values are the
+ * stored keys from the original Tailwind palette and must not change; only the
+ * class that paints them does.
  */
 const CARD_COLORS: { hex: string; className: (typeof BG_COLORS)[number] }[] = [
-  { hex: "fbcfe8", className: "bg-pink-200" },
-  { hex: "fef08a", className: "bg-yellow-200" },
-  { hex: "bfdbfe", className: "bg-blue-200" },
-  { hex: "bbf7d0", className: "bg-green-200" },
-  { hex: "e9d5ff", className: "bg-purple-200" },
-  { hex: "fed7aa", className: "bg-orange-200" },
-  { hex: "99f6e4", className: "bg-teal-200" },
-  { hex: "fecdd3", className: "bg-rose-200" },
+  { hex: "fbcfe8", className: "bg-[#ecd6cf]" },
+  { hex: "fef08a", className: "bg-[#efe3c2]" },
+  { hex: "bfdbfe", className: "bg-[#d3dee3]" },
+  { hex: "bbf7d0", className: "bg-[#d6e2cf]" },
+  { hex: "e9d5ff", className: "bg-[#ddd8e4]" },
+  { hex: "fed7aa", className: "bg-[#eed7c2]" },
+  { hex: "99f6e4", className: "bg-[#cfe2db]" },
+  { hex: "fecdd3", className: "bg-[#ead3d3]" },
 ];
 
 /** A card colour for a new post. Stored per post, so each post gets its own. */

@@ -11,10 +11,10 @@ import { enqueueResumeReaction, flushQueuedResumeReactions } from "@/lib/resume-
 import { ResumeReactionControls } from "@/components/resume-reaction-controls";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, ChevronLeft, ChevronRight, X, SlidersHorizontal, MessageSquare } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, X, SlidersHorizontal, MessageSquare, ArrowUpRight, ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
 import { TextEffect } from "@/components/motion-primitives/text-effect";
 import { HeroShowcase } from "@/components/hero-media";
@@ -26,15 +26,14 @@ type SortTab = "new" | "hot" | "top";
 
 /**
  * Shared shape for the small controls in a card footer ("View Roast",
- * "Portfolio") and the pagination buttons.
- *
- * `rounded-md` (6px) against the card's `rounded-lg` (8px), `text-xs
- * font-medium` in the body sans, and a hairline border — the shadcn small-button
- * idiom. Replaces the previous 10px display-face chips with wide tracking, which
- * read as labels rather than things you could press.
+ * "Portfolio"): the extra-small outline button, so they carry the same raised
+ * surface and ink edge as every other button rather than a one-off chip.
  */
-const CARD_ACTION =
-  "inline-flex h-7 shrink-0 items-center justify-center rounded-md border border-border bg-background px-2.5 text-xs font-medium transition-colors";
+const CARD_ACTION = buttonVariants({ variant: "outline", size: "xs" });
+
+/** Vibrant-style floating chip over card artwork: white, tight, softly lifted. */
+const MEDIA_CHIP =
+  "bg-white/95 text-neutral-900 shadow-[0_2px_6px_rgba(0,0,0,0.10),0_0_0_1px_rgba(0,0,0,0.04)]";
 
 function HallPagination({
   page,
@@ -61,7 +60,7 @@ function HallPagination({
         disabled={page <= 1}
         aria-label="Previous page"
         onClick={() => setPage((p) => Math.max(1, p - 1))}
-        className="size-9 rounded-md border border-border px-0 !shadow-none transition-colors hover:translate-y-0 hover:bg-muted"
+        className="size-9 px-0"
       >
         <ChevronLeft aria-hidden className="size-4" />
       </Button>
@@ -81,12 +80,7 @@ function HallPagination({
             aria-label={`Page ${item}`}
             aria-current={page === item ? "page" : undefined}
             onClick={() => setPage(item as number)}
-            className={cn(
-              "size-9 rounded-md border border-border px-0 font-sans text-sm font-medium tabular-nums !shadow-none transition-colors hover:translate-y-0",
-              page === item
-                ? "bg-primary text-primary-foreground"
-                : "hover:bg-muted hover:text-foreground",
-            )}
+            className="size-9 px-0 tabular-nums"
           >
             {item}
           </Button>
@@ -98,7 +92,7 @@ function HallPagination({
         disabled={page >= pages}
         aria-label="Next page"
         onClick={() => setPage((p) => Math.min(pages, p + 1))}
-        className="size-9 rounded-md border border-border px-0 !shadow-none transition-colors hover:translate-y-0 hover:bg-muted"
+        className="size-9 px-0"
       >
         <ChevronRight aria-hidden className="size-4" />
       </Button>
@@ -317,7 +311,7 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mx-auto flex max-w-xl items-stretch gap-0 overflow-hidden rounded-lg border-2 border-border bg-background transition-colors focus-within:border-foreground/40"
+          className="mx-auto flex max-w-xl items-stretch gap-0 overflow-hidden rounded-xl border-2 border-input bg-card shadow-[var(--shadow-sm)] transition-[border-color,box-shadow] focus-within:border-primary focus-within:shadow-[0_0_0_3px_hsl(var(--ring)/0.2)]"
         >
           <div className="flex items-center pl-4 pr-2 text-muted-foreground shrink-0">
             <Search className="w-5 h-5" />
@@ -334,7 +328,7 @@ export default function HomePage() {
           </button>
           <Button
             type="submit"
-            className="h-12 shrink-0 rounded-none border-0 border-l-2 border-border px-6 text-xs bg-primary text-primary-foreground hover:bg-primary/90 hover:translate-y-0 !shadow-none focus-visible:ring-0"
+            className="my-1.5 mr-1.5 ml-1.5 h-auto shrink-0 px-5"
             data-testid="button-search"
           >
             Find Resumes
@@ -368,13 +362,13 @@ export default function HomePage() {
         >
           {user?.role === "recruiter" ? (
             <Link href="/recruiter" data-testid="link-hero-recruiter">
-              <Button size="lg" className="text-base px-8 border border-border !shadow-none hover:translate-y-0 transition-colors rounded-lg font-heading tracking-wide h-12">
+              <Button size="lg" className="text-base px-8 font-heading tracking-wide h-12">
                 Recruiter Dashboard
               </Button>
             </Link>
           ) : (
             <Link href="/upload" data-testid="link-hero-upload">
-              <Button size="lg" className="text-base px-8 border border-border !shadow-none hover:translate-y-0 transition-colors rounded-lg font-heading tracking-wide h-12">
+              <Button size="lg" className="text-base px-8 font-heading tracking-wide h-12">
                 Roast My Resume
               </Button>
             </Link>
@@ -399,8 +393,8 @@ export default function HomePage() {
               pairing reads as calm at any width.
             - The count is the shared <Badge>, which is what every other page
               uses for a count or label, rather than a one-off square chip.
-            - Sort becomes a segmented control — the shadcn/Vercel pattern for
-              picking one of a few options — instead of underlined text, which
+            - Sort is a single-select pill group — one clearly active choice —
+              instead of underlined text, which
               read as three links and gave no sense of a single active choice. */}
         <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-col gap-1.5">
@@ -433,12 +427,12 @@ export default function HomePage() {
                 and not a `radiogroup`, which would promise arrow-key roving
                 focus this control doesn't implement.
 
-                Radii nest: 8px outer (`rounded-lg`) minus the 4px `p-1` gap
-                gives the 4px inner pill (`rounded-sm`). */}
+                Pills follow vibrant.design's category tabs: the active one is
+                a raised primary surface, the rest flat paper chips. */}
             <div
               role="group"
               aria-label="Sort resumes"
-              className="inline-flex items-center gap-1 rounded-lg border border-border bg-muted p-1"
+              className="inline-flex items-center gap-1"
             >
               {(
                 [
@@ -456,10 +450,10 @@ export default function HomePage() {
                     aria-pressed={selected}
                     data-testid={`button-sort-${tab.id}`}
                     className={cn(
-                      "cursor-pointer rounded-sm px-2.5 py-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45",
+                      "cursor-pointer rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45 active:before:scale-[0.97]",
                       selected
-                        ? "bg-background text-foreground shadow-[var(--shadow-2xs)]"
-                        : "text-muted-foreground hover:text-foreground",
+                        ? "t-surface t-surface-primary text-primary-foreground"
+                        : "bg-secondary text-muted-foreground hover:bg-accent hover:text-foreground",
                     )}
                   >
                     {tab.label}
@@ -492,7 +486,7 @@ export default function HomePage() {
         {loading ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
             {[...Array(3)].map((_, i) => (
-              <Card key={i} className="border border-border rounded-lg shadow-[var(--shadow-sm)] overflow-hidden">
+              <Card key={i} className="shadow-[var(--shadow-sm)]">
                 <Skeleton className="aspect-[5/4] w-full" />
                 <div className="p-3 space-y-2">
                   <Skeleton className="h-4 w-3/4" />
@@ -529,9 +523,9 @@ export default function HomePage() {
                       data-testid={`link-resume-${resume._id}`}
                       className="block h-full text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
-                      <Card className="h-full flex flex-col border border-border rounded-lg shadow-[var(--shadow-sm)] bg-card overflow-hidden group hover:bg-muted/10 transition-colors duration-200">
+                      <Card className="group h-full shadow-[var(--shadow-sm)] transition-[transform,box-shadow] duration-200 ease-out hover:shadow-[var(--shadow-md)] active:scale-[0.985] has-[button:active]:scale-100">
                         {/* Avatar — landscape frame: shorter card, wider tiles (3-up on lg) */}
-                        <div className={cn("relative aspect-[5/4] overflow-hidden border-b border-border", cardBg)}>
+                        <div className={cn("relative aspect-[5/4] overflow-hidden border-b-2 border-border", cardBg)}>
                           <Image
                             src={getDiceBearUrl(avatarSeed, resume.avatarStyle ?? undefined, 176, {
                               // Transparent so the card colour shows through. A
@@ -549,6 +543,29 @@ export default function HomePage() {
                             unoptimized
                             className="h-full w-full object-contain p-5 transition-transform duration-300 group-hover:scale-[1.03]"
                           />
+
+                          {/* Floating chips, as on vibrant.design's feed: an
+                              "open" affordance that fades in on hover (always
+                              shown on touch, where there is no hover), and the
+                              post date pinned bottom-left. Decorative only; the
+                              whole card is the link. */}
+                          <span
+                            aria-hidden
+                            className={cn(
+                              "absolute top-2.5 right-2.5 flex size-8 items-center justify-center rounded-full opacity-0 transition-opacity duration-150 group-hover:opacity-100 [@media(hover:none)]:opacity-100",
+                              MEDIA_CHIP,
+                            )}
+                          >
+                            <ArrowUpRight className="size-4" />
+                          </span>
+                          <span
+                            className={cn(
+                              "absolute bottom-2.5 left-2.5 rounded-[5px] px-1.5 text-[11px] leading-5 font-medium tabular-nums",
+                              MEDIA_CHIP,
+                            )}
+                          >
+                            {new Date(resume.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                          </span>
                         </div>
 
                         {/* Card info.
@@ -586,13 +603,10 @@ export default function HomePage() {
                           </p>
 
                           {/* Stats row */}
-                          <div className="mt-auto flex items-center justify-between pt-2 text-xs text-muted-foreground">
+                          <div className="mt-auto flex items-center pt-2 text-xs text-muted-foreground">
                             <span className="flex items-center gap-1.5">
                               <MessageSquare aria-hidden className="size-3.5 shrink-0" />
                               {resume.commentsCount ?? 0} {(resume.commentsCount ?? 0) === 1 ? "comment" : "comments"}
-                            </span>
-                            <span className="tabular-nums">
-                              {new Date(resume.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                             </span>
                           </div>
                         </div>
@@ -603,7 +617,7 @@ export default function HomePage() {
                             visually — `mr-auto` only pushes what follows it, so
                             with Portfolio rendered first the two ended up
                             sharing the left edge. */}
-                        <div className="flex items-center justify-end gap-2 border-t border-border bg-muted/40 px-3 py-2">
+                        <div className="flex items-center justify-end gap-2 border-t-2 border-border bg-muted/50 px-3 py-2">
                           <ResumeReactionControls
                             className="mr-auto"
                             likesCount={resume.likesCount ?? 0}
@@ -629,23 +643,21 @@ export default function HomePage() {
                                 router.push(`/recruiter/candidate/${ownerId}`);
                               }}
                               data-testid={`link-candidate-${ownerId}`}
-                              className={cn(CARD_ACTION, "cursor-pointer hover:bg-muted")}
+                              className={CARD_ACTION}
                             >
                               Portfolio
                             </button>
                           ) : null}
 
                           {/* Not interactive itself — the card is the link — so
-                              it highlights on `group-hover` from the card rather
-                              than on its own hover, which never fired when you
-                              were anywhere else on the card. */}
+                              its arrow nudges on `group-hover` from the card
+                              rather than on its own hover, which would never
+                              fire while you're anywhere else on the card. */}
                           <span
-                            className={cn(
-                              CARD_ACTION,
-                              "group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground",
-                            )}
+                            className={CARD_ACTION}
                           >
                             View Roast
+                            <ArrowRight aria-hidden className="transition-transform duration-150 group-hover:translate-x-0.5" />
                           </span>
                         </div>
                       </Card>
