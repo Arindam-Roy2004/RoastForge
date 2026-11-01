@@ -86,7 +86,7 @@ export default function RecruiterCandidateProfilePage() {
           <Button
             variant="outline"
             onClick={() => router.push("/")}
-            className="rounded-lg border border-border shadow-[var(--shadow-xs)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)]"
+            className="rounded-lg"
           >
             Hall of Shame
           </Button>
@@ -104,7 +104,7 @@ export default function RecruiterCandidateProfilePage() {
           <Button
             variant="outline"
             onClick={() => router.push("/recruiter")}
-            className="rounded-lg border border-border shadow-[var(--shadow-xs)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)]"
+            className="rounded-lg"
           >
             Back to candidates
           </Button>
@@ -123,7 +123,7 @@ export default function RecruiterCandidateProfilePage() {
         <Button
           variant="outline"
           onClick={() => router.back()}
-          className="w-fit border border-border shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 rounded-lg font-heading text-xs h-9"
+          className="w-fit rounded-lg font-heading text-xs h-9"
         >
           <ArrowLeft className="w-3 h-3 mr-2" /> Back
         </Button>
@@ -308,9 +308,9 @@ export default function RecruiterCandidateProfilePage() {
                           className={cn(
                             "mt-2 border border-border rounded-lg text-[10px] font-bold uppercase shadow-[var(--shadow-2xs)]",
                             project.aiStatus === "done"
-                              ? "bg-green-300 text-foreground"
+                              ? "bg-primary/20 text-foreground"
                               : project.aiStatus === "failed"
-                                ? "bg-red-300 text-foreground"
+                                ? "bg-destructive/20 text-foreground"
                                 : "bg-primary/20",
                           )}
                         >
@@ -351,7 +351,7 @@ export default function RecruiterCandidateProfilePage() {
                             >
                               <Button
                                 variant="outline"
-                                className="w-full border border-border rounded-lg font-heading text-xs shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5"
+                                className="w-full font-heading text-xs"
                               >
                                 <FaGithub className="w-4 h-4 mr-2" /> Repo
                               </Button>
@@ -359,7 +359,7 @@ export default function RecruiterCandidateProfilePage() {
                           )}
                           {project.liveDemo && (
                             <a href={project.liveDemo} target="_blank" rel="noopener noreferrer" className="flex-1">
-                              <Button className="w-full border border-border rounded-lg font-heading text-xs shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5">
+                              <Button className="w-full font-heading text-xs">
                                 <ExternalLink className="w-4 h-4 mr-2" /> Live demo
                               </Button>
                             </a>

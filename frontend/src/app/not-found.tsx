@@ -41,7 +41,7 @@ export default function NotFound() {
             href="/"
             className={cn(
               buttonVariants({ size: "lg" }),
-              "mt-8 rounded-lg font-sans text-sm font-medium tracking-normal normal-case !shadow-none hover:translate-y-0",
+              "mt-8 rounded-lg font-sans text-sm font-medium tracking-normal normal-case",
             )}
           >
             <ArrowLeft aria-hidden className="size-4" />

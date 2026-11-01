@@ -76,7 +76,7 @@ export function CookieNotice() {
       <Button
         size="sm"
         onClick={dismiss}
-        className="shrink-0 rounded-lg font-sans text-sm font-medium tracking-normal normal-case !shadow-none hover:translate-y-0"
+        className="shrink-0 rounded-lg font-sans text-sm font-medium tracking-normal normal-case"
       >
         Got it
       </Button>

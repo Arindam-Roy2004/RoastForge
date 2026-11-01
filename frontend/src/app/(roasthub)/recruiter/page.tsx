@@ -78,7 +78,7 @@ export default function RecruiterPage() {
           </div>
           <CardTitle className="mb-6 text-2xl">Recruiters only</CardTitle>
           <Link href="/" className="w-full">
-            <Button variant="outline" className="h-11 w-full rounded-lg border border-border">
+            <Button variant="outline" className="h-11 w-full">
               Back to hub
             </Button>
           </Link>
@@ -119,7 +119,7 @@ export default function RecruiterPage() {
             </div>
           </CardContent>
         <div className="bg-muted p-4 border-t border-border">
-          <Button onClick={search} className="w-full sm:w-auto border border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading text-sm bg-primary text-primary-foreground h-12 px-8 flex items-center justify-center gap-2">
+          <Button onClick={search} className="w-full sm:w-auto font-heading h-12 px-8">
             <Search className="w-4 h-4" /> Search Candidates
           </Button>
         </div>
@@ -141,7 +141,7 @@ export default function RecruiterPage() {
                 onClick={() => setRows([])}
                 aria-label="Back to filters"
                 data-testid="button-back-results"
-                className="h-8 px-3 gap-1.5 border border-border rounded-lg shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all font-heading text-[11px] tracking-wider uppercase"
+                className="h-8 px-3 gap-1.5 rounded-lg font-heading text-[11px] tracking-wider uppercase"
               >
                 <ArrowLeft className="w-3.5 h-3.5" strokeWidth={3} />
                 Back
@@ -251,7 +251,7 @@ export default function RecruiterPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full border border-border rounded-lg shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all font-heading text-xs h-9"
+                        className="w-full rounded-lg font-heading text-xs h-9"
                       >
                         View portfolio
                       </Button>
@@ -260,7 +260,7 @@ export default function RecruiterPage() {
                   <Link href={`/resume/${r.resumeId}`} className="w-full">
                     <Button
                       size="sm"
-                      className="w-full border border-border rounded-lg shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all font-heading text-xs h-9"
+                      className="w-full rounded-lg font-heading text-xs h-9"
                     >
                       Open resume
                     </Button>

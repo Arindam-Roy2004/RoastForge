@@ -48,11 +48,11 @@ const CARD_HEAD =
  * labels. Same treatment as the profile and upload pages.
  */
 const BTN =
-  "cursor-pointer rounded-lg font-sans text-sm font-medium tracking-normal normal-case !shadow-none hover:translate-y-0";
+  "cursor-pointer rounded-lg font-sans text-sm font-medium tracking-normal normal-case";
 
 /** Square icon action in a row (repo, live demo, delete). */
 const ROW_ACTION =
-  "size-8 shrink-0 rounded-md px-0 text-muted-foreground !shadow-none hover:translate-y-0 hover:bg-muted hover:text-foreground";
+  "size-8 shrink-0 rounded-md px-0 text-muted-foreground hover:bg-muted hover:text-foreground";
 
 /**
  * Only http(s) links are rendered as links. The server rejects anything else,
@@ -75,8 +75,8 @@ function safeExternalUrl(raw?: string): string | null {
  * "Pending" that never resolves.
  */
 const STATUS: Record<string, { label: string; dot: string } | undefined> = {
-  processing: { label: "Analyzing", dot: "bg-amber-500" },
-  done: { label: "Evaluated", dot: "bg-emerald-500" },
+  processing: { label: "Analyzing", dot: "bg-chart-4" },
+  done: { label: "Evaluated", dot: "bg-primary" },
   failed: { label: "Evaluation failed", dot: "bg-destructive" },
 };
 

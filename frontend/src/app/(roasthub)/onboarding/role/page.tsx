@@ -91,7 +91,7 @@ export default function OnboardingRolePage() {
           <Button
             onClick={onSubmit}
             disabled={submitting}
-            className="w-full border border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading text-lg h-12 tracking-wide"
+            className="w-full rounded-lg font-heading text-lg h-12 tracking-wide"
             data-testid="button-submit-onboarding"
           >
             {submitting ? "Setting up..." : "Continue"}

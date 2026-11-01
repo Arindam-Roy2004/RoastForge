@@ -197,7 +197,7 @@ export default function TryPage() {
                     aria-label="Remove file"
                     onClick={clearFile}
                     disabled={busy}
-                    className="absolute right-2 top-2 !shadow-none hover:translate-y-0"
+                    className="absolute right-2 top-2"
                   >
                     <X className="size-4" />
                   </Button>
@@ -215,7 +215,7 @@ export default function TryPage() {
                   onClick={run}
                   disabled={busy || phase === "done"}
                   aria-busy={busy}
-                  className="label-mono h-11 w-full shrink-0 gap-2 rounded-lg border border-border text-[0.6875rem] shadow-[var(--shadow-sm)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)] disabled:opacity-60"
+                  className="label-mono h-11 w-full shrink-0 gap-2 rounded-lg text-[0.6875rem] disabled:opacity-60"
                 >
                   <FlameIcon size={16} strokeWidth={2.25} aria-hidden />
                   {busy ? "Roasting…" : phase === "done" ? "Done" : "Roast my resume"}
@@ -294,7 +294,7 @@ export default function TryPage() {
                       <Link href="/register" className="w-full max-w-[240px]">
                         <Button
                           size="sm"
-                          className="h-10 w-full rounded-lg border border-border shadow-[var(--shadow-sm)] transition-all hover:-translate-y-0.5"
+                          className="h-10 w-full rounded-lg"
                         >
                           Sign in for unlimited
                           <ArrowRight aria-hidden />
@@ -321,7 +321,7 @@ export default function TryPage() {
                   <Link href="/register" className="block">
                     <Button
                       size="sm"
-                      className="h-10 w-full rounded-lg border border-border shadow-[var(--shadow-sm)] transition-all hover:-translate-y-0.5"
+                      className="h-10 w-full rounded-lg"
                     >
                       Sign in to save &amp; post
                       <ArrowRight aria-hidden />

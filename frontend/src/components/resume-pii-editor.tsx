@@ -170,7 +170,7 @@ export function ResumePiiEditor({ file, onCancel, onApply }: Props) {
               variant="outline"
               onClick={onCancel}
               disabled={applying}
-              className="h-9 rounded-lg border border-border font-heading text-xs uppercase tracking-wider shadow-[var(--shadow-2xs)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)] transition-all"
+              className="h-9 rounded-lg font-heading text-xs uppercase tracking-wider"
             >
               Cancel
             </Button>
@@ -178,7 +178,7 @@ export function ResumePiiEditor({ file, onCancel, onApply }: Props) {
               type="button"
               onClick={requestConvert}
               disabled={applying || loading}
-              className="h-9 rounded-lg border border-border font-heading text-xs uppercase tracking-wider shadow-[var(--shadow-sm)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-sm)] transition-all"
+              className="h-9 rounded-lg font-heading text-xs uppercase tracking-wider"
             >
               {applying ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
               {editCount > 0 ? "Convert" : "Use as-is"}
@@ -203,7 +203,7 @@ export function ResumePiiEditor({ file, onCancel, onApply }: Props) {
               type="button"
               variant="outline"
               onClick={onCancel}
-              className="mt-4 rounded-lg border border-border font-heading text-xs uppercase tracking-wider"
+              className="mt-4 rounded-lg font-heading text-xs uppercase tracking-wider"
             >
               Go back
             </Button>

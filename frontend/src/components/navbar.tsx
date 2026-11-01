@@ -64,19 +64,19 @@ const NAV_LINK_GAP = "gap-8 lg:gap-10";
  * `rounded-2xl` (16px) with `py-2` (8px) of padding, so 16 − 8 = 8px. At 12px
  * the buttons read as too round for the space they sit in.
  *
- * `border-border` is the app's own button edge — the same charcoal ink the
- * gallery's "View Roast" and pagination buttons carry — so the navbar's buttons
- * belong to the same family rather than looking like flat chips.
+ * Filled variants use the shared `t-surface` treatment (ink edge, lit gradient)
+ * so the navbar's buttons belong to the same family as every other button
+ * rather than looking like flat chips.
  */
 const NAV_BTN_BASE =
   "inline-flex h-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border px-4 text-sm font-medium transition duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45";
 const NAV_BTN_PRIMARY = cn(
   NAV_BTN_BASE,
-  "border-border bg-primary text-primary-foreground hover:bg-primary/90",
+  "border-transparent t-surface t-surface-primary text-primary-foreground",
 );
 const NAV_BTN_OUTLINE = cn(
   NAV_BTN_BASE,
-  "border-border bg-background text-foreground hover:bg-muted",
+  "border-transparent t-surface t-surface-outline text-foreground",
 );
 // Login stays edgeless so Register carries the emphasis on its own.
 const NAV_BTN_QUIET = cn(

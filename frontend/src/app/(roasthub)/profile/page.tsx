@@ -80,7 +80,7 @@ const CARD_HEAD =
  * Same treatment as the upload composer and the navbar.
  */
 const BTN =
-  "cursor-pointer rounded-lg font-sans text-sm font-medium tracking-normal normal-case !shadow-none hover:translate-y-0";
+  "cursor-pointer rounded-lg font-sans text-sm font-medium tracking-normal normal-case";
 
 /** Roughly two wrapped rows of chips in a one-third column. */
 const SKILL_PREVIEW_LIMIT = 8;

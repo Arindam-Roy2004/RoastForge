@@ -71,7 +71,7 @@ const CARD_HEAD =
  * two different designs — so its buttons take the body sans instead, matching
  * the navbar. Utilities beat the `label-mono` component class, so this wins.
  */
-const BTN = "rounded-lg font-sans text-sm font-medium tracking-normal normal-case !shadow-none hover:translate-y-0";
+const BTN = "rounded-lg font-sans text-sm font-medium tracking-normal normal-case";
 
 function formatBytes(n: number): string {
   return n < 1024 * 1024 ? `${(n / 1024).toFixed(0)} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`;
