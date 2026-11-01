@@ -9,10 +9,10 @@ import { cn } from "@/lib/utils";
 // Type badge in the corner of the avatar, as in Linear's inbox. Static class
 // strings (not built from a colour name) so Tailwind sees them.
 const TYPE_META: Record<NotificationType, { icon: LucideIcon; tone: string }> = {
-  like: { icon: Heart, tone: "bg-rose-500 text-white" },
-  comment_like: { icon: ArrowBigUp, tone: "bg-orange-500 text-white" },
-  comment: { icon: MessageSquare, tone: "bg-sky-500 text-white" },
-  reply: { icon: Reply, tone: "bg-indigo-500 text-white" },
+  like: { icon: Heart, tone: "bg-destructive text-white" },
+  comment_like: { icon: ArrowBigUp, tone: "bg-chart-4 text-white" },
+  comment: { icon: MessageSquare, tone: "bg-chart-3 text-white" },
+  reply: { icon: Reply, tone: "bg-primary text-primary-foreground" },
 };
 
 /** The sentence, split so the people and the post can be set in a heavier weight. */

@@ -8,17 +8,17 @@ export const VERDICT_DIMENSIONS: Omit<VerdictBar, "score">[] = [
   { id: "roleFit", label: "Role fit & focus" },
 ];
 
-/** 1 = rough, 5 = strong — neo-brutalist fills */
+/** 1 = rough, 5 = strong — oxblood through clay and ochre to meadow and pine. */
 export function verdictBarFillClass(score: number): string {
   const s = Math.max(1, Math.min(5, Math.round(score)));
   const map: Record<number, string> = {
-    1: "bg-red-600",
-    2: "bg-orange-500",
-    3: "bg-amber-400",
-    4: "bg-lime-500",
-    5: "bg-emerald-600",
+    1: "bg-destructive",
+    2: "bg-[#c9763f]",
+    3: "bg-chart-4",
+    4: "bg-chart-2",
+    5: "bg-primary",
   };
-  return map[s] ?? "bg-amber-400";
+  return map[s] ?? "bg-chart-4";
 }
 
 export function coalesceVerdictBars(bars: VerdictBar[] | undefined | null): VerdictBar[] {

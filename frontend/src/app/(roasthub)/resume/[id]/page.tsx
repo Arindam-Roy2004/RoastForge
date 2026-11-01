@@ -21,7 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 
 /** Sentence-case sans buttons for the body editor, matching the upload composer. */
-const BODY_BTN = "rounded-lg font-sans text-sm font-medium tracking-normal normal-case !shadow-none hover:translate-y-0";
+const BODY_BTN = "rounded-lg font-sans text-sm font-medium tracking-normal normal-case";
 import { motion, AnimatePresence, LayoutGroup } from "motion/react";
 
 export default function ResumeDetail() {
@@ -311,7 +311,7 @@ export default function ResumeDetail() {
     return (
       <div className="w-full py-8 text-center">
         <h1 className="text-4xl font-heading mb-6">Resume not found</h1>
-        <Button onClick={() => router.push("/")} className="border border-border rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all font-heading text-lg tracking-wide">
+        <Button onClick={() => router.push("/")} className="font-heading text-lg tracking-wide">
           Back Home
         </Button>
       </div>
@@ -321,7 +321,7 @@ export default function ResumeDetail() {
   const isPdf = resume.fileType === "pdf";
 
   const panelHeaderClass =
-    "min-h-14 shrink-0 px-4 flex items-center justify-between gap-3 border-b border-border bg-primary text-primary-foreground font-heading tracking-wide";
+    "min-h-14 shrink-0 px-4 flex items-center justify-between gap-3 border-b-2 border-border bg-card text-foreground font-heading tracking-wide";
 
   return (
     <div className="w-full space-y-8">
@@ -331,7 +331,7 @@ export default function ResumeDetail() {
           {/* min-w-0 + flex-1 so a long body wraps inside this column instead of
               widening it and pushing the reaction/actions group off the row. */}
           <div className="min-w-0 space-y-4 md:flex-1">
-            <Button variant="outline" onClick={() => router.back()} className="border border-border shadow-[var(--shadow-2xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading text-xs h-8 px-3">
+            <Button variant="outline" onClick={() => router.back()} className="font-heading text-xs h-8 px-3">
               <ArrowLeft className="w-3 h-3 mr-1.5" /> Back
             </Button>
 
@@ -435,7 +435,7 @@ export default function ResumeDetail() {
               <Link href={`/recruiter/candidate/${resume.userId._id}`}>
                 <Button
                   variant="secondary"
-                  className="border border-border shadow-[var(--shadow-2xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading text-xs h-9"
+                  className="font-heading text-xs h-9"
                   data-testid="link-recruiter-portfolio"
                 >
                   <Briefcase className="w-3 h-3 mr-1.5" /> Candidate portfolio
@@ -443,7 +443,7 @@ export default function ResumeDetail() {
               </Link>
             )}
             {isOwner && (
-              <Button variant="destructive" onClick={deleteThisResume} className="border border-border shadow-[var(--shadow-2xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading text-xs h-9">
+              <Button variant="destructive" onClick={deleteThisResume} className="font-heading text-xs h-9">
                 <Trash2 className="w-3 h-3 mr-1.5" /> Delete
               </Button>
             )}
@@ -463,15 +463,15 @@ export default function ResumeDetail() {
         <div className="order-1 border border-border bg-muted overflow-hidden flex flex-col h-[540px] lg:h-[var(--panel-h)]">
           <div className={cn(panelHeaderClass, "text-sm ")}>
              <div className="flex items-center gap-2.5 min-w-0">
-               <FileText className="w-5 h-5 shrink-0" strokeWidth={2.5} /> <span className="truncate">Resume PDF</span>
+               <FileText className="w-5 h-5 shrink-0 text-primary-strong" strokeWidth={2.5} /> <span className="truncate">Resume PDF</span>
              </div>
              <a
                href={resume.fileUrl}
                target="_blank"
                rel="noreferrer"
                className={cn(
-                 buttonVariants({ variant: "secondary", size: "sm" }),
-                 "border border-border bg-background text-foreground shadow-[var(--shadow-xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading text-[10px] h-9 px-3.5 font-bold shrink-0"
+                 buttonVariants({ variant: "outline", size: "sm" }),
+                 "shrink-0"
                )}
              >
                Open external
@@ -512,13 +512,13 @@ export default function ResumeDetail() {
                     aria-expanded={!chatOpen}
                     className={cn(panelHeaderClass, "cursor-pointer select-none", chatOpen && "border-b-0")}
                   >
-                    <CardTitle className="text-base flex items-center gap-2.5 tracking-tight text-primary-foreground truncate">
+                    <CardTitle className="text-base flex items-center gap-2.5 tracking-tight text-foreground truncate">
                       <Sparkles className="w-5 h-5 shrink-0" strokeWidth={2.5} /> AI Analysis
                     </CardTitle>
                     <div className="flex items-center gap-2 shrink-0">
                       <Badge
                         variant="secondary"
-                        className="border border-border rounded-lg shadow-[var(--shadow-xs)] font-heading font-bold text-[10px] uppercase bg-background text-foreground px-2.5 py-1"
+                        className="tabular-nums"
                       >
                         {chatOpen ? "Click to expand" : "Open chat"}
                       </Badge>
@@ -526,7 +526,7 @@ export default function ResumeDetail() {
                         type="button"
                         onClick={(e) => { e.stopPropagation(); toggleSwap(); }}
                         aria-label={chatOpen ? "Expand AI analysis" : "Collapse AI analysis"}
-                        className="h-7 w-7 inline-flex items-center justify-center rounded-lg border border-border bg-background/10 text-primary-foreground hover:bg-background/20 transition-colors"
+                        className={buttonVariants({ variant: "outline", size: "icon-xs" })}
                       >
                         {chatOpen ? <Maximize2 className="w-3.5 h-3.5" strokeWidth={2.5} /> : <Minimize2 className="w-3.5 h-3.5" strokeWidth={2.5} />}
                       </button>
@@ -569,7 +569,7 @@ export default function ResumeDetail() {
                                 {isPdf && isOwner && user && (
                                   <Button
                                     onClick={fetchRoast}
-                                    className="w-full border border-border shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading tracking-wide bg-background text-foreground hover:bg-muted/80 text-sm py-6 min-h-[3.25rem]"
+                                    className="w-full rounded-lg font-heading tracking-wide bg-background text-foreground hover:bg-muted/80 text-sm py-6 min-h-[3.25rem]"
                                   >
                                     <FlameIcon size={20} className="mr-2 shrink-0" strokeWidth={2} /> Run AI Analysis
                                   </Button>
@@ -617,7 +617,7 @@ export default function ResumeDetail() {
                                 <Button
                                   onClick={fetchRoast}
                                   variant="outline"
-                                  className="border border-border rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all font-heading text-xs"
+                                  className="rounded-lg font-heading text-xs"
                                 >
                                   Try Again
                                 </Button>
@@ -642,7 +642,7 @@ export default function ResumeDetail() {
                                   type="button"
                                   variant="outline"
                                   onClick={fetchRoast}
-                                  className="w-full border border-border rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all font-heading text-xs h-10 gap-2 mt-1"
+                                  className="w-full rounded-lg font-heading text-xs h-10 gap-2 mt-1"
                                 >
                                   <RefreshCw className="w-3.5 h-3.5" />
                                   Re-roast
@@ -676,15 +676,15 @@ export default function ResumeDetail() {
                     className={cn(panelHeaderClass, "cursor-pointer select-none", !chatOpen && "border-b-0")}
                   >
                      <div className="flex items-center gap-2.5 min-w-0">
-                       <FlameIcon size={20} className="shrink-0 text-yellow-200" strokeWidth={2.5} aria-hidden />
-                       <CardTitle className="text-base tracking-tight text-primary-foreground truncate">
+                       <FlameIcon size={20} className="shrink-0 text-primary-strong" strokeWidth={2.5} aria-hidden />
+                       <CardTitle className="text-base tracking-tight text-foreground truncate">
                          Roast Thread
                        </CardTitle>
                      </div>
                      <div className="flex items-center gap-2 shrink-0">
                        <Badge
                          variant="secondary"
-                         className="border border-border rounded-lg shadow-[var(--shadow-xs)] font-heading font-bold text-[10px] uppercase bg-background text-foreground px-2.5 py-1"
+                         className="tabular-nums"
                        >
                          {comments.length} {comments.length === 1 ? "comment" : "comments"}
                        </Badge>
@@ -692,7 +692,7 @@ export default function ResumeDetail() {
                          type="button"
                          onClick={(e) => { e.stopPropagation(); toggleSwap(); }}
                          aria-label={chatOpen ? "Collapse chat" : "Expand chat"}
-                         className="h-7 w-7 inline-flex items-center justify-center rounded-lg border border-border bg-background/10 text-primary-foreground hover:bg-background/20 transition-colors"
+                         className={buttonVariants({ variant: "outline", size: "icon-xs" })}
                        >
                          {chatOpen ? <Minimize2 className="w-3.5 h-3.5" strokeWidth={2.5} /> : <Maximize2 className="w-3.5 h-3.5" strokeWidth={2.5} />}
                        </button>
@@ -717,11 +717,11 @@ export default function ResumeDetail() {
                                 {/* Mock Card 1 */}
                                 <div className="border border-border bg-card p-3.5 shadow-[var(--shadow-2xs)] text-left transform -rotate-1 scale-95 translate-y-2 opacity-75 dark:opacity-90">
                                   <div className="flex items-center gap-2 mb-1.5">
-                                    <div className="w-5 h-5 rounded-full border border-border bg-emerald-500/20 dark:bg-emerald-500/30 flex items-center justify-center text-[9px] font-mono font-bold">
+                                    <div className="w-5 h-5 rounded-full border border-border bg-primary/15 flex items-center justify-center text-[9px] font-mono font-bold">
                                       S
                                     </div>
                                     <span className="font-mono text-[10px] font-bold text-foreground">u/SeniorDesigner</span>
-                                    <span className="border border-emerald-500/25 rounded-lg font-bold uppercase py-0 px-1 text-[8px] bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
+                                    <span className="rounded-[5px] px-1.5 text-[10px] leading-4 font-medium uppercase tracking-wide ring-1 ring-inset bg-primary/12 text-primary-strong ring-primary/35">
                                       strength
                                     </span>
                                   </div>
@@ -733,11 +733,11 @@ export default function ResumeDetail() {
                                 {/* Mock Card 2 */}
                                 <div className="border border-border bg-card p-3.5 shadow-[var(--shadow-xs)] text-left transform rotate-1 relative z-10">
                                   <div className="flex items-center gap-2 mb-1.5">
-                                    <div className="w-5 h-5 rounded-full border border-border bg-orange-400/20 dark:bg-orange-400/30 flex items-center justify-center text-[9px] font-mono font-bold">
+                                    <div className="w-5 h-5 rounded-full border border-border bg-chart-4/20 flex items-center justify-center text-[9px] font-mono font-bold">
                                       R
                                     </div>
                                     <span className="font-mono text-[10px] font-bold text-foreground">u/RecruiterPro</span>
-                                    <span className="border border-orange-400/30 rounded-lg font-bold uppercase py-0 px-1 text-[8px] bg-orange-400/20 text-orange-600 dark:bg-orange-400/15 dark:text-orange-300">
+                                    <span className="rounded-[5px] px-1.5 text-[10px] leading-4 font-medium uppercase tracking-wide ring-1 ring-inset bg-chart-4/18 text-foreground ring-chart-4/45">
                                       weakness
                                     </span>
                                   </div>
@@ -775,17 +775,17 @@ export default function ResumeDetail() {
                                     const isSelected = commentType === t;
                                     const btnColors = {
                                       strength: isSelected
-                                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 border-border"
-                                        : "bg-background/80 text-foreground border-border hover:bg-emerald-500/10",
+                                        ? "bg-primary/12 text-primary-strong border-border"
+                                        : "bg-card text-muted-foreground border-border hover:bg-primary/8 hover:text-foreground",
                                       weakness: isSelected
-                                        ? "bg-orange-100 text-orange-700 dark:bg-orange-950/50 dark:text-orange-300 border-border"
-                                        : "bg-background/80 text-foreground border-border hover:bg-orange-400/10",
+                                        ? "bg-chart-4/18 text-foreground border-border"
+                                        : "bg-card text-muted-foreground border-border hover:bg-chart-4/10 hover:text-foreground",
                                       suggestion: isSelected
-                                        ? "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300 border-border"
-                                        : "bg-background/80 text-foreground border-border hover:bg-blue-500/10",
+                                        ? "bg-chart-3/15 text-foreground border-border"
+                                        : "bg-card text-muted-foreground border-border hover:bg-chart-3/10 hover:text-foreground",
                                       comment: isSelected
-                                        ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 border-border"
-                                        : "bg-background/80 text-foreground border-border hover:bg-amber-500/10",
+                                        ? "bg-secondary text-foreground border-border"
+                                        : "bg-card text-muted-foreground border-border hover:bg-secondary hover:text-foreground",
                                     };
                                     return (
                                       <button
@@ -793,7 +793,7 @@ export default function ResumeDetail() {
                                         type="button"
                                         onClick={() => setCommentType(t)}
                                         className={cn(
-                                          "cursor-pointer uppercase rounded-lg border px-2.5 py-1 text-[10px] font-heading font-bold transition-all shadow-[var(--shadow-2xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5",
+                                          "cursor-pointer rounded-full border px-3 py-1 text-xs font-medium capitalize transition-colors",
                                           btnColors[t]
                                         )}
                                       >
@@ -820,7 +820,7 @@ export default function ResumeDetail() {
                                 <Button
                                   type="submit"
                                   disabled={posting}
-                                  className="min-h-10 min-w-20 px-5 border border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading text-sm tracking-wide bg-primary text-primary-foreground "
+                                  className="min-h-10 min-w-20 px-5 rounded-lg font-heading text-sm tracking-wide bg-primary text-primary-foreground"
                                 >
                                   {posting ? "…" : "Post"}
                                 </Button>
@@ -879,7 +879,7 @@ export default function ResumeDetail() {
                           {isPdf && isOwner && user && (
                             <Button
                               onClick={fetchRoast}
-                              className="w-full border border-border shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading tracking-wide bg-background text-foreground hover:bg-muted/80 text-sm py-6 min-h-[3.25rem]"
+                              className="w-full rounded-lg font-heading tracking-wide bg-background text-foreground hover:bg-muted/80 text-sm py-6 min-h-[3.25rem]"
                             >
                               <FlameIcon size={20} className="mr-2 shrink-0" strokeWidth={2} /> Run AI Analysis
                             </Button>
@@ -923,7 +923,7 @@ export default function ResumeDetail() {
                           <Button
                             onClick={fetchRoast}
                             variant="outline"
-                            className="border border-border rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all font-heading text-xs"
+                            className="rounded-lg font-heading text-xs"
                           >
                             Try Again
                           </Button>
@@ -944,7 +944,7 @@ export default function ResumeDetail() {
                             type="button"
                             variant="outline"
                             onClick={fetchRoast}
-                            className="w-full border border-border rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all font-heading text-xs h-10 gap-2 mt-1"
+                            className="w-full rounded-lg font-heading text-xs h-10 gap-2 mt-1"
                           >
                             <RefreshCw className="w-3.5 h-3.5" />
                             Re-roast
@@ -961,14 +961,14 @@ export default function ResumeDetail() {
                 <Card className="border border-border rounded-lg shadow-[var(--shadow-lg)] flex flex-col overflow-hidden h-full bg-card">
                   <CardHeader className={panelHeaderClass}>
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <FlameIcon size={20} className="shrink-0 text-yellow-200" strokeWidth={2.5} aria-hidden />
-                      <CardTitle className="text-base tracking-tight text-primary-foreground truncate">
+                      <FlameIcon size={20} className="shrink-0 text-primary-strong" strokeWidth={2.5} aria-hidden />
+                      <CardTitle className="text-base tracking-tight text-foreground truncate">
                         Roast Thread
                       </CardTitle>
                     </div>
                     <Badge
                       variant="secondary"
-                      className="border border-border rounded-lg shadow-[var(--shadow-xs)] font-heading font-bold text-[10px] uppercase bg-background text-foreground px-2.5 py-1 shrink-0"
+                      className="shrink-0 tabular-nums"
                     >
                       {comments.length} {comments.length === 1 ? "comment" : "comments"}
                     </Badge>
@@ -1011,7 +1011,7 @@ export default function ResumeDetail() {
                           <Button
                             type="submit"
                             disabled={posting}
-                            className="min-h-10 min-w-20 px-5 border border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading text-sm tracking-wide bg-primary text-primary-foreground"
+                            className="min-h-10 min-w-20 px-5 rounded-lg font-heading text-sm tracking-wide bg-primary text-primary-foreground"
                           >
                             {posting ? "…" : "Post"}
                           </Button>
@@ -1042,14 +1042,14 @@ export default function ResumeDetail() {
               <Card className="border border-border rounded-lg shadow-[var(--shadow-lg)] flex flex-col overflow-hidden h-full bg-card">
                 <CardHeader className={panelHeaderClass}>
                    <div className="flex items-center gap-2.5 min-w-0">
-                     <FlameIcon size={20} className="shrink-0 text-yellow-200" strokeWidth={2.5} aria-hidden />
-                     <CardTitle className="text-base tracking-tight text-primary-foreground truncate">
+                     <FlameIcon size={20} className="shrink-0 text-primary-strong" strokeWidth={2.5} aria-hidden />
+                     <CardTitle className="text-base tracking-tight text-foreground truncate">
                        Roast Thread
                      </CardTitle>
                    </div>
                    <Badge
                      variant="secondary"
-                     className="border border-border rounded-lg shadow-[var(--shadow-xs)] font-heading font-bold text-[10px] uppercase bg-background text-foreground px-2.5 py-1 shrink-0"
+                     className="shrink-0 tabular-nums"
                    >
                      {comments.length} {comments.length === 1 ? "comment" : "comments"}
                    </Badge>
@@ -1064,11 +1064,11 @@ export default function ResumeDetail() {
                         {/* Mock Card 1 */}
                         <div className="border border-border bg-card p-3.5 shadow-[var(--shadow-2xs)] text-left transform -rotate-1 scale-95 translate-y-2 opacity-75 dark:opacity-90">
                           <div className="flex items-center gap-2 mb-1.5">
-                            <div className="w-5 h-5 rounded-full border border-border bg-emerald-500/20 dark:bg-emerald-500/30 flex items-center justify-center text-[9px] font-mono font-bold">
+                            <div className="w-5 h-5 rounded-full border border-border bg-primary/15 flex items-center justify-center text-[9px] font-mono font-bold">
                               S
                             </div>
                             <span className="font-mono text-[10px] font-bold text-foreground">u/SeniorDesigner</span>
-                            <span className="border border-emerald-500/25 rounded-lg font-bold uppercase py-0 px-1 text-[8px] bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
+                            <span className="rounded-[5px] px-1.5 text-[10px] leading-4 font-medium uppercase tracking-wide ring-1 ring-inset bg-primary/12 text-primary-strong ring-primary/35">
                               strength
                             </span>
                           </div>
@@ -1080,11 +1080,11 @@ export default function ResumeDetail() {
                         {/* Mock Card 2 */}
                         <div className="border border-border bg-card p-3.5 shadow-[var(--shadow-xs)] text-left transform rotate-1 relative z-10">
                           <div className="flex items-center gap-2 mb-1.5">
-                            <div className="w-5 h-5 rounded-full border border-border bg-orange-400/20 dark:bg-orange-400/30 flex items-center justify-center text-[9px] font-mono font-bold">
+                            <div className="w-5 h-5 rounded-full border border-border bg-chart-4/20 flex items-center justify-center text-[9px] font-mono font-bold">
                               R
                             </div>
                             <span className="font-mono text-[10px] font-bold text-foreground">u/RecruiterPro</span>
-                            <span className="border border-orange-400/30 rounded-lg font-bold uppercase py-0 px-1 text-[8px] bg-orange-400/20 text-orange-600 dark:bg-orange-400/15 dark:text-orange-300">
+                            <span className="rounded-[5px] px-1.5 text-[10px] leading-4 font-medium uppercase tracking-wide ring-1 ring-inset bg-chart-4/18 text-foreground ring-chart-4/45">
                               weakness
                             </span>
                           </div>
@@ -1122,17 +1122,17 @@ export default function ResumeDetail() {
                             const isSelected = commentType === t;
                             const btnColors = {
                               strength: isSelected
-                                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 border-border"
-                                : "bg-background/80 text-foreground border-border hover:bg-emerald-500/10",
+                                ? "bg-primary/12 text-primary-strong border-border"
+                                : "bg-card text-muted-foreground border-border hover:bg-primary/8 hover:text-foreground",
                               weakness: isSelected
-                                ? "bg-orange-100 text-orange-700 dark:bg-orange-950/50 dark:text-orange-300 border-border"
-                                : "bg-background/80 text-foreground border-border hover:bg-orange-400/10",
+                                ? "bg-chart-4/18 text-foreground border-border"
+                                : "bg-card text-muted-foreground border-border hover:bg-chart-4/10 hover:text-foreground",
                               suggestion: isSelected
-                                ? "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300 border-border"
-                                : "bg-background/80 text-foreground border-border hover:bg-blue-500/10",
+                                ? "bg-chart-3/15 text-foreground border-border"
+                                : "bg-card text-muted-foreground border-border hover:bg-chart-3/10 hover:text-foreground",
                               comment: isSelected
-                                ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 border-border"
-                                : "bg-background/80 text-foreground border-border hover:bg-amber-500/10",
+                                ? "bg-secondary text-foreground border-border"
+                                : "bg-card text-muted-foreground border-border hover:bg-secondary hover:text-foreground",
                             };
                             return (
                               <button
@@ -1140,7 +1140,7 @@ export default function ResumeDetail() {
                                 type="button"
                                 onClick={() => setCommentType(t)}
                                 className={cn(
-                                  "cursor-pointer uppercase rounded-lg border px-2.5 py-1 text-[10px] font-heading font-bold transition-all shadow-[var(--shadow-2xs)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5",
+                                  "cursor-pointer rounded-full border px-3 py-1 text-xs font-medium capitalize transition-colors",
                                   btnColors[t]
                                 )}
                               >
@@ -1167,7 +1167,7 @@ export default function ResumeDetail() {
                         <Button
                           type="submit"
                           disabled={posting}
-                          className="min-h-10 min-w-20 px-5 border border-border shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5 transition-all rounded-lg font-heading text-sm tracking-wide bg-primary text-primary-foreground "
+                          className="min-h-10 min-w-20 px-5 rounded-lg font-heading text-sm tracking-wide bg-primary text-primary-foreground"
                         >
                           {posting ? "…" : "Post"}
                         </Button>

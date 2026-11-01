@@ -23,15 +23,15 @@ import { coalesceVerdictBars, type VerdictBar } from "@/lib/verdict-dimensions";
  */
 
 export function scoreColorClass(score: number): string {
-  if (score >= 70) return "text-emerald-600";
-  if (score >= 40) return "text-amber-500";
+  if (score >= 70) return "text-primary-strong";
+  if (score >= 40) return "text-[hsl(38_65%_34%)] dark:text-chart-4";
   return "text-destructive";
 }
 
 /** Ring stroke that matches `scoreColorClass`. */
 function scoreStrokeClass(score: number): string {
-  if (score >= 70) return "stroke-emerald-500";
-  if (score >= 40) return "stroke-amber-500";
+  if (score >= 70) return "stroke-primary";
+  if (score >= 40) return "stroke-chart-4";
   return "stroke-destructive";
 }
 

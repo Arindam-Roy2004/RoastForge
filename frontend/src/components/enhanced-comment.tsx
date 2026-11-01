@@ -33,10 +33,10 @@ export function EnhancedComment({
   const cleanText = roastMatch ? roastMatch[2].trim() : comment.text;
 
   const typeStyles: Record<string, string> = {
-    strength: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25",
-    weakness: "bg-orange-400/20 text-orange-600 dark:text-orange-300 dark:bg-orange-400/15 border border-orange-400/30",
-    suggestion: "bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/25",
-    comment: "bg-muted text-foreground border border-border",
+    strength: "bg-primary/12 text-primary-strong ring-primary/35",
+    weakness: "bg-chart-4/18 text-foreground ring-chart-4/45",
+    suggestion: "bg-chart-3/15 text-foreground ring-chart-3/40",
+    comment: "bg-secondary text-foreground ring-border",
   };
 
   async function vote(value: 1 | -1) {
@@ -87,7 +87,7 @@ export function EnhancedComment({
               isTombstoned && "italic text-muted-foreground",
             )}>u/{alias}</span>
             {!isTombstoned && (
-              <Badge variant="outline" className={cn("border border-border rounded-md font-bold uppercase py-0 text-[10px]", typeStyles[extractedType])}>
+              <Badge variant="outline" className={cn("rounded-[5px] px-1.5 py-0 text-[10px] font-semibold uppercase tracking-wide", typeStyles[extractedType])}>
                 {extractedType}
               </Badge>
             )}
@@ -110,7 +110,7 @@ export function EnhancedComment({
                 disabled={voting !== null}
                 aria-pressed={voting === "upvote"}
                 aria-label={`Upvote (${comment.upvotesCount})`}
-                className="px-2 py-1 hover:bg-green-200 transition-colors border-r border-border flex items-center gap-1 font-bold text-xs font-heading disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-2 py-1 hover:bg-primary/12 transition-colors border-r border-border flex items-center gap-1 font-bold text-xs font-heading disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ThumbsUp className="w-3 h-3" /> {comment.upvotesCount}
               </button>
@@ -120,14 +120,14 @@ export function EnhancedComment({
                 disabled={voting !== null}
                 aria-pressed={voting === "downvote"}
                 aria-label={`Downvote (${comment.downvotesCount})`}
-                className="px-2 py-1 hover:bg-red-200 transition-colors flex items-center gap-1 font-bold text-xs font-heading disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-2 py-1 hover:bg-destructive/12 transition-colors flex items-center gap-1 font-bold text-xs font-heading disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ThumbsDown className="w-3 h-3" /> {comment.downvotesCount}
               </button>
             </div>
             
             {user?.id === comment.userId?._id && (
-              <Button variant="destructive" size="sm" onClick={deleteComment} disabled={deleting} className="border border-border shadow-[var(--shadow-2xs)] hover:shadow-[var(--shadow-sm)] transition-all rounded-lg font-heading uppercase text-[10px] h-7 px-2 ml-auto">
+              <Button variant="destructive" size="sm" onClick={deleteComment} disabled={deleting} className="font-heading uppercase text-[10px] h-7 px-2 ml-auto">
                 <Trash2 className="w-3 h-3 mr-1" /> {deleting ? "…" : "Delete"}
               </Button>
             )}
