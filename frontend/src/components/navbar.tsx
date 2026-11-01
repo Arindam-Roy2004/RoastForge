@@ -130,6 +130,9 @@ function useNavItems(): NavItem[] {
     if (isRecruiter) {
       items.push({ href: "/recruiter", label: "Dashboard", testId: "link-recruiter" });
     }
+    if (user.isAdmin) {
+      items.push({ href: "/admin", label: "Admin", testId: "link-admin" });
+    }
   }
 
   return items;
