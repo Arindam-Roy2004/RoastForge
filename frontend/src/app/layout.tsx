@@ -38,8 +38,8 @@ export const metadata: Metadata = {
 // Browser chrome colour on mobile, following the theme.
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F9F6F1" },
-    { media: "(prefers-color-scheme: dark)", color: "#131316" },
+    { media: "(prefers-color-scheme: light)", color: "#FAF8F5" },
+    { media: "(prefers-color-scheme: dark)", color: "#151413" },
   ],
 };
 
