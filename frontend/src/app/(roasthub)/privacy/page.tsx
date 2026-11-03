@@ -44,7 +44,7 @@ export default function PrivacyPage() {
         <h2>Services we use</h2>
         <ul>
           <li>
-            <strong>Google Gemini</strong> for AI roasts
+            <strong>OpenRouter</strong> (Alibaba Qwen model) for AI roasts
           </li>
           <li>
             <strong>Cloudinary</strong> for PDF storage
