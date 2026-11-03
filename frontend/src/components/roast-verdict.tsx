@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts";
+import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart } from "recharts";
 import { cn } from "@/lib/utils";
 import {
   type ChartConfig,
@@ -209,6 +209,9 @@ export function RoastVerdictRadar({
             }
           />
           <PolarGrid stroke="hsl(var(--border))" />
+          {/* Pin the scale to 0–5. Left to auto, Recharts picks a "nice" max
+              (e.g. 8), so a 5/5 lands mid-chart instead of on the outer ring. */}
+          <PolarRadiusAxis domain={[0, 5]} tickCount={6} tick={false} axisLine={false} />
           <PolarAngleAxis
             dataKey="axis"
             tick={{
