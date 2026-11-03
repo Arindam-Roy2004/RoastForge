@@ -7,7 +7,7 @@ import ApiResponse from "../utils/api-response.js";
  *
  * Why this exists on top of rate limiting: per-IP limits stop *one* abuser.
  * They do nothing about a distributed script where every request arrives from a
- * fresh address — each IP stays under its own limit while the Gemini bill runs
+ * fresh address — each IP stays under its own limit while the AI bill runs
  * away. This guard counts every call to a named endpoint against one counter
  * that rolls over at UTC midnight, so the worst-case daily spend is bounded no
  * matter how many addresses show up.

@@ -1,15 +1,14 @@
-import { GoogleGenAI } from "@google/genai";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { VERDICT_DIMENSIONS, type VerdictBar } from "./verdict-dimensions.js";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_KEY! });
-
-// Model id per Google's live API: gemini-2.5-flash-lite now 404s for new keys
-// ("no longer available to new users. Please update ... to gemini-3.5-flash-lite").
-// One constant so the roast and PII calls can't drift to different models.
-const GEMINI_MODEL = "gemini-3.5-flash-lite";
+// Routed through OpenRouter. qwen3.7-flash is among the cheapest models there that
+// honors response_format JSON with reasoning disabled (glm-5.3-flash forces
+// reasoning, which bills extra output tokens). One constant so the roast and PII
+// calls can't drift to different models.
+const AI_MODEL = "qwen/qwen3.7-flash";
+const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 const analysisDir = dirname(fileURLToPath(import.meta.url));
 
@@ -75,8 +74,48 @@ export function normalizeRoastResult(raw: unknown): RoastResult {
   return { score, roastText, verdictBars };
 }
 
-/** Hard cap for the AI call; if Gemini hangs we don't pin a worker forever. */
+/** Hard cap for the AI call; if the model hangs we don't pin a worker forever. */
 const AI_TIMEOUT_MS = 45_000;
+
+/** One JSON-mode chat completion; returns the raw message text. */
+async function generateJson(systemInstruction: string, userPrompt: string): Promise<string> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), AI_TIMEOUT_MS);
+
+  let res: Response;
+  try {
+    res = await fetch(OPENROUTER_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: AI_MODEL,
+        response_format: { type: "json_object" },
+        reasoning: { enabled: false },
+        messages: [
+          { role: "system", content: systemInstruction },
+          { role: "user", content: userPrompt },
+        ],
+      }),
+      signal: ctrl.signal,
+    });
+  } catch (err: any) {
+    if (err?.name === "AbortError" || ctrl.signal.aborted) {
+      throw new Error("AI request timed out");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+
+  if (!res.ok) throw new Error(`AI request failed with status ${res.status}`);
+  const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+  const text = data.choices?.[0]?.message?.content;
+  if (!text) throw new Error("Empty response from AI model");
+  return text;
+}
 
 export const generateResumeRoast = async (resumeText: string): Promise<RoastResult> => {
   // Wrap the resume in opaque delimiters and explicitly tell the model to ignore any
@@ -89,31 +128,7 @@ export const generateResumeRoast = async (resumeText: string): Promise<RoastResu
 ${sanitized}
 <<<\/RESUME_TEXT>>>`.trim();
 
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), AI_TIMEOUT_MS);
-
-  let response: Awaited<ReturnType<typeof ai.models.generateContent>>;
-  try {
-    response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
-      contents: userPrompt,
-      config: {
-        responseMimeType: "application/json",
-        systemInstruction: loadSystemInstruction(),
-        abortSignal: ctrl.signal,
-      } as any,
-    });
-  } catch (err: any) {
-    if (err?.name === "AbortError" || ctrl.signal.aborted) {
-      throw new Error("AI request timed out");
-    }
-    throw err;
-  } finally {
-    clearTimeout(timer);
-  }
-
-  const text = response.text;
-  if (!text) throw new Error("Empty response from Gemini AI");
+  const text = await generateJson(loadSystemInstruction(), userPrompt);
 
   let parsed: unknown;
   try {
@@ -185,31 +200,7 @@ export const detectPersonalInfo = async (resumeText: string): Promise<PersonalIn
 ${sanitized}
 <<<\/RESUME_TEXT>>>`.trim();
 
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), AI_TIMEOUT_MS);
-
-  let response: Awaited<ReturnType<typeof ai.models.generateContent>>;
-  try {
-    response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
-      contents: userPrompt,
-      config: {
-        responseMimeType: "application/json",
-        systemInstruction: PII_SYSTEM_INSTRUCTION,
-        abortSignal: ctrl.signal,
-      } as any,
-    });
-  } catch (err: any) {
-    if (err?.name === "AbortError" || ctrl.signal.aborted) {
-      throw new Error("AI request timed out");
-    }
-    throw err;
-  } finally {
-    clearTimeout(timer);
-  }
-
-  const text = response.text;
-  if (!text) throw new Error("Empty response from Gemini AI");
+  const text = await generateJson(PII_SYSTEM_INSTRUCTION, userPrompt);
 
   let parsed: unknown;
   try {

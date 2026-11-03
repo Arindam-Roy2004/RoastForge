@@ -12,7 +12,7 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 process.env.JWT_ACCESS_SECRET ??= "a".repeat(32);
 process.env.JWT_REFRESH_SECRET ??= "b".repeat(32);
 process.env.GOOGLE_CLIENT_ID ??= "123.apps.googleusercontent.com";
-process.env.GOOGLE_AI_KEY ??= "test-key";
+process.env.OPENROUTER_API_KEY ??= "test-key";
 
 const { default: app } = await import("../src/app.js");
 const { default: User } = await import("../src/modules/auth/auth.model.js");

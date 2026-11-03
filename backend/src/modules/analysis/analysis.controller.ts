@@ -123,7 +123,7 @@ export const analyzeResume = async (req: Request, res: Response, next: NextFunct
       return ApiResponse.ok(res, "Roast fetched (cached)", { cached: true, ...toClientRoast(norm) });
     }
 
-    // 4. Cache miss — call Gemini AI
+    // 4. Cache miss — call the AI model
     const roastResult = await generateResumeRoast(resumeText);
 
     // 5. Store in Redis with TTL
@@ -167,7 +167,7 @@ export const detectPii = async (req: Request, res: Response) => {
  *
  * Abuse controls live in the route definition (origin check, per-IP burst and
  * daily limits, global daily budget) rather than here, so this handler stays a
- * thin wrapper over the same model call signed-in users get. The Gemini key
+ * thin wrapper over the same model call signed-in users get. The OpenRouter key
  * stays server-side; the browser only ever receives the finished roast.
  *
  * Results are intentionally not written to the Redis roast cache. That cache is

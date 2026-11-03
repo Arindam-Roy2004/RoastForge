@@ -9,7 +9,7 @@ const KEYS = [
   "JWT_ACCESS_SECRET",
   "JWT_REFRESH_SECRET",
   "GOOGLE_CLIENT_ID",
-  "GOOGLE_AI_KEY",
+  "OPENROUTER_API_KEY",
 ] as const;
 
 function validEnv(): Record<string, string> {
@@ -17,7 +17,7 @@ function validEnv(): Record<string, string> {
     JWT_ACCESS_SECRET: "a".repeat(32),
     JWT_REFRESH_SECRET: "b".repeat(32),
     GOOGLE_CLIENT_ID: "1234567890.apps.googleusercontent.com",
-    GOOGLE_AI_KEY: "test-gemini-key",
+    OPENROUTER_API_KEY: "test-openrouter-key",
   };
 }
 
@@ -48,8 +48,8 @@ describe("assertEnv", () => {
   });
 
   test("treats an empty string as missing", () => {
-    applyEnv({ ...validEnv(), GOOGLE_AI_KEY: "" });
-    assert.throws(() => assertEnv(), /Missing required env.*GOOGLE_AI_KEY/s);
+    applyEnv({ ...validEnv(), OPENROUTER_API_KEY: "" });
+    assert.throws(() => assertEnv(), /Missing required env.*OPENROUTER_API_KEY/s);
   });
 
   test("rejects a low-entropy JWT secret", () => {
