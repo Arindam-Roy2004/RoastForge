@@ -453,7 +453,7 @@ Template: [backend/env.example](backend/env.example)
 - `JWT_ACCESS_EXPIRES_IN` / `JWT_REFRESH_EXPIRES_IN` — Token expiration durations
 - `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` — Cloudinary credentials
 - `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` — Upstash Redis credentials for rate limiting
-- `GOOGLE_AI_KEY` — Google Gemini API key
+- `OPENROUTER_API_KEY` — OpenRouter API key (AI roast + PII detection)
 - `FRONTEND_ORIGIN` — Allowed CORS origin(s)
 - `CROSS_SITE_COOKIES` — Enable cross-site cookie settings (`true`/`false`)
 
