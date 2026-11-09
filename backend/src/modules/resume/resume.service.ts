@@ -15,6 +15,7 @@ import {
   AVATAR_SCALE_MIN,
 } from "../../common/utils/avatar-styles.js";
 import { safeRecalcTalentScore } from "../auth/talent-score.service.js";
+import { populateAuthor } from "../../common/utils/public-author.js";
 
 const PAGE_SIZE = 3;
 const REACTION_VALUES: readonly ResumeReactionType[] = ["like", "dislike"] as const;
@@ -48,9 +49,8 @@ function resumeOwnerId(resume: { userId: unknown }): string {
   return String(u);
 }
 
-// Populate user info for public display
-const populateUser = (q: any) =>
-  q.populate("userId", "name avatar anonymousUsername");
+// Populate user info for public display — anonymous fields only.
+const populateUser = populateAuthor;
 
 /**
  * Normalise a Like document's `reaction` field for API responses.

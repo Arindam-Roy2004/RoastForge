@@ -5,8 +5,9 @@ import Resume from "../resume/resume.model.js";
 import Notification from "../notification/notification.model.js";
 import ApiError from "../../common/utils/api-error.js";
 import { collectCommentSubtreeIds, subtreeContainsOtherAuthor } from "./comment-tree.util.js";
+import { populateAuthor } from "../../common/utils/public-author.js";
 
-const populateUser = (q: any) => q.populate("userId", "name avatar anonymousUsername");
+const populateUser = populateAuthor;
 
 export const getComments = async (resumeId: string) => {
   // Get all top-level comments (no parent)

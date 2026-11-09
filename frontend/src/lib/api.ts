@@ -326,7 +326,7 @@ export type AiRoast = {
 
 export type Resume = {
   _id: string;
-  userId: { _id: string; name: string; avatar: string; anonymousUsername?: string };
+  userId: { _id: string; anonymousUsername?: string };
   avatarStyle?: AvatarStyle | null;
   avatarSeed?: string | null;
   avatarBackgroundColor?: string | null;

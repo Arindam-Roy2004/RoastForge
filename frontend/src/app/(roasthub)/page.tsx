@@ -500,7 +500,7 @@ export default function HomePage() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
               {resumes.map((resume: Resume) => {
                 const ownerId = resume.userId?._id;
-                const username = resume.userId?.anonymousUsername || resume.userId?.name || "Anonymous";
+                const username = resume.userId?.anonymousUsername || "Anonymous";
                 // Legacy fallback intentionally keys on the (immutable) resume id only
                 // so the avatar stays visually stable even when the owner rerolls their
                 // anonymous username. New resumes store avatarSeed explicitly.

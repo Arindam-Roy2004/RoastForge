@@ -181,7 +181,8 @@ export const getCandidateProfile = async (candidateUserId: string) => {
   return {
     userId: user._id,
     anonymousUsername: user.anonymousUsername,
-    avatar: user.avatar || "",
+    // The stored avatar is the Google profile photo, so it is identity too.
+    avatar: share ? user.avatar || "" : "",
     talentComposite: user.talentMetrics?.composite ?? 0,
     targetRole: user.publicProfile?.targetRole || "",
     skills: Array.isArray(user.publicProfile?.skills) ? user.publicProfile.skills : [],
