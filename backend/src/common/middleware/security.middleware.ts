@@ -141,26 +141,48 @@ export const piiDetectRateLimiter = createRateLimiter({
   message: "Too many requests. Slow down.",
 });
 
+// ─── Signed-in AI calls: per-user daily ceilings ─────────────────────────────
+//
+// The per-minute limiters above stop bursts, not a script running all day:
+// at 15/min a single free Google account could make ~21k PII calls a day.
+// Mounted after `authenticate`, so `userOrIp` buckets per user.
+
+/** Five AI roasts per signed-in user per day. */
+export const analysisDailyLimiter = createRateLimiter({
+  prefix: "rl:analysis-daily",
+  tokens: 5,
+  window: "86400 s",
+  keyFn: userOrIp,
+  message: "You've used your 5 roasts for today. Try again tomorrow.",
+});
+
+export const piiDetectDailyLimiter = createRateLimiter({
+  prefix: "rl:pii-detect-daily",
+  tokens: 30,
+  window: "86400 s",
+  keyFn: userOrIp,
+  message: "You've reached today's personal-info detection limit. Try again tomorrow.",
+});
+
 // ─── Public trial roast (no account) ─────────────────────────────────────────
 //
 // `POST /api/analysis/try` is the only unauthenticated endpoint that spends
 // money, so it gets two independent brakes: one per visitor, one global.
 
 /**
- * Exactly one free roast per IP per day.
+ * Two free roasts per IP per day.
  *
  * Keyed strictly on IP. There's no user to key on, and honouring any
  * client-supplied identifier (header, cookie, body field) would just hand the
- * caller a free way to reset their own bucket. A single token also makes a
- * separate burst limiter pointless — the second request of the day is already
- * refused.
+ * caller a free way to reset their own bucket. With only two tokens a day a
+ * separate burst limiter is pointless — the third request is already refused.
  */
 export const tryRoastRateLimiter = createRateLimiter({
   prefix: "rl:try-roast",
-  tokens: 1,
+  tokens: 2,
   window: "86400 s",
   keyFn: (req: Request) => `ip:${ipKeyGenerator(req.ip ?? "")}`,
-  message: "You've used your free roast for today. Sign in with Google for unlimited roasts.",
+  message: "You've used your 2 free roasts for today. Sign in with Google for 5 roasts a day.",
 });
 
 /**

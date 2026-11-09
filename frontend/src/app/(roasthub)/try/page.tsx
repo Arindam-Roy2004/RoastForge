@@ -290,13 +290,13 @@ export default function TryPage() {
 
                   {quotaReached ? (
                     <>
-                      <h2 className="text-lg">Free roast used</h2>
+                      <h2 className="text-lg">Free roasts used</h2>
                       <Link href="/register" className="w-full max-w-[240px]">
                         <Button
                           size="sm"
                           className="h-10 w-full rounded-lg"
                         >
-                          Sign in for unlimited
+                          Sign in for more roasts
                           <ArrowRight aria-hidden />
                         </Button>
                       </Link>
